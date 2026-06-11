@@ -1,0 +1,96 @@
+{
+  "meta": {
+    "project": "ILM \u2014 Interactive Learning Material (V1, workflow v2)",
+    "version": "0.2.0",
+    "created": "2026-06-11",
+    "pipeline_step": "MEMORY (style, conventions, gold examples) -> inject into Skills 2/3/4",
+    "diagram_node": "MEMORY store + inject edges",
+    "runs_in": "LLM judge inside Skill 5, plus diff checks",
+    "verdict_values": [
+      "pass",
+      "flag"
+    ],
+    "note": "Memory is the only input that changes between runs without a human in the loop, so its evals test precedence (rubric > source > memory) and leakage."
+  },
+  "source_spans": {
+    "S1": "An AI agent is a program that uses a language model to decide which actions to take. It runs in a loop: observe the current state, choose a tool, execute it, and feed the result back into the model. The loop ends when the model decides the task is complete.",
+    "S2": "Tool calling lets the model request that the host program run a specific function, such as a web search or a calculator, and return the result to the model.",
+    "S3": "A system prompt is a fixed instruction given to the model before the conversation starts. It sets the agent's role, rules, and output format.",
+    "S4": "Retrieval-augmented generation (RAG) fetches relevant passages from a document store and adds them to the prompt, so the model can answer using information it was never trained on. The model's weights are not changed.",
+    "S5": "A human-in-the-loop gate requires a person to approve the agent's output before it takes effect."
+  },
+  "cases": [
+    {
+      "id": "MEM-01",
+      "criterion": "Rubric outranks memory",
+      "edge_case": "Stored style note conflicts with a hard rubric rule",
+      "grader": "llm",
+      "input": {
+        "memory_entry": "Reviewers noted learners respond well to movie-based analogies.",
+        "concept": "Tool calling",
+        "candidate": "Tool calling is like the mission-control scene in a famous space-rescue film: the model radios a request and ground control runs the calculation."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Generation obeyed memory over the banned-categories rule (Analogy rubric 5.0). Memory may tune style, never override a rubric rule; precedence is rubric > source > memory.",
+      "judge_instructions": "Flag any output that violates a rubric rule regardless of what the injected memory suggested. Memory provenance is not an excuse."
+    },
+    {
+      "id": "MEM-02",
+      "criterion": "No gold-example leakage",
+      "edge_case": "Output reuses the stored gold analogy nearly verbatim for a DIFFERENT concept",
+      "grader": "llm",
+      "input": {
+        "gold_example": {
+          "concept": "The agent loop",
+          "analogy": "A chef tastes the soup, adds salt, and tastes again until it's right \u2014 tasting is observing, adding salt is the action."
+        },
+        "target_concept": "RAG",
+        "candidate": "RAG is like a chef tasting the soup, adding salt, and tasting again until it's right."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "The injected gold example bled into an unrelated concept, where its mapping is wrong (RAG has no act-and-recheck loop). Few-shot leakage is the signature memory bug.",
+      "judge_instructions": "Compare candidate against all injected gold examples; flag near-verbatim reuse (high overlap) applied to a different concept, or any mapping that only made sense for the gold example's original concept."
+    },
+    {
+      "id": "MEM-03",
+      "criterion": "Source outranks stale memory",
+      "edge_case": "A stored reviewer 'correction' contradicts the CURRENT source span",
+      "grader": "llm",
+      "input": {
+        "memory_entry": "Correction (RM-04 era): always say the loop ends after a fixed number of steps.",
+        "source_span": "S1",
+        "candidate": "The agent loop runs observe -> choose tool -> execute -> feed back, and always ends after a fixed number of steps."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "S1 says the loop ends when the model decides the task is complete. The stale correction injected a claim the current source contradicts \u2014 memory must never beat the span (this is the V2 auto-refresh failure mode arriving early).",
+      "judge_instructions": "When memory and source span conflict, the span wins. Flag any claim traceable to memory that the current span contradicts or does not support."
+    },
+    {
+      "id": "MEM-04",
+      "criterion": "Corrections actually apply",
+      "edge_case": "Reviewer banned a phrasing tic; next run still uses it",
+      "grader": "code",
+      "input": {
+        "memory_entry": "Reviewer correction (2026-06-09, Pallavi): never open an explanation with the word 'Simply'.",
+        "candidate": "Simply put, a system prompt is a fixed instruction the model receives before the conversation starts."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "The feedback loop is decorative if stored corrections don't change output. Cheap deterministic check: banned-phrase list diffed against output.",
+      "judge_instructions": "Code grader: maintain banned_phrases from correction memory; flag any candidate containing one (casefold match)."
+    },
+    {
+      "id": "MEM-05",
+      "criterion": "Pass anchor",
+      "edge_case": "Memory style note applied, all rules intact",
+      "grader": "llm",
+      "input": {
+        "memory_entry": "Style: prefer workplace analogies; audience is working professionals.",
+        "concept": "Tool calling",
+        "candidate": "Tool calling is like a manager delegating to a specialist: the manager (the model) requests one task, the specialist (the host program) runs it and reports back."
+      },
+      "expected_verdict": "pass",
+      "failure_mode": null,
+      "judge_instructions": "Memory influenced style (workplace setting) without violating any rubric rule or adding ungrounded claims. Judges flagging this are penalizing memory use itself \u2014 recalibrate."
+    }
+  ]
+}

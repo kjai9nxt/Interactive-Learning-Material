@@ -1,0 +1,7 @@
+# Interactive Learning Material (ILM) — V1 agent
+# PRD lock-in: plain Python + LLM SDK, NO LangChain framework.
+requests>=2.31
+pydantic>=2.6
+python-dotenv>=1.0
+flask>=3.0
+flask-cors>=4.0

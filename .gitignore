@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Python (ILM agent)
+.venv
+__pycache__/
+*.pyc
+.env
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

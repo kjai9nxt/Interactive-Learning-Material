@@ -1,0 +1,254 @@
+{
+ "Explanation": {
+  "1.0": {
+   "criterion": "Concept correctness (technical)",
+   "pass": "Every statement is factually correct and nothing contradicts the source RM",
+   "fail": "Any statement is factually wrong or contradicts the source"
+  },
+  "2.0": {
+   "criterion": "Complexity / level",
+   "pass": "Uses only vocabulary fit for the audience level; any new term defined inline",
+   "fail": ">=1 unexplained term above the audience level"
+  },
+  "3.0": {
+   "criterion": "Relevancy",
+   "pass": "100% of the text is about the target concept",
+   "fail": ">=1 sentence is about a different topic"
+  },
+  "4.0": {
+   "criterion": "Visual present",
+   "pass": "A visual / diagram is present",
+   "fail": "Visual absent"
+  },
+  "5.0": {
+   "criterion": "Visual correctness",
+   "pass": "Visual accurately represents the concept; no incorrect element",
+   "fail": "Any element is wrong or misleading"
+  },
+  "6.0": {
+   "criterion": "Length",
+   "pass": "2-4 sentences",
+   "fail": ">4 sentences or <1 full sentence"
+  },
+  "7.0": {
+   "criterion": "Faithfulness / grounded in source",
+   "pass": "Every claim is supported by source_span",
+   "fail": ">=1 claim not in (or inferable from) the source"
+  }
+ },
+ "Analogy": {
+  "1.0": {
+   "criterion": "Quality (self-explanatory)",
+   "pass": "Stands alone and the link to the concept is explicit",
+   "fail": "Link to concept missing or unclear"
+  },
+  "2.0": {
+   "criterion": "Understandability",
+   "pass": "A target-level reader grasps it in one read, no outside help",
+   "fail": "Needs extra explanation or unstated domain knowledge"
+  },
+  "3.0": {
+   "criterion": "Correlation (mapping)",
+   "pass": ">=2 elements map to specific parts of the concept",
+   "fail": "Decorative; fewer than 1 element maps"
+  },
+  "4.0": {
+   "criterion": "Technical correctness",
+   "pass": "The mapping holds at every stated point; implies nothing false",
+   "fail": "Any mapped element implies an untruth"
+  },
+  "5.0": {
+   "criterion": "Not misleading / distraction",
+   "pass": "No reference to movies, actors, politics, sports, or brands",
+   "fail": ">=1 reference to a banned category"
+  },
+  "6.0": {
+   "criterion": "Visuals",
+   "pass": "Visual present and clearly supports the analogy",
+   "fail": "Absent or does not aid understanding"
+  },
+  "7.0": {
+   "criterion": "Faithfulness / grounded",
+   "pass": "Introduces no claim about the concept beyond the source",
+   "fail": "Adds a property/claim not in the source"
+  },
+  "8.0": {
+   "criterion": "Length / concise",
+   "pass": "<=3 sentences",
+   "fail": ">3 sentences"
+  }
+ },
+ "Example Scenarios": {
+  "1.0": {
+   "criterion": "Correctness",
+   "pass": "Factually accurate and a valid instance of the concept",
+   "fail": "Misuses or misrepresents the concept"
+  },
+  "2.0": {
+   "criterion": "Quality / effectiveness",
+   "pass": "Clearly shows the concept in action",
+   "fail": "Generic; could apply to many concepts"
+  },
+  "3.0": {
+   "criterion": "Complexity / difficulty",
+   "pass": "Easy to follow for the audience level",
+   "fail": "Too complex / overloaded"
+  },
+  "4.0": {
+   "criterion": "Length",
+   "pass": "<=3 sentences",
+   "fail": ">3 sentences"
+  },
+  "5.0": {
+   "criterion": "Usefulness",
+   "pass": "Adds understanding beyond the explanation",
+   "fail": "Just restates the explanation"
+  },
+  "6.0": {
+   "criterion": "Code playground (if code concept)",
+   "pass": "Playground present when the concept involves code",
+   "fail": "Playground absent for a code concept"
+  },
+  "7.0": {
+   "criterion": "Relevance / grounded",
+   "pass": "Within the concept domain and a true instance",
+   "fail": "Off-domain or not actually an instance"
+  },
+  "8.0": {
+   "criterion": "Distinct (no duplicates)",
+   "pass": "Each scenario is a different situation, not just reworded",
+   "fail": ">=2 are the same situation reworded"
+  }
+ },
+ "Mini Quiz": {
+  "1.0": {
+   "criterion": "Single correct option",
+   "pass": "Exactly one option is correct",
+   "fail": "More than one (or none) correct"
+  },
+  "2.0": {
+   "criterion": "Technical correctness",
+   "pass": "Question is unambiguous and the keyed option is the single correct answer",
+   "fail": "Ambiguous, or keyed answer wrong/also-correct"
+  },
+  "3.0": {
+   "criterion": "Relevancy",
+   "pass": "Tests the target concept",
+   "fail": "About another topic"
+  },
+  "4.0": {
+   "criterion": "Understanding / discrimination question",
+   "pass": ">=1 question tests understanding/tell-it-apart and genuinely does so",
+   "fail": "None, or labeled question does not test that aspect"
+  },
+  "5.0": {
+   "criterion": "Analysis question",
+   "pass": ">=1 analysis (\"why\") question that genuinely tests reasoning",
+   "fail": "None, or does not test analysis"
+  },
+  "6.0": {
+   "criterion": "Application question",
+   "pass": ">=1 application question that genuinely tests use in a new situation",
+   "fail": "None, or does not test application"
+  },
+  "7.0": {
+   "criterion": "Distractor quality",
+   "pass": "Each of the 3 distractors is plausible to a half-learner AND maps to a stated misconception",
+   "fail": ">=1 distractor is absurd, unrelated, or a give-away"
+  },
+  "8.0": {
+   "criterion": "Exactly 4 options",
+   "pass": "Each question has exactly 4 options",
+   "fail": "3 or 5 options"
+  },
+  "9.0": {
+   "criterion": "No duplicate options",
+   "pass": "All 4 options are distinct",
+   "fail": "Repeated option text"
+  },
+  "10.0": {
+   "criterion": "Number of questions",
+   "pass": "4-5 questions in the quiz",
+   "fail": "Fewer than 4 or more than 5"
+  },
+  "11.0": {
+   "criterion": "Explanation present",
+   "pass": "States why the correct option is right AND why each distractor is wrong",
+   "fail": "Missing, or only names the correct option"
+  },
+  "12.0": {
+   "criterion": "Recall question",
+   "pass": ">=1 recall question that genuinely tests recall",
+   "fail": "None"
+  },
+  "13.0": {
+   "criterion": "Difficulty mix",
+   "pass": ">=2 difficulty levels (>=1 easy and >=1 hard)",
+   "fail": "All questions same difficulty"
+  },
+  "14.0": {
+   "criterion": "Grounded in source",
+   "pass": "Correct answer is supported by the source RM",
+   "fail": "Relies on outside info"
+  }
+ },
+ "Concept Partition": {
+  "1.0": {
+   "criterion": "New-only (vs past RMs)",
+   "pass": "No substantial overlap with any past-RM concept",
+   "fail": "Same as (or a subset of) a past-RM concept"
+  },
+  "2.0": {
+   "criterion": "Grounded in source",
+   "pass": "Concept is explicitly discussed in this RM",
+   "fail": "Not present in the RM"
+  },
+  "3.0": {
+   "criterion": "Coverage (no miss)",
+   "pass": "All genuinely-new key concepts captured",
+   "fail": "A new key concept is missed"
+  },
+  "4.0": {
+   "criterion": "Granularity",
+   "pass": "One teachable idea (explainable in a single unit)",
+   "fail": "Bundles multiple ideas, or is a trivial fragment"
+  },
+  "5.0": {
+   "criterion": "No overlap within set",
+   "pass": "No two extracted concepts cover the same idea",
+   "fail": ">=2 overlap"
+  },
+  "6.0": {
+   "criterion": "Correct titling",
+   "pass": "Title names the concept accurately and specifically",
+   "fail": "Vague or mismatched title"
+  }
+ },
+ "Unit-level": {
+  "1.0": {
+   "criterion": "source_span present",
+   "pass": "Non-blank source text per concept",
+   "fail": "Empty source_span"
+  },
+  "2.0": {
+   "criterion": "Schema valid",
+   "pass": "Unit matches the output schema (all required fields)",
+   "fail": "Missing / broken fields"
+  },
+  "3.0": {
+   "criterion": "All components present",
+   "pass": "Explanation + visual + analogy + scenarios + quiz all present",
+   "fail": "A component is missing"
+  },
+  "4.0": {
+   "criterion": "Reviewed before publish",
+   "pass": "Human-approved before render",
+   "fail": "Published while review.status = pending"
+  },
+  "5.0": {
+   "criterion": "Within scope (new only)",
+   "pass": "Only genuinely-new concepts are rendered",
+   "fail": "A duplicate / old concept is rendered"
+  }
+ }
+}

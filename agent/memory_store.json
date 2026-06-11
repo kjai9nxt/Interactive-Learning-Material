@@ -1,0 +1,20 @@
+{
+  "style": [
+    "Audience: motivated beginners. Plain language, define any new term inline.",
+    "No references to movies, actors, politics, sports, or brands in analogies.",
+    "Explanations are 2-4 sentences. Analogies are <=3 sentences with an explicit mapping.",
+    "Every claim must trace to the source span; if a fact is missing, flag \u2014 never invent."
+  ],
+  "conventions": [
+    "Analogy text must explicitly state what maps to what ('just like X, the Y ...').",
+    "MCQ distractors must each map to a real misconception, never be absurd.",
+    "Quizzes carry a difficulty mix and cover recall/understanding/application/analysis.",
+    "Banned analogy domains explicitly include theatre/film: no director, actor, script, stage, or movie-scene analogies. Prefer everyday non-media situations.",
+    "Do NOT add purpose/benefit claims the source does not state (e.g. 'prevents errors', 'ensures correctness', 'guides behaviour throughout the conversation', 'tailors interactions'). Describe only the mechanism the source span states.",
+    "The MCQ correct answer must be a fact stated in the source span; never key an answer that relies on outside knowledge (ethics, best practices, etc.)."
+  ],
+  "gold_examples": [],
+  "reviewer_corrections": [
+    "Always state explicitly which axis (main vs cross) a property acts on."
+  ]
+}

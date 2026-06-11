@@ -1,0 +1,165 @@
+{
+  "meta": {
+    "project": "ILM \u2014 Interactive Learning Material (V1, workflow v2)",
+    "version": "0.2.0",
+    "created": "2026-06-11",
+    "pipeline_step": "Skill 3 (explainer text + visual)",
+    "diagram_node": "Skill 3: explainer (HTML)",
+    "runs_in": "Skill 5: eval-audit",
+    "verdict_values": [
+      "pass",
+      "flag"
+    ],
+    "note": "Split from ilm_eval_set.json v0.1.0; cases unchanged."
+  },
+  "source_spans": {
+    "S1": "An AI agent is a program that uses a language model to decide which actions to take. It runs in a loop: observe the current state, choose a tool, execute it, and feed the result back into the model. The loop ends when the model decides the task is complete.",
+    "S2": "Tool calling lets the model request that the host program run a specific function, such as a web search or a calculator, and return the result to the model.",
+    "S3": "A system prompt is a fixed instruction given to the model before the conversation starts. It sets the agent's role, rules, and output format.",
+    "S4": "Retrieval-augmented generation (RAG) fetches relevant passages from a document store and adds them to the prompt, so the model can answer using information it was never trained on. The model's weights are not changed.",
+    "S5": "A human-in-the-loop gate requires a person to approve the agent's output before it takes effect."
+  },
+  "cases": [
+    {
+      "id": "EXP-01",
+      "rubric_case_id": 1.0,
+      "criterion": "Concept correctness (technical)",
+      "edge_case": "One subtly wrong clause inside an otherwise correct explanation",
+      "grader": "llm",
+      "input": {
+        "concept": "The agent loop",
+        "source_span": "S1",
+        "candidate": "An AI agent works in a repeating loop. It looks at the current situation, picks a tool, runs it, and sends the result back to the model. The loop stops automatically when the model runs out of context window."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "First two sentences are perfect; the stop condition is wrong (source: loop ends when the model decides the task is complete, not when context runs out). Judges anchored on overall vibe will pass this.",
+      "judge_instructions": "Check every individual claim against the source span. One wrong clause = flag, even if 90% of the text is correct."
+    },
+    {
+      "id": "EXP-02",
+      "rubric_case_id": 2.0,
+      "criterion": "Complexity / level",
+      "edge_case": "Single unexplained jargon term in otherwise beginner-level text",
+      "grader": "llm",
+      "input": {
+        "concept": "RAG",
+        "audience_level": "beginner",
+        "source_span": "S4",
+        "candidate": "RAG lets the model look things up instead of relying only on memory. It finds relevant passages from a document store using embedding-space nearest-neighbor search and pastes them into the prompt. The model can then answer using information it was never trained on."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "'Embedding-space nearest-neighbor search' is one phrase above beginner level, undefined inline. Everything else is fine \u2014 the single-term case is the boundary the rubric draws (>=1 unexplained term = flag).",
+      "judge_instructions": "Flag on the first term above the stated audience level that is not defined inline. Do not average difficulty across the text."
+    },
+    {
+      "id": "EXP-03",
+      "rubric_case_id": 3.0,
+      "criterion": "Relevancy",
+      "edge_case": "One drifting sentence that is topically adjacent, not random",
+      "grader": "llm",
+      "input": {
+        "concept": "System prompt",
+        "source_span": "S3",
+        "candidate": "A system prompt is a fixed instruction the model receives before the conversation starts. It sets the agent's role, rules, and output format. Interestingly, the first chatbots in the 1960s had no such configuration at all."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "The history sentence is related-sounding but teaches nothing about the target concept. Adjacent drift is harder to catch than off-topic drift.",
+      "judge_instructions": "Flag if any sentence does not directly teach the target concept, even if it is on a neighboring topic."
+    },
+    {
+      "id": "EXP-04",
+      "rubric_case_id": 4.0,
+      "criterion": "Visual present",
+      "edge_case": "Field exists but is whitespace / empty wrapper \u2014 naive presence checks pass it",
+      "grader": "code",
+      "input": {
+        "concept": "Tool calling",
+        "candidate_unit_fields": {
+          "visual_diagram_html": "<div class=\"diagram\">   </div>"
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Key is present and non-null, string is non-empty \u2014 but it renders nothing. The code grader must check for meaningful content (e.g., strip tags/whitespace, require non-empty result or at least one drawable element), not key presence.",
+      "judge_instructions": "Code grader: strip markup and whitespace; flag if no renderable content remains."
+    },
+    {
+      "id": "EXP-05",
+      "rubric_case_id": 5.0,
+      "criterion": "Visual correctness",
+      "edge_case": "Diagram has correct boxes, one reversed arrow",
+      "grader": "llm",
+      "input": {
+        "concept": "The agent loop",
+        "source_span": "S1",
+        "candidate_visual_description": "Boxes: [Observe state] -> [Model chooses tool] -> [Execute tool]; final arrow: [Model] -> [Tool result] (result flows FROM the model TO the tool output box).",
+        "candidate": "Diagram of the agent loop with four stages."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "All labels correct, one arrow direction reversed \u2014 the tool result should feed back INTO the model. Element-level correctness is the rubric bar; one wrong element = flag.",
+      "judge_instructions": "Verify every node AND every edge direction against the source span. One misleading element = flag."
+    },
+    {
+      "id": "EXP-06",
+      "rubric_case_id": 6.0,
+      "criterion": "Length",
+      "edge_case": "Boundary: exactly 4 sentences (max allowed) \u2014 must PASS",
+      "grader": "llm",
+      "input": {
+        "concept": "Tool calling",
+        "source_span": "S2",
+        "candidate": "Tool calling is how an agent gets things done outside the model. The model asks the host program to run a specific function. That could be a web search or a calculator. The result comes back to the model so it can continue."
+      },
+      "expected_verdict": "pass",
+      "failure_mode": null,
+      "judge_instructions": "Count sentences. 2-4 sentences = pass. This case sits exactly on the upper bound; a grader that flags it has an off-by-one error."
+    },
+    {
+      "id": "EXP-07",
+      "rubric_case_id": 6.0,
+      "criterion": "Length",
+      "edge_case": "Boundary: 5 sentences (one over) \u2014 must FLAG",
+      "grader": "llm",
+      "input": {
+        "concept": "Tool calling",
+        "source_span": "S2",
+        "candidate": "Tool calling is how an agent gets things done outside the model. The model asks the host program to run a specific function. That could be a web search or a calculator. The result comes back to the model. The model then continues with the task."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Five sentences. Paired with EXP-06 this pins the boundary precisely \u2014 the two cases differ by one sentence split.",
+      "judge_instructions": "Count sentences. >4 = flag."
+    },
+    {
+      "id": "EXP-08",
+      "rubric_case_id": 7.0,
+      "criterion": "Faithfulness / grounded in source",
+      "edge_case": "Plausible, helpful-sounding fact that the source never states",
+      "grader": "llm",
+      "input": {
+        "concept": "RAG",
+        "source_span": "S4",
+        "candidate": "RAG fetches relevant passages from a document store and adds them to the prompt. This typically cuts hallucinations by more than half. The model's weights are not changed."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "The statistic is plausible and even directionally reasonable \u2014 which is exactly why it is dangerous. The source contains no such claim. This is the PRD's core no-hallucination guardrail.",
+      "judge_instructions": "Every claim must be present in or directly inferable from the source span. Plausibility is not grounding. Flag any quantitative claim absent from the span."
+    },
+    {
+      "id": "EXP-09",
+      "rubric_case_id": "anchor",
+      "criterion": "All criteria (pass anchor)",
+      "edge_case": "Clean explanation \u2014 calibrates against over-flagging",
+      "grader": "llm",
+      "input": {
+        "concept": "Human-in-the-loop gate",
+        "source_span": "S5",
+        "candidate": "A human-in-the-loop gate means a person must approve the agent's output before it takes effect. Nothing the agent produces reaches the end user without that approval. It is a safety check, not a performance feature.",
+        "candidate_unit_fields": {
+          "visual_diagram_html": "<svg><text>Agent output -> Human review -> Published</text></svg>"
+        }
+      },
+      "expected_verdict": "pass",
+      "failure_mode": null,
+      "judge_instructions": "Correct, beginner-level, on-topic, 3 sentences, visual present and accurate, every claim grounded in S5. A judge flagging this is over-strict."
+    }
+  ]
+}

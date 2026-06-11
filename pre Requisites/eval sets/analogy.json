@@ -1,0 +1,160 @@
+{
+  "meta": {
+    "project": "ILM \u2014 Interactive Learning Material (V1, workflow v2)",
+    "version": "0.2.0",
+    "created": "2026-06-11",
+    "pipeline_step": "Skill 2 (analogy)",
+    "diagram_node": "Skill 2: analogy",
+    "runs_in": "Skill 5: eval-audit",
+    "verdict_values": [
+      "pass",
+      "flag"
+    ],
+    "note": "Split from ilm_eval_set.json v0.1.0; cases unchanged."
+  },
+  "source_spans": {
+    "S1": "An AI agent is a program that uses a language model to decide which actions to take. It runs in a loop: observe the current state, choose a tool, execute it, and feed the result back into the model. The loop ends when the model decides the task is complete.",
+    "S2": "Tool calling lets the model request that the host program run a specific function, such as a web search or a calculator, and return the result to the model.",
+    "S3": "A system prompt is a fixed instruction given to the model before the conversation starts. It sets the agent's role, rules, and output format.",
+    "S4": "Retrieval-augmented generation (RAG) fetches relevant passages from a document store and adds them to the prompt, so the model can answer using information it was never trained on. The model's weights are not changed.",
+    "S5": "A human-in-the-loop gate requires a person to approve the agent's output before it takes effect."
+  },
+  "cases": [
+    {
+      "id": "ANA-01",
+      "rubric_case_id": 1.0,
+      "criterion": "Quality (self-explanatory)",
+      "edge_case": "Good analogy, but the link to the concept is left implicit",
+      "grader": "llm",
+      "input": {
+        "concept": "The agent loop",
+        "source_span": "S1",
+        "candidate": "A chef tastes the soup, decides it needs salt, adds it, and tastes again \u2014 repeating until the soup is right."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "The mapping is actually excellent, but the analogy never says what maps to what. The rubric requires the link to be explicit; a judge grading 'is this a good analogy?' instead of 'is the link explicit?' passes it.",
+      "judge_instructions": "Flag unless the text explicitly states the correspondence to the concept (e.g., 'just like an agent observes, acts, and re-observes'). Quality of the implicit mapping does not substitute for stating it."
+    },
+    {
+      "id": "ANA-02",
+      "rubric_case_id": 2.0,
+      "criterion": "Understandability",
+      "edge_case": "Analogy explains a simple concept via a reference that itself needs domain knowledge",
+      "grader": "llm",
+      "input": {
+        "concept": "System prompt",
+        "audience_level": "beginner",
+        "source_span": "S3",
+        "candidate": "A system prompt is like a Kubernetes ConfigMap mounted at pod startup \u2014 fixed configuration the workload reads before doing anything else, just as the model reads its role and rules before the conversation."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "The link IS explicit (passes criterion 1) and technically sound \u2014 but a beginner does not know what a ConfigMap is. The analogy outsources the explanation to harder material.",
+      "judge_instructions": "Simulate a target-level reader. Flag if understanding the analogy requires knowledge harder than the concept itself."
+    },
+    {
+      "id": "ANA-03",
+      "rubric_case_id": 3.0,
+      "criterion": "Correlation (mapping)",
+      "edge_case": "Boundary: exactly 2 mapped elements \u2014 must PASS",
+      "grader": "llm",
+      "input": {
+        "concept": "RAG",
+        "source_span": "S4",
+        "candidate": "RAG is like an open-book exam: the book is the document store, and reading the relevant page before answering is the retrieval step. You don't memorize anything new \u2014 you just look it up."
+      },
+      "expected_verdict": "pass",
+      "failure_mode": null,
+      "judge_instructions": "Count explicit element mappings (book -> document store; reading the page -> retrieval). Exactly 2 = pass; this case sits on the lower bound of the rubric (>=2)."
+    },
+    {
+      "id": "ANA-04",
+      "rubric_case_id": 4.0,
+      "criterion": "Technical correctness",
+      "edge_case": "Mapping holds at the stated points but implies one false property",
+      "grader": "llm",
+      "input": {
+        "concept": "RAG",
+        "source_span": "S4",
+        "candidate": "RAG is like an open-book exam where the book always contains the correct answer: the book is the document store and looking up the page is retrieval."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Mappings are fine; 'always contains the correct answer' implies retrieval is infallible, which the source neither states nor supports. The untruth rides in on a modifier, not a mapping.",
+      "judge_instructions": "Check not only the stated mappings but what the analogy implies. Flag if any implication about the concept is false or unsupported."
+    },
+    {
+      "id": "ANA-05",
+      "rubric_case_id": 5.0,
+      "criterion": "Not misleading / distraction (banned references)",
+      "edge_case": "Banned reference made obliquely, without naming the movie/brand",
+      "grader": "llm",
+      "input": {
+        "concept": "Tool calling",
+        "source_span": "S2",
+        "candidate": "Tool calling is like a certain billionaire superhero's AI butler: the hero (the model) asks, and the butler (the host program) runs the scan or fires up the suit and reports back."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "No movie or character is named, but the reference is unmistakably a film franchise. Keyword blocklists miss it; the judge must catch the category, not the string.",
+      "judge_instructions": "Flag any recognizable reference to movies, actors, politics, sports, or brands \u2014 including indirect or unnamed references that a typical reader would identify."
+    },
+    {
+      "id": "ANA-06",
+      "rubric_case_id": 6.0,
+      "criterion": "Visuals",
+      "edge_case": "Visual present but generic \u2014 does not depict the analogy",
+      "grader": "llm",
+      "input": {
+        "concept": "The agent loop",
+        "candidate": "An agent is like a chef tasting and adjusting soup: tasting is observing, adding salt is the action, tasting again is feeding the result back.",
+        "candidate_visual_description": "A stock-style icon of a robot head with a lightbulb. No loop, no chef, no stages."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Presence check passes (a visual exists); the rubric requires it to clearly support the analogy, and a generic robot icon supports nothing.",
+      "judge_instructions": "Flag if the visual would not help a learner connect the analogy to the concept. Presence alone is insufficient."
+    },
+    {
+      "id": "ANA-07",
+      "rubric_case_id": 7.0,
+      "criterion": "Faithfulness / grounded",
+      "edge_case": "Analogy smuggles in a claim about the concept's benefits absent from the source",
+      "grader": "llm",
+      "input": {
+        "concept": "Human-in-the-loop gate",
+        "source_span": "S5",
+        "candidate": "It's like an editor approving an article before it's printed: the writer (the agent) drafts, the editor (the human) approves \u2014 which is why gated systems make far fewer mistakes in production."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "The mapping is clean; the trailing clause asserts an outcome claim ('far fewer mistakes in production') the source never makes. Grounding violations inside analogies usually hide in the tail.",
+      "judge_instructions": "Flag any claim about the concept that goes beyond the source span, even if attached to an otherwise faithful analogy."
+    },
+    {
+      "id": "ANA-08",
+      "rubric_case_id": 8.0,
+      "criterion": "Length / concise",
+      "edge_case": "Boundary pair: exactly 3 sentences (pass) \u2014 see ANA-09 for the flag twin",
+      "grader": "llm",
+      "input": {
+        "concept": "Tool calling",
+        "source_span": "S2",
+        "candidate": "Tool calling is like a manager delegating to a specialist. The manager (the model) asks the specialist (the host program) to run one specific task, like a search. The specialist reports the result back so the manager can decide what's next."
+      },
+      "expected_verdict": "pass",
+      "failure_mode": null,
+      "judge_instructions": "Count sentences. <=3 = pass. Upper-bound case."
+    },
+    {
+      "id": "ANA-09",
+      "rubric_case_id": 8.0,
+      "criterion": "Length / concise",
+      "edge_case": "Boundary pair: 4 sentences (one over) \u2014 must FLAG",
+      "grader": "llm",
+      "input": {
+        "concept": "Tool calling",
+        "source_span": "S2",
+        "candidate": "Tool calling is like a manager delegating to a specialist. The manager (the model) asks the specialist (the host program) to run one specific task. That task might be a search or a calculation. The specialist reports the result back so the manager can decide what's next."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Identical content to ANA-08 split into 4 sentences. The pair isolates the length check from content quality.",
+      "judge_instructions": "Count sentences. >3 = flag."
+    }
+  ]
+}

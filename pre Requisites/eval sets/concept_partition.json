@@ -1,0 +1,178 @@
+{
+  "meta": {
+    "project": "ILM \u2014 Interactive Learning Material (V1, workflow v2)",
+    "version": "0.2.0",
+    "created": "2026-06-11",
+    "pipeline_step": "Skill 1 + dedupe + Eval gate 1",
+    "diagram_node": "Skill 1: concept-extraction -> Keep only NEW concepts -> Eval gate 1",
+    "runs_in": "Skill 5: eval-audit",
+    "verdict_values": [
+      "pass",
+      "flag"
+    ],
+    "note": "Split from ilm_eval_set.json v0.1.0; cases unchanged."
+  },
+  "source_spans": {
+    "S1": "An AI agent is a program that uses a language model to decide which actions to take. It runs in a loop: observe the current state, choose a tool, execute it, and feed the result back into the model. The loop ends when the model decides the task is complete.",
+    "S2": "Tool calling lets the model request that the host program run a specific function, such as a web search or a calculator, and return the result to the model.",
+    "S3": "A system prompt is a fixed instruction given to the model before the conversation starts. It sets the agent's role, rules, and output format.",
+    "S4": "Retrieval-augmented generation (RAG) fetches relevant passages from a document store and adds them to the prompt, so the model can answer using information it was never trained on. The model's weights are not changed.",
+    "S5": "A human-in-the-loop gate requires a person to approve the agent's output before it takes effect."
+  },
+  "cases": [
+    {
+      "id": "CPT-01",
+      "rubric_case_id": 1.0,
+      "criterion": "New-only (vs past RMs)",
+      "edge_case": "Partial overlap, not exact duplicate \u2014 extracted concept is a superset of an already-taught one",
+      "grader": "llm",
+      "input": {
+        "past_concepts": [
+          "variables",
+          "functions",
+          "what is an LLM",
+          "prompting basics"
+        ],
+        "candidate_concept": {
+          "id": "c_104",
+          "title": "Prompting and system prompts",
+          "summary": "How to write prompts, plus the special fixed prompt that configures an agent.",
+          "source_span": "S3"
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Half the concept ('how to write prompts') re-teaches 'prompting basics' from a past RM. Only the system-prompt half is new. Graders that only check exact title matches will miss this.",
+      "judge_instructions": "Compare the candidate concept against the past-concepts list at the idea level, not the title level. Flag if any substantial portion of the candidate re-covers a past concept, even when bundled with new material."
+    },
+    {
+      "id": "CPT-02",
+      "rubric_case_id": 2.0,
+      "criterion": "Grounded in source",
+      "edge_case": "Concept is plausible for the domain and adjacent to the RM, but the RM never discusses it",
+      "grader": "llm",
+      "input": {
+        "rm_spans": [
+          "S1",
+          "S2",
+          "S3",
+          "S4",
+          "S5"
+        ],
+        "candidate_concept": {
+          "id": "c_105",
+          "title": "Fine-tuning the agent's model",
+          "summary": "Adapting model weights to the agent's task domain.",
+          "source_span": null
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Fine-tuning sounds like it belongs in an agents doc \u2014 S4 even mentions weights ('weights are not changed') \u2014 but no span teaches it. The mention of a word is not coverage of a concept.",
+      "judge_instructions": "Flag unless at least one span explicitly discusses the concept itself. A span that merely contains a related keyword does not count as grounding."
+    },
+    {
+      "id": "CPT-03",
+      "rubric_case_id": 3.0,
+      "criterion": "Coverage (no miss)",
+      "edge_case": "Output misses exactly one concept, and the missed one is the least prominent in the RM",
+      "grader": "human",
+      "input": {
+        "gold_list": [
+          "AI agent / agent loop",
+          "tool calling",
+          "system prompt",
+          "RAG",
+          "human-in-the-loop gate"
+        ],
+        "candidate_output": [
+          "AI agent / agent loop",
+          "tool calling",
+          "system prompt",
+          "RAG"
+        ]
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Misses 'human-in-the-loop gate' (one short span, S5). Near-miss coverage is the realistic failure \u2014 extraction rarely misses the headline concept, it misses the one-paragraph concept.",
+      "judge_instructions": "Reviewer compares against the gold list. Any missed gold concept = flag, regardless of how minor the concept appears in the RM."
+    },
+    {
+      "id": "CPT-04",
+      "rubric_case_id": 4.0,
+      "criterion": "Granularity",
+      "edge_case": "Two genuinely related ideas bundled as one concept \u2014 defensible-sounding, still wrong",
+      "grader": "llm",
+      "input": {
+        "candidate_concept": {
+          "id": "c_106",
+          "title": "Tool calling and RAG",
+          "summary": "How agents get outside information: by calling tools and by retrieving documents.",
+          "source_span": "S2 + S4"
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "The bundle has a unifying theme ('getting outside information'), which makes it look like one concept. But each half needs its own explanation, analogy, and quiz \u2014 it is two teachable units.",
+      "judge_instructions": "Flag if the concept requires teaching two separable mechanisms. Test: could a quiz question about one half be answered without the other half? If yes, it is two concepts."
+    },
+    {
+      "id": "CPT-05",
+      "rubric_case_id": 5.0,
+      "criterion": "No overlap within set",
+      "edge_case": "Same idea extracted twice under non-matching titles",
+      "grader": "llm",
+      "input": {
+        "candidate_output": [
+          {
+            "id": "c_101",
+            "title": "The agent loop",
+            "summary": "Observe, choose a tool, execute, feed result back.",
+            "source_span": "S1"
+          },
+          {
+            "id": "c_107",
+            "title": "How agents decide and act",
+            "summary": "The cycle of observing state and taking actions until done.",
+            "source_span": "S1"
+          }
+        ]
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Zero title overlap, near-100% idea overlap, same source span. String-similarity dedup passes this; semantic dedup must catch it.",
+      "judge_instructions": "Compare concepts pairwise at the idea level. Flag if any two would produce substantially the same explanation."
+    },
+    {
+      "id": "CPT-06",
+      "rubric_case_id": 6.0,
+      "criterion": "Correct titling",
+      "edge_case": "Title is accurate but too broad to be specific",
+      "grader": "llm",
+      "input": {
+        "candidate_concept": {
+          "id": "c_108",
+          "title": "Working with AI",
+          "summary": "A human-in-the-loop gate requires a person to approve outputs before they take effect.",
+          "source_span": "S5"
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "'Working with AI' is not false, just vague \u2014 it could title any concept in the doc. Vagueness is the edge; outright mismatch is the easy case.",
+      "judge_instructions": "Flag if the title could plausibly apply to two or more other concepts in the same RM. Titles must be specific enough to identify the concept uniquely."
+    },
+    {
+      "id": "CPT-07",
+      "rubric_case_id": "anchor",
+      "criterion": "All criteria (pass anchor)",
+      "edge_case": "Clean extraction \u2014 calibrates the judge against over-flagging",
+      "grader": "llm",
+      "input": {
+        "candidate_concept": {
+          "id": "c_109",
+          "title": "Human-in-the-loop approval gate",
+          "summary": "A required human approval step before an agent's output takes effect.",
+          "source_span": "S5"
+        }
+      },
+      "expected_verdict": "pass",
+      "failure_mode": null,
+      "judge_instructions": "This concept is new, grounded in S5, single-idea, and specifically titled. A judge that flags this is over-strict; recalibrate the judge prompt."
+    }
+  ]
+}

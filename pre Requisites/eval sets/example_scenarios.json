@@ -1,0 +1,149 @@
+{
+  "meta": {
+    "project": "ILM \u2014 Interactive Learning Material (V1, workflow v2)",
+    "version": "0.2.0",
+    "created": "2026-06-11",
+    "pipeline_step": "Scenario generation (NOT in v2 diagram \u2014 see note)",
+    "diagram_node": "MISSING from v2 diagram",
+    "runs_in": "Skill 5: eval-audit",
+    "verdict_values": [
+      "pass",
+      "flag"
+    ],
+    "note": "Split from ilm_eval_set.json v0.1.0; cases unchanged. WARNING: the rubric xlsx defines Example Scenarios but workflow v2 has no scenario node. Either add a 'Skill: scenarios' box to the per-concept loop or drop this sheet; keeping the eval set so either decision is covered."
+  },
+  "source_spans": {
+    "S1": "An AI agent is a program that uses a language model to decide which actions to take. It runs in a loop: observe the current state, choose a tool, execute it, and feed the result back into the model. The loop ends when the model decides the task is complete.",
+    "S2": "Tool calling lets the model request that the host program run a specific function, such as a web search or a calculator, and return the result to the model.",
+    "S3": "A system prompt is a fixed instruction given to the model before the conversation starts. It sets the agent's role, rules, and output format.",
+    "S4": "Retrieval-augmented generation (RAG) fetches relevant passages from a document store and adds them to the prompt, so the model can answer using information it was never trained on. The model's weights are not changed.",
+    "S5": "A human-in-the-loop gate requires a person to approve the agent's output before it takes effect."
+  },
+  "cases": [
+    {
+      "id": "SCN-01",
+      "rubric_case_id": 1.0,
+      "criterion": "Correctness",
+      "edge_case": "Scenario sounds like the concept but describes a different mechanism",
+      "grader": "llm",
+      "input": {
+        "concept": "RAG",
+        "source_span": "S4",
+        "candidate": "A legal-tech startup uploads its case files so the model retrains on them overnight; the next day, the assistant answers questions about those cases."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "'Answers questions about your documents' matches the RAG vibe, but retraining changes weights \u2014 the source explicitly says weights are not changed. This is the classic RAG/fine-tuning confusion.",
+      "judge_instructions": "Verify the mechanism in the scenario matches the concept's mechanism in the source span, not just the outcome."
+    },
+    {
+      "id": "SCN-02",
+      "rubric_case_id": 2.0,
+      "criterion": "Quality / effectiveness",
+      "edge_case": "Scenario mentions the concept by name but would fit any concept",
+      "grader": "llm",
+      "input": {
+        "concept": "Tool calling",
+        "source_span": "S2",
+        "candidate": "A company adopts tool calling and finds their AI system becomes more capable and efficient, improving productivity across teams."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Name-dropping the concept defeats naive relevance checks, but swap in 'RAG' or 'system prompts' and the scenario still reads fine \u2014 it shows nothing concept-specific in action.",
+      "judge_instructions": "Substitution test: replace the concept name with a sibling concept. If the scenario still makes sense, flag as generic."
+    },
+    {
+      "id": "SCN-03",
+      "rubric_case_id": 3.0,
+      "criterion": "Complexity / difficulty",
+      "edge_case": "Correct and relevant, but overloaded with incidental detail",
+      "grader": "human",
+      "input": {
+        "concept": "The agent loop",
+        "audience_level": "beginner",
+        "source_span": "S1",
+        "candidate": "A DevOps agent monitoring a Kubernetes cluster with 14 microservices observes p99 latency breaching 250ms on the checkout service, selects the kubectl-scale tool with replica delta +3 subject to the HPA ceiling, executes, then re-reads Prometheus metrics to decide whether a further scale event or a rollback of the 14:02 canary is warranted."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Every detail is accurate and the loop structure is there \u2014 but a beginner drowns in Kubernetes specifics before seeing the loop. Pilot-phase human judgment per the rubric.",
+      "judge_instructions": "Reviewer: would a beginner extract the observe-act-repeat structure on first read? If the incidental detail obscures it, flag."
+    },
+    {
+      "id": "SCN-04",
+      "rubric_case_id": 4.0,
+      "criterion": "Length",
+      "edge_case": "Boundary: exactly 3 sentences \u2014 must PASS",
+      "grader": "llm",
+      "input": {
+        "concept": "Human-in-the-loop gate",
+        "source_span": "S5",
+        "candidate": "A bank's email-drafting agent writes responses to customer complaints. Each draft lands in a queue where a support lead approves or edits it. Only approved drafts are sent to customers."
+      },
+      "expected_verdict": "pass",
+      "failure_mode": null,
+      "judge_instructions": "Count sentences. <=3 = pass. Upper-bound case."
+    },
+    {
+      "id": "SCN-05",
+      "rubric_case_id": 5.0,
+      "criterion": "Usefulness",
+      "edge_case": "Scenario is the explanation paraphrased with a thin narrative wrapper",
+      "grader": "llm",
+      "input": {
+        "concept": "System prompt",
+        "source_span": "S3",
+        "explanation_text": "A system prompt is a fixed instruction the model receives before the conversation starts. It sets the agent's role, rules, and output format.",
+        "candidate": "At a startup, an engineer gives the model a fixed instruction before any conversation starts. This instruction sets the assistant's role, its rules, and its output format."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Adding 'at a startup, an engineer' to the explanation is not a scenario. Compare candidate against the explanation_text \u2014 near-paraphrase means zero added understanding.",
+      "judge_instructions": "Flag if the scenario adds no concrete situation, stakes, or consequence beyond rephrasing the explanation. Provide the explanation text to the judge for direct comparison."
+    },
+    {
+      "id": "SCN-06",
+      "rubric_case_id": 6.0,
+      "criterion": "Code playground (if code concept)",
+      "edge_case": "Playground key present but contains only a comment stub",
+      "grader": "code",
+      "input": {
+        "concept": "Tool calling (code concept: writing a tool function)",
+        "candidate_unit_fields": {
+          "code_playground": "# TODO: add starter code\n"
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Key-presence check passes; the playground contains no runnable starter code. Code grader must require at least one non-comment, non-blank line (or a successful parse with executable statements).",
+      "judge_instructions": "Code grader: strip comments and whitespace; flag if no executable content remains."
+    },
+    {
+      "id": "SCN-07",
+      "rubric_case_id": 7.0,
+      "criterion": "Relevance / grounded",
+      "edge_case": "Scenario is in-domain (AI/software) but is not actually an instance of the concept",
+      "grader": "llm",
+      "input": {
+        "concept": "The agent loop",
+        "source_span": "S1",
+        "candidate": "A data analyst asks a chatbot to summarize a quarterly report; the chatbot reads the document and returns a one-page summary."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Same domain, plausible AI story \u2014 but it's a single-shot completion with no observe-act-repeat loop and no tool selection. In-domain non-instances are harder than the rubric's spreadsheet example.",
+      "judge_instructions": "Check the scenario exhibits the defining structure of the concept (here: a loop with tool choice and feedback), not merely the same industry or technology."
+    },
+    {
+      "id": "SCN-08",
+      "rubric_case_id": 8.0,
+      "criterion": "Distinct (no duplicates)",
+      "edge_case": "Two scenarios with different surface settings but the identical underlying situation",
+      "grader": "llm",
+      "input": {
+        "concept": "Human-in-the-loop gate",
+        "candidate_scenarios": [
+          "A bank's email agent drafts complaint responses; a support lead approves each one before it is sent.",
+          "An insurance firm's email assistant writes replies to customer grievances; a team supervisor signs off on every reply before it goes out."
+        ]
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Bank->insurance, complaints->grievances, lead->supervisor \u2014 pure synonym substitution. Embedding-distance or n-gram dedup may pass it; the situation (email + manager approval) is identical.",
+      "judge_instructions": "Flag if two scenarios share the same actor-action-approval structure regardless of industry or wording. Distinctness means a different situation, not a different vocabulary."
+    }
+  ]
+}

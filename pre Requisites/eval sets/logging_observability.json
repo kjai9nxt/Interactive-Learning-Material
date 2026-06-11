@@ -1,0 +1,129 @@
+{
+  "meta": {
+    "project": "ILM \u2014 Interactive Learning Material (V1, workflow v2)",
+    "version": "0.2.0",
+    "created": "2026-06-11",
+    "pipeline_step": "LOGGING (run trace, eval scores, reviewer edits) + OBSERVABILITY",
+    "diagram_node": "LOGGING -> OBSERVABILITY -> DSPy OPTIMIZER",
+    "runs_in": "code checks run per pipeline run",
+    "verdict_values": [
+      "pass",
+      "flag"
+    ],
+    "note": "Logs feed the self-evolving loop, so log gaps silently starve it. PRD non-negotiable #4: logging on every run."
+  },
+  "cases": [
+    {
+      "id": "LOG-01",
+      "criterion": "Trace completeness",
+      "edge_case": "Run trace exists but one skill's eval scores are missing (skill errored and the except block skipped logging)",
+      "grader": "code",
+      "input": {
+        "trace": {
+          "run_id": "r_0042",
+          "skills_invoked": [
+            "skill_1",
+            "skill_2",
+            "skill_3",
+            "skill_4",
+            "skill_5"
+          ],
+          "eval_scores": {
+            "skill_1": 0.9,
+            "skill_2": 0.85,
+            "skill_4": 0.7,
+            "skill_5": 1.0
+          }
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "skill_3 invoked, no score logged. Failure paths are exactly the runs the self-evolving loop needs most \u2014 error handlers must log a failure record, not skip the write.",
+      "judge_instructions": "Code grader: assert eval_scores keys == skills_invoked; flag any invoked skill without a score or explicit error record."
+    },
+    {
+      "id": "LOG-02",
+      "criterion": "Reviewer edits stored as diffs",
+      "edge_case": "Log stores only the post-edit final text, not what changed",
+      "grader": "code",
+      "input": {
+        "review_record": {
+          "unit_id": "c_101",
+          "action": "edited",
+          "final_text": "...",
+          "pre_edit_text": null,
+          "diff": null
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Without pre-edit text or a diff, reviewer corrections can't become memory entries or eval cases \u2014 the 'corrections' edge in the diagram has nothing to carry. Edited actions must store both versions.",
+      "judge_instructions": "Code grader: when action == 'edited', flag if pre_edit_text or diff is null."
+    },
+    {
+      "id": "LOG-03",
+      "criterion": "Run ID uniqueness",
+      "edge_case": "Retry of a failed concept reuses the parent run_id, overwriting the failed attempt's trace",
+      "grader": "code",
+      "input": {
+        "traces": [
+          {
+            "run_id": "r_0042",
+            "attempt": 1,
+            "verdict": "flag"
+          },
+          {
+            "run_id": "r_0042",
+            "attempt": 2,
+            "verdict": "pass"
+          }
+        ],
+        "storage_behavior": "second write overwrote the first"
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Auto-retry (Eval gate 2's fail->regenerate edge) erases its own failure evidence \u2014 the optimizer then never sees what failed. Attempts need distinct IDs (r_0042.1, r_0042.2) and immutable writes.",
+      "judge_instructions": "Code grader: flag duplicate (run_id, attempt) keys or any overwrite of an existing trace record."
+    },
+    {
+      "id": "LOG-04",
+      "criterion": "No secrets in traces",
+      "edge_case": "Raw request payload logged for debuggability includes the Authorization header",
+      "grader": "code",
+      "input": {
+        "trace_fragment": {
+          "request_headers": {
+            "Authorization": "Bearer sk-ant-api03-EXAMPLEKEY...",
+            "Content-Type": "application/json"
+          }
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Traces flow to observability dashboards and (per the PRD) start life in a spreadsheet \u2014 the widest-shared, least-protected store in the project. Redact key patterns at write time.",
+      "judge_instructions": "Code grader: scan trace blobs for credential patterns (Bearer, sk-, api_key=); flag any hit. Redaction must happen before persistence, not at display time."
+    },
+    {
+      "id": "LOG-05",
+      "criterion": "Pass anchor",
+      "edge_case": "Complete, immutable, redacted trace with edit diff",
+      "grader": "code",
+      "input": {
+        "trace": {
+          "run_id": "r_0043",
+          "attempt": 1,
+          "skills_invoked": [
+            "skill_1"
+          ],
+          "eval_scores": {
+            "skill_1": 0.95
+          },
+          "review_record": {
+            "action": "approved",
+            "approved_by": "pallavi"
+          },
+          "secrets_scan": "clean"
+        }
+      },
+      "expected_verdict": "pass",
+      "failure_mode": null,
+      "judge_instructions": "All completeness, uniqueness, and redaction invariants hold."
+    }
+  ]
+}

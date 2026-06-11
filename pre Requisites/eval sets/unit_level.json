@@ -1,0 +1,174 @@
+{
+  "meta": {
+    "project": "ILM \u2014 Interactive Learning Material (V1, workflow v2)",
+    "version": "0.2.0",
+    "created": "2026-06-11",
+    "pipeline_step": "Assemble + schema validate + human gate + render",
+    "diagram_node": "Assemble Concept Unit -> Human review gate -> Output",
+    "runs_in": "Skill 5: eval-audit",
+    "verdict_values": [
+      "pass",
+      "flag"
+    ],
+    "note": "Split from ilm_eval_set.json v0.1.0; cases unchanged."
+  },
+  "source_spans": {
+    "S1": "An AI agent is a program that uses a language model to decide which actions to take. It runs in a loop: observe the current state, choose a tool, execute it, and feed the result back into the model. The loop ends when the model decides the task is complete.",
+    "S2": "Tool calling lets the model request that the host program run a specific function, such as a web search or a calculator, and return the result to the model.",
+    "S3": "A system prompt is a fixed instruction given to the model before the conversation starts. It sets the agent's role, rules, and output format.",
+    "S4": "Retrieval-augmented generation (RAG) fetches relevant passages from a document store and adds them to the prompt, so the model can answer using information it was never trained on. The model's weights are not changed.",
+    "S5": "A human-in-the-loop gate requires a person to approve the agent's output before it takes effect."
+  },
+  "cases": [
+    {
+      "id": "UNT-01",
+      "rubric_case_id": 1.0,
+      "criterion": "source_span present",
+      "edge_case": "source_span is whitespace-only, not empty string",
+      "grader": "code",
+      "input": {
+        "candidate_unit_fields": {
+          "source_span": "   \n\t"
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "`if source_span:` passes on whitespace. Grader must check source_span.strip() != ''.",
+      "judge_instructions": "Code grader: flag if source_span is None or source_span.strip() is empty."
+    },
+    {
+      "id": "UNT-02",
+      "rubric_case_id": 2.0,
+      "criterion": "Schema valid",
+      "edge_case": "Required field present but null \u2014 key-existence checks pass, type validation must fail",
+      "grader": "code",
+      "input": {
+        "candidate_unit_fields": {
+          "concept_id": "c_101",
+          "explanation": "...",
+          "analogy": "...",
+          "scenarios": [
+            "..."
+          ],
+          "mini_quiz": null,
+          "visual_diagram_html": "<svg>...</svg>",
+          "source_span": "S1"
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "'mini_quiz' in unit is True; the value is null. pydantic in models.py catches this only if the field is typed non-Optional \u2014 this case enforces that typing decision.",
+      "judge_instructions": "Code grader: validate against the pydantic model; required components must be non-null and non-empty, not merely present as keys."
+    },
+    {
+      "id": "UNT-03",
+      "rubric_case_id": 3.0,
+      "criterion": "All components present",
+      "edge_case": "scenarios component present but is an empty list",
+      "grader": "code",
+      "input": {
+        "candidate_unit_fields": {
+          "explanation": "...",
+          "analogy": "...",
+          "scenarios": [],
+          "mini_quiz": {
+            "questions": [
+              "..."
+            ]
+          },
+          "visual_diagram_html": "<svg>...</svg>"
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Empty list is truthy enough for key checks and schema-valid if typed list \u2014 but zero scenarios means the component is effectively missing. Require min length on list components.",
+      "judge_instructions": "Code grader: flag if any list-typed component has length 0."
+    },
+    {
+      "id": "UNT-04",
+      "rubric_case_id": 4.0,
+      "criterion": "Reviewed before publish",
+      "edge_case": "review.status approved but approved_by is empty \u2014 approval recorded without an approver",
+      "grader": "code",
+      "input": {
+        "candidate_unit_fields": {
+          "review": {
+            "status": "approved",
+            "approved_by": "",
+            "approved_at": null
+          },
+          "rendered": true
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Checking status == 'approved' alone passes this. A status that flipped without an approver identity/timestamp is exactly how an auto-retry loop accidentally self-approves. This protects PRD non-negotiable #1.",
+      "judge_instructions": "Code grader: rendered units must have review.status == 'approved' AND non-empty approved_by AND non-null approved_at."
+    },
+    {
+      "id": "UNT-05",
+      "rubric_case_id": 5.0,
+      "criterion": "Within scope (new only)",
+      "edge_case": "Rendered concept passed partition at generation time, but a past-RM mapping was added later \u2014 staleness edge",
+      "grader": "code",
+      "input": {
+        "candidate_render_manifest": {
+          "rendered_concepts": [
+            "agent loop",
+            "tool calling",
+            "prompting basics"
+          ],
+          "past_concepts_at_render_time": [
+            "variables",
+            "functions",
+            "what is an LLM",
+            "prompting basics"
+          ]
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "'prompting basics' is in both lists \u2014 the duplicate check must run at render time against the CURRENT past-concepts registry, not rely on a partition verdict cached from generation time.",
+      "judge_instructions": "Code grader: at render time, flag any rendered concept whose normalized title appears in the current past-concepts registry."
+    },
+    {
+      "id": "UNT-06",
+      "rubric_case_id": "anchor",
+      "criterion": "All criteria (pass anchor)",
+      "edge_case": "Fully valid unit \u2014 calibrates code graders against false positives",
+      "grader": "code",
+      "input": {
+        "candidate_unit_fields": {
+          "concept_id": "c_109",
+          "title": "Human-in-the-loop approval gate",
+          "explanation": "A human-in-the-loop gate means a person must approve the agent's output before it takes effect. Nothing reaches the end user without that approval. It is a safety check, not a performance feature.",
+          "analogy": "It's like an editor approving an article before printing: the writer is the agent, the editor's sign-off is the gate.",
+          "scenarios": [
+            "A bank's email agent drafts complaint responses; a support lead approves each draft before it is sent."
+          ],
+          "mini_quiz": {
+            "questions": [
+              {
+                "question": "...",
+                "options": [
+                  "a",
+                  "b",
+                  "c",
+                  "d"
+                ],
+                "correct_index": 0,
+                "explanation": "..."
+              }
+            ]
+          },
+          "visual_diagram_html": "<svg><text>Agent output -> Human review -> Published</text></svg>",
+          "source_span": "A human-in-the-loop gate requires a person to approve the agent's output before it takes effect.",
+          "review": {
+            "status": "approved",
+            "approved_by": "pallavi",
+            "approved_at": "2026-06-11T10:30:00Z"
+          },
+          "rendered": true
+        }
+      },
+      "expected_verdict": "pass",
+      "failure_mode": null,
+      "judge_instructions": "All fields present, typed, non-empty; review fully recorded; concept not in past registry. Any grader flagging this unit has a false-positive bug."
+    }
+  ]
+}

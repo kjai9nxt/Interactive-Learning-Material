@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./Styles.css";
 import type { Theme, QuizScore } from "./types";
 import ThemeToggle from "./components/ThemeToggle";

@@ -1,4 +1,3 @@
-import React from "react";
 import type { QuizScore } from "../types";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -57,9 +56,13 @@ interface SectionScore {
 
 interface CourseCompleteProps {
   sectionScores: SectionScore[];
+  intro?: string;
 }
 
-export function CourseComplete({ sectionScores }: CourseCompleteProps) {
+const DEFAULT_INTRO =
+  "You can now write media queries that target by type, size, orientation, and combine conditions with AND, NOT, and OR. Here's how you did on the mini-quizzes:";
+
+export function CourseComplete({ sectionScores, intro = DEFAULT_INTRO }: CourseCompleteProps) {
   const totalCorrect = sectionScores.reduce((s, x) => s + x.score.correct, 0);
   const totalQuestions = sectionScores.reduce((s, x) => s + x.score.total, 0);
   const totalWrong = totalQuestions - totalCorrect;
@@ -76,9 +79,7 @@ export function CourseComplete({ sectionScores }: CourseCompleteProps) {
         </div>
       </div>
 
-      <p className="cc-intro">
-        You can now write media queries that target by type, size, orientation, and combine conditions with AND, NOT, and OR. Here's how you did on the mini-quizzes:
-      </p>
+      <p className="cc-intro">{intro}</p>
 
       <div className="cc-score-card">
         <div className="cc-score-label">Your overall score</div>

@@ -1,0 +1,356 @@
+{
+  "meta": {
+    "project": "ILM \u2014 Interactive Learning Material (V1, workflow v2)",
+    "version": "0.2.0",
+    "created": "2026-06-11",
+    "pipeline_step": "Skill 4 (MCQs)",
+    "diagram_node": "Skill 4: MCQs",
+    "runs_in": "Skill 5: eval-audit",
+    "verdict_values": [
+      "pass",
+      "flag"
+    ],
+    "note": "Split from ilm_eval_set.json v0.1.0; cases unchanged."
+  },
+  "source_spans": {
+    "S1": "An AI agent is a program that uses a language model to decide which actions to take. It runs in a loop: observe the current state, choose a tool, execute it, and feed the result back into the model. The loop ends when the model decides the task is complete.",
+    "S2": "Tool calling lets the model request that the host program run a specific function, such as a web search or a calculator, and return the result to the model.",
+    "S3": "A system prompt is a fixed instruction given to the model before the conversation starts. It sets the agent's role, rules, and output format.",
+    "S4": "Retrieval-augmented generation (RAG) fetches relevant passages from a document store and adds them to the prompt, so the model can answer using information it was never trained on. The model's weights are not changed.",
+    "S5": "A human-in-the-loop gate requires a person to approve the agent's output before it takes effect."
+  },
+  "cases": [
+    {
+      "id": "QUZ-01",
+      "rubric_case_id": 1.0,
+      "criterion": "Single correct option",
+      "edge_case": "Two options are semantically identical (both correct) but textually distinct \u2014 code dedup passes, single-correct is violated",
+      "grader": "llm",
+      "input": {
+        "concept": "System prompt",
+        "candidate_question": {
+          "question": "When does the model receive the system prompt?",
+          "options": [
+            "Before the conversation starts",
+            "Prior to the first user message",
+            "After every user message",
+            "Only when the agent calls a tool"
+          ],
+          "correct_index": 0,
+          "explanation": "The system prompt is given before the conversation starts."
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Options A and B are the same answer in different words; both are correct. The deterministic exactly-one-keyed check passes (one index keyed) and the duplicate-text check passes \u2014 only semantic review catches it. Route to LLM judge.",
+      "judge_instructions": "Evaluate each option for correctness independently. Flag if more than one option is a correct answer, even if only one is keyed."
+    },
+    {
+      "id": "QUZ-02",
+      "rubric_case_id": 2.0,
+      "criterion": "Technical correctness",
+      "edge_case": "Keyed answer is wrong by one index \u2014 a classic generation off-by-one",
+      "grader": "llm",
+      "input": {
+        "concept": "RAG",
+        "source_span": "S4",
+        "candidate_question": {
+          "question": "What does RAG change about the model?",
+          "options": [
+            "Its weights, via overnight retraining",
+            "Nothing about the model itself \u2014 only the prompt content",
+            "Its tokenizer vocabulary",
+            "Its system prompt permissions"
+          ],
+          "correct_index": 0,
+          "explanation": "RAG adds retrieved passages to the prompt; the weights are not changed."
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "The explanation describes option B, but index 0 is keyed. The keyed answer directly contradicts the source span AND the quiz's own explanation. Judges must check key-vs-content consistency, not just question quality.",
+      "judge_instructions": "Verify the keyed option is correct per the source span, and that the explanation is consistent with the keyed option. Flag any mismatch."
+    },
+    {
+      "id": "QUZ-03",
+      "rubric_case_id": 7.0,
+      "criterion": "Distractor quality",
+      "edge_case": "Two distractors are plausible misconceptions, one is a throwaway",
+      "grader": "llm",
+      "input": {
+        "concept": "Tool calling",
+        "candidate_question": {
+          "question": "In tool calling, who actually executes the function?",
+          "options": [
+            "The host program",
+            "The language model itself",
+            "The end user, manually",
+            "A blockchain smart contract"
+          ],
+          "correct_index": 0,
+          "explanation": "The model requests; the host program executes."
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Distractors B and C map to real misconceptions; D is buzzword filler that no half-learner would pick. The rubric requires EACH distractor to be plausible AND misconception-mapped \u2014 one throwaway = flag.",
+      "judge_instructions": "Evaluate each distractor separately: (a) would a half-learner plausibly choose it, (b) does it map to a stated or recognizable misconception? Flag if any single distractor fails either test."
+    },
+    {
+      "id": "QUZ-04",
+      "rubric_case_id": [
+        4.0,
+        12.0
+      ],
+      "criterion": "Bloom-level coverage (mislabeled levels)",
+      "edge_case": "A question is labeled 'application' but actually tests recall \u2014 label-trusting graders miscount coverage",
+      "grader": "llm",
+      "input": {
+        "concept": "The agent loop",
+        "candidate_question": {
+          "question": "Which of the following lists the stages of the agent loop in order?",
+          "options": [
+            "Observe, choose tool, execute, feed result back",
+            "Execute, observe, choose tool, report",
+            "Choose tool, observe, execute, terminate",
+            "Observe, execute, choose tool, feed result back"
+          ],
+          "correct_index": 0,
+          "bloom_level_label": "application",
+          "explanation": "The loop runs observe -> choose -> execute -> feed back."
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Reciting the stage order is recall, not application \u2014 nothing is applied to a new situation. If the grader counts coverage by reading labels, a quiz can fake full Bloom coverage with mislabeled recall questions.",
+      "judge_instructions": "Classify each question's actual Bloom level from its content, ignoring the label. Flag if the labeled level does not match the actual level, or if a required level (recall/understanding/analysis/application) is only 'covered' by a mislabeled question."
+    },
+    {
+      "id": "QUZ-05",
+      "rubric_case_id": 8.0,
+      "criterion": "Exactly 4 options",
+      "edge_case": "One question has 5 options including 'All of the above' appended",
+      "grader": "code",
+      "input": {
+        "candidate_question": {
+          "question": "What can a tool call do?",
+          "options": [
+            "Run a web search",
+            "Run a calculator",
+            "Run a custom function",
+            "Return results to the model",
+            "All of the above"
+          ],
+          "correct_index": 4
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "5 options. 'All of the above' is the common way option counts silently inflate during generation; it also breaks the single-correct rule. Deterministic: len(options) != 4.",
+      "judge_instructions": "Code grader: assert len(options) == 4 for every question."
+    },
+    {
+      "id": "QUZ-06",
+      "rubric_case_id": 9.0,
+      "criterion": "No duplicate options",
+      "edge_case": "Duplicate options differing only in trailing whitespace and case",
+      "grader": "code",
+      "input": {
+        "candidate_question": {
+          "question": "What sets the agent's role and rules?",
+          "options": [
+            "The system prompt",
+            "the system prompt ",
+            "The user's first message",
+            "The tool registry"
+          ],
+          "correct_index": 0
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Exact string comparison sees two distinct strings. The grader must normalize (strip, casefold) before comparing \u2014 this case exists to force that normalization.",
+      "judge_instructions": "Code grader: compare options after strip().casefold(); flag any collision."
+    },
+    {
+      "id": "QUZ-07",
+      "rubric_case_id": 10.0,
+      "criterion": "Number of questions",
+      "edge_case": "Boundary pair: 5 questions (max) must PASS; 6 must FLAG",
+      "grader": "code",
+      "input": {
+        "candidate_quizzes": [
+          {
+            "quiz_id": "q_boundary_hi_pass",
+            "question_count": 5,
+            "expected": "pass"
+          },
+          {
+            "quiz_id": "q_boundary_over_flag",
+            "question_count": 6,
+            "expected": "flag"
+          },
+          {
+            "quiz_id": "q_boundary_lo_pass",
+            "question_count": 4,
+            "expected": "pass"
+          },
+          {
+            "quiz_id": "q_boundary_under_flag",
+            "question_count": 3,
+            "expected": "flag"
+          }
+        ]
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Four sub-cases pinning both boundaries of the 4-5 range. The top-level expected_verdict applies to the set check: the grader must produce exactly the per-quiz expectations listed; the two out-of-range quizzes must flag.",
+      "judge_instructions": "Code grader: assert 4 <= question_count <= 5. Run all four sub-cases; an off-by-one error at either boundary fails this eval case."
+    },
+    {
+      "id": "QUZ-08",
+      "rubric_case_id": 11.0,
+      "criterion": "Explanation present",
+      "edge_case": "Explanation exists and names the correct option, but ignores the distractors",
+      "grader": "llm",
+      "input": {
+        "concept": "RAG",
+        "candidate_question": {
+          "question": "Why can a RAG system answer questions about documents the model never saw in training?",
+          "options": [
+            "Retrieved passages are added to the prompt at answer time",
+            "The model is retrained nightly on the documents",
+            "The model memorizes documents on first read",
+            "The documents are converted into new model weights"
+          ],
+          "correct_index": 0,
+          "explanation": "Correct: retrieved passages are added to the prompt at answer time."
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Presence check passes; the rubric requires why the correct option is right AND why each distractor is wrong. Distractors B-D map to the retraining misconception and go unaddressed \u2014 which defeats the PRD's misconception-aware remediation differentiator.",
+      "judge_instructions": "Flag unless the explanation addresses why each individual distractor is wrong, not just why the keyed answer is right."
+    },
+    {
+      "id": "QUZ-09",
+      "rubric_case_id": 13.0,
+      "criterion": "Difficulty mix",
+      "edge_case": "Labels show a mix but actual difficulty is uniform",
+      "grader": "llm",
+      "input": {
+        "concept": "System prompt",
+        "candidate_quiz_summary": {
+          "questions": [
+            {
+              "text": "When is the system prompt given to the model?",
+              "difficulty_label": "easy"
+            },
+            {
+              "text": "What does the system prompt set for the agent?",
+              "difficulty_label": "medium"
+            },
+            {
+              "text": "Which of these is part of a system prompt: role, rules, or output format?",
+              "difficulty_label": "hard"
+            },
+            {
+              "text": "Is the system prompt fixed or does it change each turn?",
+              "difficulty_label": "hard"
+            }
+          ]
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "All four questions are direct recall of the same two sentences in S3 \u2014 the 'hard' labels are decorative. Difficulty must be judged from content; label-reading graders pass this.",
+      "judge_instructions": "Assess each question's actual difficulty for a beginner who read the span. Flag if the real difficulty levels do not include at least one easy and at least one hard question, regardless of labels."
+    },
+    {
+      "id": "QUZ-10",
+      "rubric_case_id": 14.0,
+      "criterion": "Grounded in source",
+      "edge_case": "Question is on-concept but its correct answer requires knowledge outside the span",
+      "grader": "llm",
+      "input": {
+        "concept": "Tool calling",
+        "source_span": "S2",
+        "candidate_question": {
+          "question": "Which JSON field does the OpenAI API use to declare a tool's parameters?",
+          "options": [
+            "parameters",
+            "arguments",
+            "schema",
+            "inputs"
+          ],
+          "correct_index": 0,
+          "explanation": "Tool definitions declare their inputs in the 'parameters' field."
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "Squarely about tool calling (passes relevancy) and has one correct answer \u2014 but nothing in S2 mentions API field names. A learner who mastered the RM cannot answer it. Relevant-but-ungrounded is the trap.",
+      "judge_instructions": "Flag if answering correctly requires any information not present in the source span, even when the question is on-topic."
+    },
+    {
+      "id": "QUZ-11",
+      "rubric_case_id": "anchor",
+      "criterion": "All criteria (pass anchor)",
+      "edge_case": "Fully compliant quiz \u2014 calibrates against over-flagging",
+      "grader": "llm",
+      "input": {
+        "concept": "RAG",
+        "source_span": "S4",
+        "candidate_quiz": {
+          "questions": [
+            {
+              "question": "What does RAG add to the prompt?",
+              "options": [
+                "Relevant passages from a document store",
+                "New model weights",
+                "A longer system prompt",
+                "The user's chat history"
+              ],
+              "correct_index": 0,
+              "bloom_level_label": "recall",
+              "difficulty_label": "easy",
+              "explanation": "Correct: RAG fetches passages from a document store and adds them to the prompt. 'New model weights' is wrong because weights are not changed; 'a longer system prompt' is wrong because retrieval modifies the user-facing prompt content, not the fixed instructions; 'chat history' is wrong because retrieval pulls from the document store, not the conversation."
+            },
+            {
+              "question": "A team wants their assistant to answer questions about this week's internal memos without retraining. Which approach fits?",
+              "options": [
+                "Use RAG over the memo store",
+                "Fine-tune the model on the memos",
+                "Increase the model's context limit",
+                "Add the memos to the system prompt permanently"
+              ],
+              "correct_index": 0,
+              "bloom_level_label": "application",
+              "difficulty_label": "medium",
+              "explanation": "Correct: RAG retrieves the memos at answer time with no weight changes. Fine-tuning changes weights (the thing they want to avoid); a larger context limit alone doesn't fetch the memos; permanently stuffing the system prompt doesn't scale and isn't retrieval."
+            },
+            {
+              "question": "How is RAG different from retraining the model on new documents?",
+              "options": [
+                "RAG leaves the model's weights unchanged",
+                "RAG permanently teaches the model the documents",
+                "RAG requires more GPU time than retraining",
+                "There is no difference"
+              ],
+              "correct_index": 0,
+              "bloom_level_label": "understanding",
+              "difficulty_label": "medium",
+              "explanation": "Correct: the source states weights are not changed. 'Permanently teaches' describes retraining, not RAG; the GPU claim is unsupported and backwards in spirit; 'no difference' contradicts the source's explicit distinction."
+            },
+            {
+              "question": "Why can a RAG system answer correctly about information the model was never trained on?",
+              "options": [
+                "Because the needed information is placed into the prompt at answer time",
+                "Because retrieval updates the model's training data",
+                "Because the model infers unseen facts from its weights",
+                "Because the document store replaces the model"
+              ],
+              "correct_index": 0,
+              "bloom_level_label": "analysis",
+              "difficulty_label": "hard",
+              "explanation": "Correct: the answer comes from the retrieved passages in the prompt, not from training. 'Updates training data' is the retraining misconception; 'infers unseen facts from weights' contradicts 'never trained on'; 'replaces the model' misstates the architecture \u2014 the model still generates the answer."
+            }
+          ]
+        }
+      },
+      "expected_verdict": "pass",
+      "failure_mode": null,
+      "judge_instructions": "4 questions, 4 options each, no duplicates, one correct each, all Bloom levels genuinely covered, easy+hard mix, every distractor misconception-mapped and addressed in the explanation, all answers grounded in S4. A judge flagging this is over-strict; recalibrate."
+    }
+  ]
+}
