@@ -62,8 +62,10 @@ python -m agent.orchestrator input/ai_agents.md --auto-approve
 python -m agent.evals.run_evals            # code + LLM judge
 python -m agent.evals.run_evals --code-only  # deterministic only (free/instant)
 
-# 3) See the result
+# 3) See the result — starts BOTH the Flask backend (:5174) and Vite (:5173)
 npm install && npm run dev   # open http://localhost:5173
+#    (the in-app "Load example", Generate, and code playground all call /api/*,
+#     so the backend must run too — `npm run dev` now launches both for you.)
 ```
 
 ## How the PRD non-negotiables are met

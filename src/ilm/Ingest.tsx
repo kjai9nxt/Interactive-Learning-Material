@@ -92,8 +92,8 @@ export default function Ingest({ onResult }: { onResult: (data: ConceptUnitsFile
         if (st.state === "done") { onResult(st.result as ConceptUnitsFile); return; }
         if (st.state === "error") throw new Error(st.error || "Generation failed");
       }
-    } catch (e: any) {
-      setError(e.message || "Generation failed. Check that the backend is running.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Generation failed. Check that the backend is running.");
       setBusy(false);
     }
   };

@@ -35,6 +35,9 @@ class Explanation(BaseModel):
 
 class Scenario(BaseModel):
     text: str = Field(..., description="<=3 sentences, a concrete instance")
+    # Inline SVG that illustrates THIS real-world example (like the analogy/explanation
+    # visuals). Optional, but the generator should provide one for most scenarios.
+    visual_html: str = Field(default="", description="inline SVG illustrating the scenario")
     # Present only when the concept involves code (rubric: Example Scenarios #6).
     code_playground: Optional[dict] = None  # {"language", "html"/"css"/"code"}
 

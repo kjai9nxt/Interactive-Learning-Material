@@ -7,10 +7,12 @@ from __future__ import annotations
 
 from .. import llm
 from ..models import Analogy, Concept
+from ..visual_spec import VISUAL_SPEC
 
 SYSTEM = (
-    "You write short teaching analogies. They must be self-contained, map "
-    "explicitly to the concept, and never imply anything the source does not say."
+    "You write short teaching analogies with a clear, polished supporting visual. "
+    "They must be self-contained, map explicitly to the concept, and never imply "
+    "anything the source does not say."
 )
 
 PROMPT = """{memory}
@@ -18,15 +20,22 @@ PROMPT = """{memory}
 Write ONE analogy for the concept below.
 
 Hard rules (Analogy rubric):
-- EXPLICIT MAPPING: state what maps to what ("just like X does A, the concept does A").
-  At least 2 elements of the analogy must map to specific parts of the concept.
+- EXPLICIT MAPPING (the gate fails the unit without this): name AT LEAST TWO
+  distinct elements of the everyday scene and state, in words, which specific part
+  of the concept each one corresponds to — e.g. "the X is like the <concept part>,
+  and the Y is like the <other concept part>". Two or more pairings must be
+  spelled out explicitly in the analogy text; a single mapped element, or elements
+  that are merely mentioned but not paired to a concept part, is a FAIL.
 - UNDERSTANDABLE: a beginner grasps it in one read; use only everyday situations.
 - TECHNICALLY CORRECT: the mapping must hold; imply nothing false.
 - NO BANNED REFERENCES: no movies, actors, politics, sports, or brands.
 - FAITHFUL: introduce no claim about the concept beyond the SOURCE SPAN.
 - LENGTH: at most 3 sentences.
-- VISUAL: produce a small self-contained inline SVG (no external assets, no
-  scripts) that illustrates the analogy. Keep it ~320x180, use simple shapes/text.
+- The VISUAL should illustrate the EVERYDAY SCENE of the analogy and visually
+  echo the mapping (label the analogy side and the concept side so the parallel
+  is obvious).
+
+{visual_spec}
 
 CONCEPT: {title}
 SUMMARY: {summary}
@@ -45,13 +54,14 @@ def generate_analogy(concept: Concept, *, memory_block: str = "") -> Analogy:
             {"role": "system", "content": SYSTEM},
             {"role": "user", "content": PROMPT.format(
                 memory=memory_block,
+                visual_spec=VISUAL_SPEC,
                 title=concept.title,
                 summary=concept.summary,
                 span=concept.source_span,
             )},
         ],
         temperature=0.6,
-        max_tokens=1200,
+        max_tokens=1600,
     )
     return Analogy(
         text=data["analogy"].strip(),

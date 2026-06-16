@@ -70,7 +70,7 @@ def judge(
         ],
         model=config.JUDGE_MODEL,
         temperature=0.0,
-        max_tokens=400,
+        max_tokens=600,
     )
     verdict = str(data.get("verdict", "flag")).lower().strip()
     if verdict not in ("pass", "flag"):

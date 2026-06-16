@@ -83,7 +83,7 @@ export default function TopicQuiz({ topicKey, sectionLabel, onComplete }: Props)
   return (
     <div className="topic-quiz">
       {confetti.map((c) => (
-        <span key={c.id} className="confetti-piece" style={{ left: `${c.left}px`, top: "50%", background: c.color, ["--cx" as any]: `${c.tx}px`, ["--cy" as any]: `${c.ty}px`, animationDelay: `${c.delay}s` }} />
+        <span key={c.id} className="confetti-piece" style={{ left: `${c.left}px`, top: "50%", background: c.color, "--cx": `${c.tx}px`, "--cy": `${c.ty}px`, animationDelay: `${c.delay}s` } as React.CSSProperties} />
       ))}
       <div className="tq-head">
         <div className="tq-icon">?</div>

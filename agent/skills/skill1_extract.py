@@ -33,6 +33,11 @@ Rules (these map to the Concept-Partition rubric):
   concept — every sentence in the RM that discusses it, verbatim (not just one
   sentence). The downstream explanation/analogy/quiz may only use facts in this
   span, so capture enough. Never leave it blank.
+  CRITICAL: include the EXPLANATORY PROSE, not just code. If the concept has a
+  code block, the span must ALSO contain the sentences that explain what the code
+  means / how it behaves. A code-only span with no prose leaves the explainer
+  nothing to ground on and the unit will fail the faithfulness gate — so always
+  pull in the surrounding descriptive text too.
 
 PAST READING MATERIALS (already-taught concepts — exclude these):
 {past}
@@ -63,7 +68,7 @@ def extract_concepts(
             {"role": "user", "content": prompt},
         ],
         temperature=0.2,
-        max_tokens=1800,
+        max_tokens=8000,
     )
     raw = data.get("concepts", data if isinstance(data, list) else [])
     concepts: list[Concept] = []

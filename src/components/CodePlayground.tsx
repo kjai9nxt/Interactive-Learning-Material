@@ -18,17 +18,24 @@ interface Props {
   initialJs?: string;
 }
 
+type LogEntry = { level: "log" | "info" | "warn" | "error"; text: string };
+
 export default function CodePlayground({ initialHtml, initialCss, initialJs = "" }: Props) {
   const [html, setHtml] = useState(initialHtml);
   const [css, setCss] = useState(initialCss);
   const [js, setJs] = useState(initialJs);
-  const [tab, setTab] = useState<"html" | "css" | "js">("css");
+  // Default to the JS tab when the example ships JS, else CSS.
+  const [tab, setTab] = useState<"html" | "css" | "js">(initialJs.trim() ? "js" : "css");
   const [srcDoc, setSrcDoc] = useState("");
   const [hasRun, setHasRun] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [deviceSize, setDeviceSize] = useState<DeviceSize>("full");
   const [customWidth, setCustomWidth] = useState(700);
+  // Console: capture console.* / errors from the iframe so JS output is visible.
+  const [showConsole, setShowConsole] = useState(true);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
   const settingsRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     if (!showSettings) return;
@@ -39,14 +46,35 @@ export default function CodePlayground({ initialHtml, initialCss, initialJs = ""
     return () => window.removeEventListener("mousedown", onClick);
   }, [showSettings]);
 
+  // Listen for console messages forwarded from THIS playground's iframe only.
+  useEffect(() => {
+    const onMsg = (e: MessageEvent) => {
+      if (iframeRef.current && e.source !== iframeRef.current.contentWindow) return;
+      const d = e.data;
+      if (d && d.__ilmConsole) setLogs((prev) => [...prev, { level: d.level, text: d.text }]);
+    };
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+  }, []);
+
+  // Capture script injected into the preview so console.* and runtime errors
+  // surface in our own console panel (the iframe has no visible devtools).
+  const CONSOLE_HOOK = `<script>(function(){
+    var ser=function(a){try{return typeof a==='object'?JSON.stringify(a):String(a)}catch(e){return String(a)}};
+    var send=function(level,args){parent.postMessage({__ilmConsole:true,level:level,text:Array.prototype.map.call(args,ser).join(' ')},'*')};
+    ['log','info','warn','error'].forEach(function(m){var o=console[m];console[m]=function(){send(m==='log'?'log':m,arguments);if(o)o.apply(console,arguments)}});
+    window.addEventListener('error',function(e){send('error',[(e.error&&e.error.stack)||e.message])});
+    window.addEventListener('unhandledrejection',function(e){send('error',['Uncaught (in promise) '+ser(e.reason)])});
+  })();</scr` + `ipt>`;
+
   const buildDoc = () => `<!DOCTYPE html>
 <html><head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style>html,body{margin:0;padding:0;font-family:system-ui,sans-serif;} ${css}</style>
-</head><body>${html}<script>${js}<\/script></body></html>`;
+</head><body>${html}${CONSOLE_HOOK}<script>${js}</script></body></html>`;
 
-  const handleRun = () => { setSrcDoc(buildDoc()); setHasRun(true); };
-  const handleReset = () => { setHtml(initialHtml); setCss(initialCss); setJs(initialJs); };
+  const handleRun = () => { setLogs([]); setSrcDoc(buildDoc()); setHasRun(true); };
+  const handleReset = () => { setHtml(initialHtml); setCss(initialCss); setJs(initialJs); setLogs([]); };
 
   const currentValue = tab === "html" ? html : tab === "css" ? css : js;
   const currentSetter = tab === "html" ? setHtml : tab === "css" ? setCss : setJs;
@@ -79,10 +107,16 @@ export default function CodePlayground({ initialHtml, initialCss, initialJs = ""
           {showSettings && (
             <div className="pg-settings">
               <div className="pg-settings-head">
-                <span className="pg-settings-title">Display size</span>
+                <span className="pg-settings-title">Preview Settings</span>
                 <button className="pg-settings-close" onClick={() => setShowSettings(false)}>×</button>
               </div>
               <div className="pg-settings-body">
+                <label className="pg-console-toggle">
+                  <input type="checkbox" checked={showConsole} onChange={(e) => setShowConsole(e.target.checked)} />
+                  <span className="pg-console-box">{showConsole ? "✓" : ""}</span>
+                  <span>Console</span>
+                  <span className="pg-console-hint">Show console.log output below the preview</span>
+                </label>
                 <div className="pg-settings-sub">Presets</div>
                 <div className="pg-size-grid">
                   {(Object.keys(SIZE_PRESETS) as Array<keyof typeof SIZE_PRESETS>).map((key) => {
@@ -120,7 +154,7 @@ export default function CodePlayground({ initialHtml, initialCss, initialJs = ""
           <div className="pg-preview-wrapper">
             <div className="pg-preview-frame" style={{ width: previewWidth ? `${previewWidth}px` : "100%" }}>
               {hasRun ? (
-                <iframe className="pg-iframe" title="preview" srcDoc={srcDoc} sandbox="allow-same-origin allow-scripts" />
+                <iframe ref={iframeRef} className="pg-iframe" title="preview" srcDoc={srcDoc} sandbox="allow-same-origin allow-scripts" />
               ) : (
                 <div className="pg-preview-empty">
                   <div className="pg-preview-empty-icon">▶</div>
@@ -129,6 +163,26 @@ export default function CodePlayground({ initialHtml, initialCss, initialJs = ""
               )}
             </div>
           </div>
+          {showConsole && hasRun && (
+            <div className="pg-console">
+              <div className="pg-console-bar">
+                <span className="pg-console-title">Console</span>
+                <button className="pg-console-clear" onClick={() => setLogs([])}>Clear</button>
+              </div>
+              <div className="pg-console-body">
+                {logs.length === 0 ? (
+                  <div className="pg-console-empty">No console output. Use <code>console.log(...)</code> in the JS tab.</div>
+                ) : (
+                  logs.map((l, i) => (
+                    <div key={i} className={`pg-console-line lvl-${l.level}`}>
+                      <span className="pg-console-caret">›</span>
+                      <span className="pg-console-text">{l.text}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

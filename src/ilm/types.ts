@@ -15,10 +15,12 @@ export interface CodePlayground {
   code?: string;
   html?: string;
   css?: string;
+  js?: string;
 }
 
 export interface Scenario {
   text: string;
+  visual_html?: string;
   code_playground?: CodePlayground | null;
 }
 

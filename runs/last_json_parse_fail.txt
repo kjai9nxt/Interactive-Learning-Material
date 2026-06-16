@@ -1,0 +1,9 @@
+# parse error: Expecting value: line 1 column 1 (char 0)
+
+I need to evaluate each question for: exactly one correct keyed answer, grounded in source, and plausible distractors mapping to real misconceptions.
+
+**Q1:** The keyed answer defines an infinite loop as a condition never evaluating to false. The source supports this (Mistake 2 and 3 both describe infinite loops from conditions not becoming false or counter not updating). The distractors map to off-by-one errors, zero-iteration loops, and properly terminating loops — all plausible misconceptions. ✓
+
+**Q2:** The keyed answer says the condition is evaluated once and stored as a fixed boolean. This is grounded in the source's Mistake 2 example. However, I need to check if this is actually true in JavaScript. In JavaScript, `let condition = (counter < 3)` evaluates `counter < 3` at that moment and stores the boolean result. So `condition` is `true` (since counter=0 < 3), and since `counter` IS incremented inside the loop but `condition` never updates, the loop runs indefinitely. The keyed answer is correct. Distractor B says counter is never incremented — but the source's error example DOES include `counter = counter + 1`, so B is indeed wrong. ✓
+
+**Q3:** The scenario has `x = 0`, `done = (x === 5)` which is `false`, so `while (done)` never executes at all — it's a zero-iteration loop, not an infinite loop. The question says "it never stops" but with `done = false`, the loop would never run. This is a factual error in the question premise. However, the fix suggested (replace with live expression) is still the correct approach from the source's perspective. The question premise is flawed

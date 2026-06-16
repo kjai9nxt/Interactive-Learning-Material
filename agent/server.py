@@ -23,6 +23,7 @@ from flask_cors import CORS
 
 from . import config
 from .orchestrator import run_on_text
+from .runner import run_code, supported_languages, installed_languages
 
 app = Flask(__name__)
 CORS(app)
@@ -61,7 +62,20 @@ def _run_job(job_id: str, md: str, doc_name: str, limit, llm_audit: bool):
 @app.get("/api/health")
 def health():
     return jsonify({"ok": True, "gen_model": config.GEN_MODEL,
-                    "judge_model": config.JUDGE_MODEL})
+                    "judge_model": config.JUDGE_MODEL,
+                    "runnable_languages": supported_languages(),
+                    "installed_languages": installed_languages()})
+
+
+@app.post("/api/run")
+def run():
+    """Execute a code playground snippet. Body: {language, code}."""
+    data = request.get_json(force=True, silent=True) or {}
+    language = (data.get("language") or "").strip()
+    code = data.get("code") or ""
+    if not code.strip():
+        return jsonify({"error": "code is required"}), 400
+    return jsonify(run_code(language, code))
 
 
 @app.get("/api/sample")

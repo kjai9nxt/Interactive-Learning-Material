@@ -71,30 +71,90 @@ def chat(
     raise LLMError(f"LLM call failed after {retries} attempts: {last_err}")
 
 
-def chat_json(messages: list[dict[str, str]], **kwargs: Any) -> Any:
+def chat_json(messages: list[dict[str, str]], *, json_retries: int = 3, **kwargs: Any) -> Any:
     """Call the model in JSON mode and parse the result.
 
-    Tolerates models that wrap JSON in ```json fences.
+    Tolerates models that wrap JSON in ```json fences. Because JSON-mode output
+    is stochastic, a single generation can contain an unescaped quote/newline in
+    a verbatim span and fail to parse. We retry a few times (nudging temperature
+    up so we don't replay the same bad generation) before giving up, and dump the
+    last raw response for diagnosis.
     """
     kwargs.setdefault("json_mode", True)
-    raw = chat(messages, **kwargs)
-    return _parse_json(raw)
+    base_temp = float(kwargs.get("temperature", 0.4))
+    # Hard instruction appended as a final user turn: stops the model from
+    # "thinking out loud" before its JSON. That reasoning preamble was what
+    # exhausted max_tokens and left the response with no JSON at all. (We can't
+    # use assistant-prefill here — OpenRouter routes this model to a provider
+    # that rejects it — so we enforce it via the prompt instead.)
+    json_only = {
+        "role": "user",
+        "content": (
+            "Respond with ONLY the JSON described above and nothing else. "
+            "No explanation, no analysis, no markdown code fences, no text before "
+            "or after. Your entire reply must be a single valid JSON value that "
+            "starts with { or [."
+        ),
+    }
+    msgs = list(messages) + [json_only]
+    last_err: Exception | None = None
+    last_raw = ""
+    for attempt in range(json_retries):
+        if attempt:
+            # add variance so a deterministic bad generation isn't reproduced
+            kwargs["temperature"] = min(1.0, base_temp + 0.2 * attempt)
+        last_raw = chat(msgs, **kwargs)
+        try:
+            return _parse_json(last_raw)
+        except json.JSONDecodeError as e:
+            last_err = e
+    _dump_failed_json(last_raw, last_err)
+    raise LLMError(
+        f"Model did not return valid JSON after {json_retries} attempts: {last_err}. "
+        f"Raw response saved to {config.RUNS_DIR / 'last_json_parse_fail.txt'}"
+    )
+
+
+def _dump_failed_json(raw: str, err: Exception | None) -> None:
+    try:
+        path = config.RUNS_DIR / "last_json_parse_fail.txt"
+        path.write_text(f"# parse error: {err}\n\n{raw}")
+    except Exception:
+        pass
 
 
 def _parse_json(raw: str) -> Any:
-    raw = raw.strip()
-    if raw.startswith("```"):
-        raw = raw.split("```", 2)[1]
-        if raw.lstrip().startswith("json"):
-            raw = raw.lstrip()[4:]
-    raw = raw.strip().strip("`").strip()
-    # Best-effort: slice to the outermost JSON object/array.
+    original = raw
+    stripped = raw.strip()
+    # Strip a *wrapping* ```json fence only — but NOT when the content itself
+    # contains fenced code blocks (source spans often embed ```jsx ...```),
+    # since a naive split would truncate the JSON at the first inner fence.
+    if stripped.startswith("```") and stripped.count("```") == 2:
+        inner = stripped.split("```", 2)[1]
+        if inner.lstrip().startswith("json"):
+            inner = inner.lstrip()[4:]
+        stripped = inner.strip().strip("`").strip()
+    # Build candidate strings: the (de-fenced) text, then the outermost slice.
+    candidates = [stripped]
+    start = min((stripped.find("{") if "{" in stripped else len(stripped)),
+                (stripped.find("[") if "[" in stripped else len(stripped)))
+    end = max(stripped.rfind("}"), stripped.rfind("]"))
+    if 0 <= start <= end:
+        candidates.append(stripped[start:end + 1])
+    last_err: json.JSONDecodeError | None = None
+    for cand in candidates:
+        try:
+            return json.loads(cand)
+        except json.JSONDecodeError as e:
+            last_err = e
+    # Last resort: json-repair handles the common LLM breakages — unescaped
+    # quotes copied from verbatim source text, stray control chars, trailing
+    # commas, and surrounding markdown fences. Feed it the ORIGINAL response so
+    # nothing has been truncated by the fence handling above.
     try:
-        return json.loads(raw)
-    except json.JSONDecodeError:
-        start = min((raw.find("{") if "{" in raw else len(raw)),
-                    (raw.find("[") if "[" in raw else len(raw)))
-        end = max(raw.rfind("}"), raw.rfind("]"))
-        if 0 <= start <= end:
-            return json.loads(raw[start:end + 1])
-        raise
+        from json_repair import repair_json
+        return json.loads(repair_json(original))
+    except Exception:
+        pass
+    assert last_err is not None
+    raise last_err
