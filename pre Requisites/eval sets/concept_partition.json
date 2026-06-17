@@ -1,6 +1,6 @@
 {
   "meta": {
-    "project": "ILM \u2014 Interactive Learning Material (V1, workflow v2)",
+    "project": "ILM — Interactive Learning Material (V1, workflow v2)",
     "version": "0.2.0",
     "created": "2026-06-11",
     "pipeline_step": "Skill 1 + dedupe + Eval gate 1",
@@ -24,9 +24,11 @@
       "id": "CPT-01",
       "rubric_case_id": 1.0,
       "criterion": "New-only (vs past RMs)",
-      "edge_case": "Partial overlap, not exact duplicate \u2014 extracted concept is a superset of an already-taught one",
+      "edge_case": "Partial overlap, not exact duplicate — extracted concept is a superset of an already-taught one",
       "grader": "llm",
+      "polarity": "bad",
       "input": {
+        "polarity": "bad",
         "past_concepts": [
           "variables",
           "functions",
@@ -42,7 +44,16 @@
       },
       "expected_verdict": "flag",
       "failure_mode": "Half the concept ('how to write prompts') re-teaches 'prompting basics' from a past RM. Only the system-prompt half is new. Graders that only check exact title matches will miss this.",
-      "judge_instructions": "Compare the candidate concept against the past-concepts list at the idea level, not the title level. Flag if any substantial portion of the candidate re-covers a past concept, even when bundled with new material."
+      "judge_instructions": "Compare the candidate concept against the past-concepts list at the idea level, not the title level. Flag if any substantial portion of the candidate re-covers a past concept, even when bundled with new material.",
+      "metadata": {
+        "polarity": "bad",
+        "agent": "concept_extractor",
+        "artefact_kind": "concept_unit",
+        "slide_type": null,
+        "taxonomy_tags": ["new-only", "partial-overlap", "dedupe"],
+        "findings": ["partial_overlap_with_past_rm"],
+        "notes": "Negative case: candidate bundles a new idea (system prompts) with an already-taught one (prompting basics). Expected to be flagged at idea-level, not title-level."
+      }
     },
     {
       "id": "CPT-02",
@@ -50,7 +61,9 @@
       "criterion": "Grounded in source",
       "edge_case": "Concept is plausible for the domain and adjacent to the RM, but the RM never discusses it",
       "grader": "llm",
+      "polarity": "bad",
       "input": {
+        "polarity": "bad",
         "rm_spans": [
           "S1",
           "S2",
@@ -66,8 +79,17 @@
         }
       },
       "expected_verdict": "flag",
-      "failure_mode": "Fine-tuning sounds like it belongs in an agents doc \u2014 S4 even mentions weights ('weights are not changed') \u2014 but no span teaches it. The mention of a word is not coverage of a concept.",
-      "judge_instructions": "Flag unless at least one span explicitly discusses the concept itself. A span that merely contains a related keyword does not count as grounding."
+      "failure_mode": "Fine-tuning sounds like it belongs in an agents doc — S4 even mentions weights ('weights are not changed') — but no span teaches it. The mention of a word is not coverage of a concept.",
+      "judge_instructions": "Flag unless at least one span explicitly discusses the concept itself. A span that merely contains a related keyword does not count as grounding.",
+      "metadata": {
+        "polarity": "bad",
+        "agent": "concept_extractor",
+        "artefact_kind": "concept_unit",
+        "slide_type": null,
+        "taxonomy_tags": ["grounded-in-source", "hallucinated-concept", "keyword-vs-coverage"],
+        "findings": ["not_grounded_in_source"],
+        "notes": "Negative case: plausible, domain-adjacent concept with no supporting span. A related keyword appearing in a span is not the same as the span teaching the concept."
+      }
     },
     {
       "id": "CPT-03",
@@ -75,7 +97,9 @@
       "criterion": "Coverage (no miss)",
       "edge_case": "Output misses exactly one concept, and the missed one is the least prominent in the RM",
       "grader": "human",
+      "polarity": "bad",
       "input": {
+        "polarity": "bad",
         "gold_list": [
           "AI agent / agent loop",
           "tool calling",
@@ -91,16 +115,27 @@
         ]
       },
       "expected_verdict": "flag",
-      "failure_mode": "Misses 'human-in-the-loop gate' (one short span, S5). Near-miss coverage is the realistic failure \u2014 extraction rarely misses the headline concept, it misses the one-paragraph concept.",
-      "judge_instructions": "Reviewer compares against the gold list. Any missed gold concept = flag, regardless of how minor the concept appears in the RM."
+      "failure_mode": "Misses 'human-in-the-loop gate' (one short span, S5). Near-miss coverage is the realistic failure — extraction rarely misses the headline concept, it misses the one-paragraph concept.",
+      "judge_instructions": "Reviewer compares against the gold list. Any missed gold concept = flag, regardless of how minor the concept appears in the RM.",
+      "metadata": {
+        "polarity": "bad",
+        "agent": "concept_extractor",
+        "artefact_kind": "concept_unit",
+        "slide_type": null,
+        "taxonomy_tags": ["coverage", "near-miss", "least-prominent-concept"],
+        "findings": ["missed_gold_concept"],
+        "notes": "Negative case: extraction drops the least prominent gold concept (S5). Human grader; any missed gold concept flags regardless of prominence."
+      }
     },
     {
       "id": "CPT-04",
       "rubric_case_id": 4.0,
       "criterion": "Granularity",
-      "edge_case": "Two genuinely related ideas bundled as one concept \u2014 defensible-sounding, still wrong",
+      "edge_case": "Two genuinely related ideas bundled as one concept — defensible-sounding, still wrong",
       "grader": "llm",
+      "polarity": "bad",
       "input": {
+        "polarity": "bad",
         "candidate_concept": {
           "id": "c_106",
           "title": "Tool calling and RAG",
@@ -109,8 +144,17 @@
         }
       },
       "expected_verdict": "flag",
-      "failure_mode": "The bundle has a unifying theme ('getting outside information'), which makes it look like one concept. But each half needs its own explanation, analogy, and quiz \u2014 it is two teachable units.",
-      "judge_instructions": "Flag if the concept requires teaching two separable mechanisms. Test: could a quiz question about one half be answered without the other half? If yes, it is two concepts."
+      "failure_mode": "The bundle has a unifying theme ('getting outside information'), which makes it look like one concept. But each half needs its own explanation, analogy, and quiz — it is two teachable units.",
+      "judge_instructions": "Flag if the concept requires teaching two separable mechanisms. Test: could a quiz question about one half be answered without the other half? If yes, it is two concepts.",
+      "metadata": {
+        "polarity": "bad",
+        "agent": "concept_extractor",
+        "artefact_kind": "concept_unit",
+        "slide_type": null,
+        "taxonomy_tags": ["granularity", "bundled-concepts", "separable-mechanisms"],
+        "findings": ["granularity_bundle"],
+        "notes": "Negative case: two separable mechanisms (tool calling, RAG) bundled under a unifying theme. Each half is its own teachable unit; expected to be flagged."
+      }
     },
     {
       "id": "CPT-05",
@@ -118,7 +162,9 @@
       "criterion": "No overlap within set",
       "edge_case": "Same idea extracted twice under non-matching titles",
       "grader": "llm",
+      "polarity": "bad",
       "input": {
+        "polarity": "bad",
         "candidate_output": [
           {
             "id": "c_101",
@@ -136,7 +182,16 @@
       },
       "expected_verdict": "flag",
       "failure_mode": "Zero title overlap, near-100% idea overlap, same source span. String-similarity dedup passes this; semantic dedup must catch it.",
-      "judge_instructions": "Compare concepts pairwise at the idea level. Flag if any two would produce substantially the same explanation."
+      "judge_instructions": "Compare concepts pairwise at the idea level. Flag if any two would produce substantially the same explanation.",
+      "metadata": {
+        "polarity": "bad",
+        "agent": "concept_extractor",
+        "artefact_kind": "concept_unit",
+        "slide_type": null,
+        "taxonomy_tags": ["no-overlap-within-set", "semantic-duplicate", "dedupe"],
+        "findings": ["intra_set_overlap"],
+        "notes": "Negative case: same idea (S1 agent loop) extracted twice under non-matching titles. String-similarity dedup misses it; semantic dedup must flag it."
+      }
     },
     {
       "id": "CPT-06",
@@ -144,7 +199,9 @@
       "criterion": "Correct titling",
       "edge_case": "Title is accurate but too broad to be specific",
       "grader": "llm",
+      "polarity": "bad",
       "input": {
+        "polarity": "bad",
         "candidate_concept": {
           "id": "c_108",
           "title": "Working with AI",
@@ -153,16 +210,27 @@
         }
       },
       "expected_verdict": "flag",
-      "failure_mode": "'Working with AI' is not false, just vague \u2014 it could title any concept in the doc. Vagueness is the edge; outright mismatch is the easy case.",
-      "judge_instructions": "Flag if the title could plausibly apply to two or more other concepts in the same RM. Titles must be specific enough to identify the concept uniquely."
+      "failure_mode": "'Working with AI' is not false, just vague — it could title any concept in the doc. Vagueness is the edge; outright mismatch is the easy case.",
+      "judge_instructions": "Flag if the title could plausibly apply to two or more other concepts in the same RM. Titles must be specific enough to identify the concept uniquely.",
+      "metadata": {
+        "polarity": "bad",
+        "agent": "concept_extractor",
+        "artefact_kind": "concept_unit",
+        "slide_type": null,
+        "taxonomy_tags": ["correct-titling", "vague-title", "specificity"],
+        "findings": ["vague_title"],
+        "notes": "Negative case: accurate but over-broad title that could label any concept in the doc. Vagueness (not mismatch) is the edge being tested."
+      }
     },
     {
       "id": "CPT-07",
       "rubric_case_id": "anchor",
       "criterion": "All criteria (pass anchor)",
-      "edge_case": "Clean extraction \u2014 calibrates the judge against over-flagging",
+      "edge_case": "Clean extraction — calibrates the judge against over-flagging",
       "grader": "llm",
+      "polarity": "good",
       "input": {
+        "polarity": "good",
         "candidate_concept": {
           "id": "c_109",
           "title": "Human-in-the-loop approval gate",
@@ -172,7 +240,16 @@
       },
       "expected_verdict": "pass",
       "failure_mode": null,
-      "judge_instructions": "This concept is new, grounded in S5, single-idea, and specifically titled. A judge that flags this is over-strict; recalibrate the judge prompt."
+      "judge_instructions": "This concept is new, grounded in S5, single-idea, and specifically titled. A judge that flags this is over-strict; recalibrate the judge prompt.",
+      "metadata": {
+        "polarity": "good",
+        "agent": "concept_extractor",
+        "artefact_kind": "concept_unit",
+        "slide_type": null,
+        "taxonomy_tags": ["anchor", "clean-extraction"],
+        "findings": [],
+        "notes": "Positive anchor: new, grounded, single-idea, specifically titled. Calibrates the judge against over-flagging."
+      }
     }
   ]
 }

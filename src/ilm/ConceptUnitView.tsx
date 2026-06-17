@@ -51,6 +51,47 @@ function ScenarioBody({ s }: { s: Scenario }) {
   );
 }
 
+/* Stacked, scroll-based rendering of one Concept Unit — explanation, analogy,
+   and scenarios are all laid out vertically and fully visible (no carousel /
+   click-to-reveal). This is the low-friction "reading" layout; interactivity is
+   reserved for the code playgrounds and the mini-quiz, not for revealing text. */
+export function UnitContent({ unit }: { unit: ConceptUnit }) {
+  const scenarios = unit.scenarios || [];
+  return (
+    <div className="ilm-unit">
+      <section className="ilm-block">
+        <div className="ilm-block-label">What it is</div>
+        <p className="ilm-explanation">{unit.explanation.text}</p>
+        <Visual html={unit.explanation.visual_diagram_html} label={`${unit.title} diagram`} />
+      </section>
+
+      <section className="ilm-block ilm-analogy">
+        <div className="ilm-block-label">Think of it like this</div>
+        <p className="ilm-analogy-text">{unit.analogy.text}</p>
+        <Visual html={unit.analogy.visual_html} label={`${unit.title} analogy`} />
+      </section>
+
+      {scenarios.length > 0 && (
+        <section className="ilm-block">
+          <div className="ilm-block-label">In practice</div>
+          <div className="ilm-scenarios">
+            {scenarios.map((s, i) => (
+              <div className="ilm-scenario" key={i}>
+                {scenarios.length > 1 && <div className="ilm-scenario-num">{i + 1}</div>}
+                <div className="ilm-scenario-body">
+                  <ScenarioBody s={s} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
+/* Legacy carousel slide builder — kept so the click-through layout can still be
+   A/B'd against the scroll layout if needed. Not used by Lesson anymore. */
 export function buildUnitSlides(unit: ConceptUnit): CarouselSlide[] {
   const slides: CarouselSlide[] = [
     {

@@ -4,15 +4,47 @@ import type { QuizScore } from "../types";
    SECTION HEADER
    ══════════════════════════════════════════════════════════════════════ */
 
-export function SectionHeader({ number, title, subtitle, sectionClass }: { number: string; title: string; subtitle: string; sectionClass: string }) {
+export function SectionHeader({ number, title, subtitle, sectionClass, collapsed, onToggle }: { number: string; title: string; subtitle: string; sectionClass: string; collapsed?: boolean; onToggle?: () => void }) {
+  const collapsible = !!onToggle;
   return (
-    <div className={`sec-header ${sectionClass}`}>
+    <div
+      className={`sec-header ${sectionClass}${collapsible ? " sec-header-clickable" : ""}${collapsed ? " is-collapsed" : ""}`}
+      onClick={onToggle}
+      role={collapsible ? "button" : undefined}
+      tabIndex={collapsible ? 0 : undefined}
+      aria-expanded={collapsible ? !collapsed : undefined}
+      onKeyDown={collapsible ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle!(); } } : undefined}
+    >
       <div className="sec-meta">
         <span className="sec-num-badge">{number}</span>
         <span className="sec-num">Section</span>
       </div>
       <h2 className="sec-title">{title}</h2>
       <p className="sec-sub">{subtitle}</p>
+      {collapsible && (
+        <span className="sec-collapse-toggle" aria-hidden="true">{collapsed ? "▸" : "▾"}</span>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   LOCKED PREVIEW — dimmed placeholder for the next, not-yet-unlocked section.
+   Makes the lock *visible* (vs. the section simply being absent) so the learner
+   knows there's more and what unlocks it.
+   ══════════════════════════════════════════════════════════════════════ */
+
+export function LockedPreview({ number, title, hint }: { number: string; title: string; hint: string }) {
+  return (
+    <div className="locked-preview" aria-disabled="true">
+      <div className="locked-preview-row">
+        <span className="locked-preview-lock" aria-hidden="true">🔒</span>
+        <div className="locked-preview-meta">
+          <span className="locked-preview-num">Section {number}</span>
+          <span className="locked-preview-title">{title}</span>
+        </div>
+      </div>
+      <p className="locked-preview-hint">{hint}</p>
     </div>
   );
 }

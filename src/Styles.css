@@ -227,6 +227,41 @@
 .sec-title { font-size: 1.7rem; font-weight: 700; color: var(--text); line-height: 1.18; letter-spacing: -0.025em; margin-bottom: 6px; text-align: left; }
 .sec-sub { font-size: .94rem; color: var(--text2); max-width: 600px; text-align: left; }
 
+/* ── Click-to-collapse section header ───────────────────── */
+.sec-header-clickable { cursor: pointer; transition: box-shadow .2s ease, transform .12s ease; }
+.sec-header-clickable:hover { box-shadow: 0 6px 20px rgba(0,0,0,.08); }
+.sec-header-clickable:focus-visible { outline: 2px solid var(--accent-from, var(--indigo)); outline-offset: 2px; }
+.sec-header.is-collapsed { margin-bottom: 1.5rem; }
+.sec-collapse-toggle {
+  position: absolute; top: 1.5rem; right: 1.75rem;
+  font-size: 14px; color: var(--accent-from, var(--indigo));
+  width: 28px; height: 28px; border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--accent-soft, var(--indigo-soft));
+  transition: transform .2s ease;
+}
+.sec-header.is-collapsed .sec-sub { margin-bottom: 0; }
+
+/* ── Locked preview (dimmed next section) ───────────────── */
+.locked-preview {
+  margin: 1.75rem 0 1rem;
+  padding: 1.1rem 1.5rem 1.25rem;
+  background: var(--surface);
+  border: 1px dashed var(--border2);
+  border-radius: 14px;
+  opacity: 0.6;
+  text-align: left;
+}
+.locked-preview-row { display: flex; align-items: center; gap: 12px; }
+.locked-preview-lock { font-size: 1.1rem; line-height: 1; filter: grayscale(0.3); }
+.locked-preview-meta { display: flex; flex-direction: column; gap: 2px; }
+.locked-preview-num {
+  font-family: var(--mono); font-size: 11px; font-weight: 600;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--text2);
+}
+.locked-preview-title { font-size: 1.05rem; font-weight: 700; color: var(--text); line-height: 1.2; }
+.locked-preview-hint { margin: 8px 0 0 34px; font-size: .85rem; color: var(--text2); }
+
 /* Section accent themes */
 .sec-1 { --accent-from: var(--indigo); --accent-to: var(--cyan); --accent-soft: var(--indigo-soft); }
 .sec-2 { --accent-from: var(--purple); --accent-to: var(--pink); --accent-soft: var(--purple-soft); }
