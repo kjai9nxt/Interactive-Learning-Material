@@ -26,11 +26,14 @@ Hard rules (Analogy rubric):
   and the Y is like the <other concept part>". Two or more pairings must be
   spelled out explicitly in the analogy text; a single mapped element, or elements
   that are merely mentioned but not paired to a concept part, is a FAIL.
-- UNDERSTANDABLE: a beginner grasps it in one read; use only everyday situations.
+- UNDERSTANDABLE: a beginner grasps it in one read; use only simple, everyday
+  words and a familiar everyday situation. The everyday scene can come from
+  general life, but everything it says ABOUT THE CONCEPT must stay true to the
+  source — the analogy may not imply any concept fact the source does not state.
 - TECHNICALLY CORRECT: the mapping must hold; imply nothing false.
 - NO BANNED REFERENCES: no movies, actors, politics, sports, or brands.
 - FAITHFUL: introduce no claim about the concept beyond the SOURCE SPAN.
-- LENGTH: at most 3 sentences.
+- LENGTH: at most 3 short sentences.
 - The VISUAL should illustrate the EVERYDAY SCENE of the analogy and visually
   echo the mapping (label the analogy side and the concept side so the parallel
   is obvious).
@@ -61,7 +64,7 @@ def generate_analogy(concept: Concept, *, memory_block: str = "") -> Analogy:
             )},
         ],
         temperature=0.6,
-        max_tokens=1600,
+        max_tokens=1400,  # 3-sentence analogy + one small simple SVG
     )
     return Analogy(
         text=data["analogy"].strip(),

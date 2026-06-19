@@ -21,8 +21,9 @@ PROMPT = """{memory}
 Build an explainer + 2 example scenarios for the concept below.
 
 EXPLANATION rules:
-- 2-4 sentences, factually correct, 100% about THIS concept, no drift.
-- Audience = beginner: define any new term inline; no unexplained jargon.
+- SHORT & SIMPLE: 2-3 plain sentences. Use everyday words and short sentences a
+  beginner reads once and gets. No jargon (define any unavoidable term inline).
+- Factually correct, 100% about THIS concept, no drift.
 - FAITHFUL: every claim supported by the SOURCE SPAN; if a needed fact is
   missing, omit it — do not invent statistics or rules.
 - STAY INSIDE THE SOURCE: do NOT add correct-but-unstated elaboration (extra
@@ -33,10 +34,13 @@ EXPLANATION rules:
 {visual_spec}
 
 SCENARIO rules (Example Scenarios rubric):
-- Each scenario <=3 sentences, factually accurate, a valid INSTANCE of the concept.
-- Concrete and specific (not generic), adds understanding beyond the explanation.
+- Each scenario 1-2 SHORT sentences in plain words, factually accurate, a valid
+  INSTANCE of the concept. Concrete and specific, adds understanding beyond the
+  explanation — but keep it easy to read.
 - The two scenarios must be DISTINCT situations, not reworded copies.
-- Prefer real-world framing (a relatable task the learner would actually do).
+- Prefer real-world framing (a relatable task the learner would actually do), but
+  the situation must still be grounded in / consistent with the SOURCE SPAN — do
+  not introduce facts about the concept that the source does not state.
 - VISUAL: give EVERY scenario its own inline-SVG `visual_html` (same spec/rules as
   the explanation visual above) that depicts THAT real-world example — its inputs,
   what happens, and the result. Reuse the theme CSS variables; no <script>/images.
@@ -93,7 +97,7 @@ def build_explainer(concept: Concept, *, memory_block: str = ""):
             )},
         ],
         temperature=0.5,
-        max_tokens=4200,  # explanation SVG + a per-scenario SVG each + code
+        max_tokens=3400,  # concise text + simple (small) SVGs + code — fits well under this
     )
     exp = data["explanation"]
     explanation = Explanation(

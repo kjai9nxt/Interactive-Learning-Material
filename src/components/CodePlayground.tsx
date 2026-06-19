@@ -28,6 +28,12 @@ export default function CodePlayground({ initialHtml, initialCss, initialJs = ""
   const [tab, setTab] = useState<"html" | "css" | "js">(initialJs.trim() ? "js" : "css");
   const [srcDoc, setSrcDoc] = useState("");
   const [hasRun, setHasRun] = useState(false);
+  // Bumped on every Run so the iframe is force-remounted (see key={runId}).
+  // Without this, clicking Run again with unedited code produces a byte-identical
+  // srcDoc — React skips the DOM update, the iframe never reloads, and the run
+  // silently no-ops (console clears but nothing re-executes). Remounting gives
+  // each run a fresh JS realm, so no stale state or re-declaration errors carry over.
+  const [runId, setRunId] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
   const [deviceSize, setDeviceSize] = useState<DeviceSize>("full");
   const [customWidth, setCustomWidth] = useState(700);
@@ -73,7 +79,7 @@ export default function CodePlayground({ initialHtml, initialCss, initialJs = ""
 <style>html,body{margin:0;padding:0;font-family:system-ui,sans-serif;} ${css}</style>
 </head><body>${html}${CONSOLE_HOOK}<script>${js}</script></body></html>`;
 
-  const handleRun = () => { setLogs([]); setSrcDoc(buildDoc()); setHasRun(true); };
+  const handleRun = () => { setLogs([]); setSrcDoc(buildDoc()); setHasRun(true); setRunId((n) => n + 1); };
   const handleReset = () => { setHtml(initialHtml); setCss(initialCss); setJs(initialJs); setLogs([]); };
 
   const currentValue = tab === "html" ? html : tab === "css" ? css : js;
@@ -154,7 +160,7 @@ export default function CodePlayground({ initialHtml, initialCss, initialJs = ""
           <div className="pg-preview-wrapper">
             <div className="pg-preview-frame" style={{ width: previewWidth ? `${previewWidth}px` : "100%" }}>
               {hasRun ? (
-                <iframe ref={iframeRef} className="pg-iframe" title="preview" srcDoc={srcDoc} sandbox="allow-same-origin allow-scripts" />
+                <iframe key={runId} ref={iframeRef} className="pg-iframe" title="preview" srcDoc={srcDoc} sandbox="allow-same-origin allow-scripts" />
               ) : (
                 <div className="pg-preview-empty">
                   <div className="pg-preview-empty-icon">▶</div>

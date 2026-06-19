@@ -55,6 +55,23 @@
 .theme-light .ilm-visual-inner { background: rgba(15, 23, 42, 0.02); }
 .ilm-visual-inner svg { max-width: 100%; height: auto; display: block; }
 
+/* Safety net: if the model forgets a fill on a <text>, SVG defaults it to black,
+   which is invisible on the dark theme. Force a theme-aware default so every
+   label is readable; any inline style="fill:…" the model DID set still wins. */
+.ilm-visual-inner svg text { fill: var(--svg-text); }
+
+/* Hover interactivity — the generator wraps each labelled part in
+   <g class="ilm-node">. Hovering the diagram dims every part; hovering one part
+   keeps it bright (and lifts it above the rest), so the learner can isolate and
+   read each element in turn. Pure CSS — no scripts run inside the injected SVG. */
+.ilm-visual-inner svg .ilm-node { transition: opacity 0.18s ease, filter 0.18s ease; }
+.ilm-visual-inner svg:hover .ilm-node { opacity: 0.32; }
+.ilm-visual-inner svg .ilm-node:hover {
+  opacity: 1;
+  filter: drop-shadow(0 0 6px var(--indigo-soft));
+  cursor: pointer;
+}
+
 /* Scenarios */
 .ilm-scenarios { display: flex; flex-direction: column; gap: 14px; }
 .ilm-scenario {

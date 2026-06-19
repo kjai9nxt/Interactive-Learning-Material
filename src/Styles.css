@@ -233,12 +233,39 @@
 .sec-header-clickable:focus-visible { outline: 2px solid var(--accent-from, var(--indigo)); outline-offset: 2px; }
 .sec-header.is-collapsed { margin-bottom: 1.5rem; }
 .sec-collapse-toggle {
-  position: absolute; top: 1.5rem; right: 1.75rem;
-  font-size: 14px; color: var(--accent-from, var(--indigo));
-  width: 28px; height: 28px; border-radius: 8px;
+  position: absolute; top: 1.4rem; right: 1.5rem;
+  width: 34px; height: 34px; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center;
-  background: var(--accent-soft, var(--indigo-soft));
-  transition: transform .2s ease;
+  /* Solid accent gradient + white glyph + glow so the control is clearly
+     visible against the section header (the old faint soft-tint was easy to miss). */
+  background: linear-gradient(135deg, var(--accent-from, var(--indigo)), var(--accent-to, var(--cyan)));
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(99,102,241,0.35), 0 0 0 1px rgba(255,255,255,0.12) inset;
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease;
+  animation: toggle-attention 2.6s ease-in-out infinite;
+}
+.sec-collapse-chevron {
+  font-size: 15px; font-weight: 700; line-height: 1;
+  /* Expanded = chevron points DOWN; collapsed = points RIGHT (❯). */
+  transform: rotate(90deg);
+  transition: transform .28s cubic-bezier(.34, 1.56, .64, 1);
+}
+.sec-header.is-collapsed .sec-collapse-chevron { transform: rotate(0deg); }
+/* Hover/focus lift on the whole header bumps the toggle so it reads as a button. */
+.sec-header-clickable:hover .sec-collapse-toggle,
+.sec-header-clickable:focus-visible .sec-collapse-toggle {
+  transform: scale(1.12);
+  box-shadow: 0 6px 18px rgba(99,102,241,0.5), 0 0 0 1px rgba(255,255,255,0.18) inset;
+  animation: none;
+}
+@keyframes toggle-attention {
+  0%, 100% { box-shadow: 0 4px 12px rgba(99,102,241,0.35), 0 0 0 1px rgba(255,255,255,0.12) inset; }
+  50%      { box-shadow: 0 4px 18px rgba(99,102,241,0.6),  0 0 0 4px rgba(99,102,241,0.18); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sec-collapse-toggle { animation: none; }
+  .sec-collapse-chevron { transition: none; }
 }
 .sec-header.is-collapsed .sec-sub { margin-bottom: 0; }
 

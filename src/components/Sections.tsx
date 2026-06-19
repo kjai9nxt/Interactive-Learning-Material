@@ -22,7 +22,9 @@ export function SectionHeader({ number, title, subtitle, sectionClass, collapsed
       <h2 className="sec-title">{title}</h2>
       <p className="sec-sub">{subtitle}</p>
       {collapsible && (
-        <span className="sec-collapse-toggle" aria-hidden="true">{collapsed ? "▸" : "▾"}</span>
+        <span className="sec-collapse-toggle" aria-hidden="true">
+          <span className="sec-collapse-chevron">❯</span>
+        </span>
       )}
     </div>
   );

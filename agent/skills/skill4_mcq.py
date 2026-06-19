@@ -16,24 +16,34 @@ SYSTEM = (
 
 PROMPT = """{memory}
 
-Write a mini-quiz of EXACTLY 4 questions for the concept below.
+Write a mini-quiz of EXACTLY 4 EASY questions for the concept below.
+
+Goal: a student who has just READ THE SOURCE SPAN should be able to answer every
+question. Test understanding of what the material actually says — not trivia,
+tricks, or outside knowledge.
 
 Hard rules (Mini Quiz rubric):
+- EASY & DIRECT: each question checks one simple idea stated in the source span.
+  No trick questions, no "all/none of the above", no multi-step reasoning.
+- SHORT: the question is ONE clear sentence in plain words. Each option is a short
+  phrase (a few words), not a long sentence.
 - Each question has EXACTLY 4 options, all distinct, with EXACTLY ONE correct.
 - The keyed answer must be the single unambiguously correct option; no second
   option may also be correct (watch for paraphrase duplicates).
-- DISTRACTORS: each of the 3 wrong options is plausible to a half-learner AND
-  maps to a stated misconception — never absurd, unrelated, or a give-away.
-- GROUNDED: the correct answer must be supported by the SOURCE SPAN.
-- ASPECT SPREAD across the 4 questions: include >=1 recall, >=1 understanding,
-  >=1 application (use in a new situation), and >=1 analysis ("why") question.
-- DIFFICULTY MIX: at least one "easy" and at least one "hard".
-- EXPLANATION: for each question say why the correct option is right AND why
-  each distractor is wrong.
+- GROUNDED — STRICT: both the question AND its correct answer must come straight
+  from the SOURCE SPAN. Do NOT ask about anything the span does not state. If the
+  span doesn't cover something, don't ask it.
+- DISTRACTORS: each of the 3 wrong options is a plausible everyday slip-up (a
+  common beginner mistake), but clearly wrong to someone who read the span — never
+  absurd, unrelated, or a give-away.
+- DIFFICULTY: keep them mostly "easy" (a couple "medium" at most); never "hard".
+- ASPECT: favour recall + understanding; at most one simple "application".
+- EXPLANATION: 1-2 SHORT sentences — say plainly why the correct option is right
+  (you may add a brief note on the main wrong option). Keep it concise.
 
 CONCEPT: {title}
 SUMMARY: {summary}
-SOURCE SPAN (the only facts the correct answer may rely on):
+SOURCE SPAN (the ONLY facts the questions and answers may rely on):
 \"\"\"{span}\"\"\"
 
 Return JSON:
@@ -56,8 +66,8 @@ def generate_quiz(concept: Concept, *, memory_block: str = "") -> MiniQuiz:
                 span=concept.source_span,
             )},
         ],
-        temperature=0.55,
-        max_tokens=2200,
+        temperature=0.5,
+        max_tokens=1500,  # 4 short questions + concise explanations
     )
     questions = []
     for q in data.get("questions", []):

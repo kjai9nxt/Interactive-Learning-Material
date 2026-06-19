@@ -48,16 +48,62 @@ def _eval_gate_1(concepts, doc_text: str) -> tuple[bool, list[str]]:
     return (not problems), problems
 
 
-def build_unit(concept, *, memory_block: str, log: RunLogger) -> ConceptUnit:
-    # Skills 2/3/4 are independent — run them concurrently (IO-bound LLM calls).
-    log.invoke("skill_2"); log.invoke("skill_3"); log.invoke("skill_4")
+# Which generation skill owns each audit criterion — lets a retry regenerate ONLY
+# the artifact that failed instead of rebuilding the whole unit. skill_3 owns both
+# the explanation and the scenarios (it emits them together).
+_ALL_SKILLS = {"analogy", "explanation", "quiz"}
+
+
+def _skills_for_flags(flags) -> set[str]:
+    """Map audit flags → the skills that must be re-run. Any flag we can't map
+    confidently (e.g. a code-grader on an unusual criterion) forces a full rebuild,
+    so we never silently skip regenerating something that's actually broken."""
+    skills: set[str] = set()
+    for f in flags:
+        c = (f.get("criterion") or "").lower()
+        if "analogy" in c:
+            skills.add("analogy")
+        elif "quiz" in c or "mcq" in c:
+            skills.add("quiz")
+        elif "explanation" in c:
+            skills.add("explanation")
+        else:
+            return set(_ALL_SKILLS)  # unknown criterion → safe full rebuild
+    return skills or set(_ALL_SKILLS)
+
+
+def build_unit(concept, *, memory_block: str, log: RunLogger,
+               prev: ConceptUnit | None = None, only: set[str] | None = None) -> ConceptUnit:
+    """Build (or selectively rebuild) one unit. `only` names the skills to (re)run;
+    everything else is carried over from `prev`. On the first attempt `only` is
+    None → full build. On a retry we pass just the flagged skill(s), so a single
+    failed artifact no longer forces regenerating + re-judging the whole unit."""
+    run = only if only is not None else _ALL_SKILLS
+    # Carry over the parts we're NOT regenerating from the previous attempt.
+    analogy = prev.analogy if prev else None
+    explanation = prev.explanation if prev else None
+    scenarios = prev.scenarios if prev else None
+    quiz = prev.mini_quiz if prev else None
+
+    # Selected skills are independent — run them concurrently (IO-bound LLM calls).
     with ThreadPoolExecutor(max_workers=3) as ex:
-        f_ana = ex.submit(skill2_analogy.generate_analogy, concept, memory_block=memory_block)
-        f_exp = ex.submit(skill3_explainer.build_explainer, concept, memory_block=memory_block)
-        f_quiz = ex.submit(skill4_mcq.generate_quiz, concept, memory_block=memory_block)
-        analogy = f_ana.result()
-        explanation, scenarios = f_exp.result()
-        quiz = f_quiz.result()
+        futures = {}
+        if "analogy" in run:
+            log.invoke("skill_2")
+            futures["ana"] = ex.submit(skill2_analogy.generate_analogy, concept, memory_block=memory_block)
+        if "explanation" in run:
+            log.invoke("skill_3")
+            futures["exp"] = ex.submit(skill3_explainer.build_explainer, concept, memory_block=memory_block)
+        if "quiz" in run:
+            log.invoke("skill_4")
+            futures["quiz"] = ex.submit(skill4_mcq.generate_quiz, concept, memory_block=memory_block)
+        if "ana" in futures:
+            analogy = futures["ana"].result()
+        if "exp" in futures:
+            explanation, scenarios = futures["exp"].result()
+        if "quiz" in futures:
+            quiz = futures["quiz"].result()
+
     # assemble + schema-validate (pydantic raises on broken shape)
     return ConceptUnit(
         id=concept.id,
@@ -145,10 +191,14 @@ def run_on_text(
         attempt = 0
         report = None
         unit = None
+        prev_flag_sig = None
         while attempt <= config.MAX_RETRIES_PER_UNIT:
             attempt += 1
+            # First attempt: full build. Retry: regenerate ONLY the flagged
+            # skill(s), carrying the passing artifacts over from the last attempt.
+            only = None if (attempt == 1 or report is None) else _skills_for_flags(report.flags)
             try:
-                unit = build_unit(concept, memory_block=memory_block, log=log)
+                unit = build_unit(concept, memory_block=memory_block, log=log, prev=unit, only=only)
             except Exception as e:
                 log.event("assemble_error", concept=concept.id, attempt=attempt, error=str(e))
                 print(f"   {concept.title}: assemble failed (attempt {attempt}): {e}")
@@ -158,6 +208,15 @@ def run_on_text(
             print(f"   {concept.title}: audit attempt {attempt} → score={report.score} flags={len(report.flags)}")
             if report.passed:
                 break  # eval gate 2 passed
+            # Early-stop: if a retry produced the SAME set of failing criteria, the
+            # model is stuck (usually an inference the source genuinely doesn't
+            # support) — more retries just burn time. Ship it flagged instead.
+            flag_sig = tuple(sorted((f.get("source", ""), f.get("criterion", "")) for f in report.flags))
+            if flag_sig == prev_flag_sig:
+                log.event("eval_gate_2_stuck", concept=concept.id, attempt=attempt, flags=report.flags)
+                print(f"   {concept.title}: same flags as last attempt — stopping retries early.")
+                break
+            prev_flag_sig = flag_sig
             log.event("eval_gate_2_retry", concept=concept.id, attempt=attempt, flags=report.flags)
         if unit is None:
             log.unit_result(concept.id, status="assemble_failed")
@@ -174,7 +233,7 @@ def run_on_text(
 
     # Concepts are independent — generate them concurrently so wall-clock is
     # roughly one concept's time, not the sum. Order is preserved.
-    workers = min(len(concepts), 5) or 1
+    workers = min(len(concepts), config.MAX_CONCEPT_WORKERS) or 1
     with ThreadPoolExecutor(max_workers=workers) as ex:
         outcomes = list(ex.map(process_concept, concepts))
 

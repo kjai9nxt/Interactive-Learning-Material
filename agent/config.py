@@ -43,5 +43,13 @@ GEN_MODEL = os.environ.get("ILM_GEN_MODEL", "openai/gpt-4o")
 JUDGE_MODEL = os.environ.get("ILM_JUDGE_MODEL", "openai/gpt-4o")
 
 # ── Pipeline knobs ───────────────────────────────────────────────────────
-MAX_RETRIES_PER_UNIT = int(os.environ.get("ILM_MAX_RETRIES", "2"))  # eval gate 2 auto-retry budget
+# eval gate 2 auto-retry budget. 1 by default: surgical retries (regenerate only
+# the flagged artifact) + early-stop on a stuck unit make a second retry rarely
+# worth the wall-clock. Bump via ILM_MAX_RETRIES if you want more polishing passes.
+MAX_RETRIES_PER_UNIT = int(os.environ.get("ILM_MAX_RETRIES", "1"))
 REQUEST_TIMEOUT = int(os.environ.get("ILM_TIMEOUT", "90"))
+# How many concepts to generate+audit concurrently. The old hard-coded cap of 5
+# forced docs with >5 concepts into multiple serial waves (a 7-concept doc took
+# ~2 waves ≈ 2× wall-clock). Concept work is IO-bound LLM calls, so a higher cap
+# collapses most docs into a single wave. Override via env if you hit rate limits.
+MAX_CONCEPT_WORKERS = int(os.environ.get("ILM_MAX_WORKERS", "12"))
