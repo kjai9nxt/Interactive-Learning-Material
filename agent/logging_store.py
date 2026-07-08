@@ -58,6 +58,6 @@ class RunLogger:
     def close(self, status: str) -> dict[str, Any]:
         self.trace["status"] = status
         self.trace["ended_at"] = _now()
-        with self.path.open("a") as f:
+        with self.path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(self.trace) + "\n")
         return self.trace

@@ -90,7 +90,7 @@ def run_code(language: str, code: str) -> dict:
     src = os.path.join(workdir, spec["file"])
     exe = os.path.join(workdir, "prog")
     try:
-        with open(src, "w") as f:
+        with open(src, "w", encoding="utf-8") as f:
             f.write(code)
 
         def _fmt(cmd):

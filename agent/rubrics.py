@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 
 _PATH = Path(__file__).resolve().parent / "rubrics.json"
-_RUBRICS = json.loads(_PATH.read_text()) if _PATH.exists() else {}
+_RUBRICS = json.loads(_PATH.read_text(encoding="utf-8")) if _PATH.exists() else {}
 
 # eval-set file stem -> rubric sheet name
 SET_TO_SHEET = {

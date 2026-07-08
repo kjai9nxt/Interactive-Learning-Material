@@ -125,14 +125,14 @@ def run():
 @app.get("/api/sample")
 def sample():
     path = config.INPUT_DIR / "ai_agents.md"
-    text = path.read_text() if path.exists() else ""
+    text = path.read_text(encoding="utf-8") if path.exists() else ""
     return jsonify({"name": "ai_agents.md", "markdown": text})
 
 
 @app.get("/api/units")
 def current_units():
     if config.FRONTEND_DATA.exists():
-        return jsonify(json.loads(config.FRONTEND_DATA.read_text()))
+        return jsonify(json.loads(config.FRONTEND_DATA.read_text(encoding="utf-8")))
     return jsonify({"units": [], "published_units": 0, "generated_units": 0})
 
 

@@ -126,7 +126,7 @@ def _predict_llm(case: dict[str, Any], spans: dict[str, str] | None = None,
 
 # ── runner ──────────────────────────────────────────────────────────────────
 def run_set(path, *, code_only: bool = False) -> dict[str, Any]:
-    data = json.loads(path.read_text())
+    data = json.loads(path.read_text(encoding="utf-8"))
     spans = data.get("source_spans", {})
     rows = []
     for case in data.get("cases", []):

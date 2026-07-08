@@ -339,6 +339,14 @@
 }
 .ilm-newbtn:hover { background: rgba(129, 140, 248, 0.28); }
 
+.ilm-dlbtn {
+  background: rgba(16, 185, 129, 0.16); color: var(--text, #e2e8f0);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  border-radius: 9px; padding: 7px 13px; font-size: 13px; font-weight: 600;
+  cursor: pointer; margin-right: 10px;
+}
+.ilm-dlbtn:hover { background: rgba(16, 185, 129, 0.30); }
+
 .ilm-rejected {
   margin: 18px auto 0; max-width: 720px; text-align: left;
   background: rgba(217, 119, 6, 0.10); border: 1px solid rgba(217, 119, 6, 0.35);

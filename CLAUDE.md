@@ -120,6 +120,40 @@ Every OpenRouter call's `usage` is accumulated per run and written to
 - Work autonomously — finish end-to-end without yes/no prompts (saved preference).
 
 ## Change log
+- **2026-07-08 (10)** — **Interactive HTML export (parity upgrade).** The standalone
+  HTML export now embeds the app's dynamic behaviour as vanilla JS (fully offline):
+  (1) **sequential gated units** — each unit's mini-quiz must be attempted before
+  the next unlocks (lock-view / continue-button flow mirroring `Lesson.tsx`);
+  (2) **editable + live-run web code playground** — HTML/CSS/JS textareas whose
+  edits re-render an `<iframe srcdoc>` preview on input + Run ▶. Non-web code
+  (Python/Java/…) stays a read-only block (running it needs the backend, absent in
+  a static file). All in `src/ilm/exportHtml.ts`; `IlmApp.tsx` unchanged.
+- **2026-07-08 (9)** — **Standalone HTML export.** New "↓ Export HTML" button (top
+  bar, next to Export JSON) downloads the approved lesson as ONE self-contained
+  `.html` file — inlined CSS, images embedded as data URLs (fetched from
+  `/ilm-images` at export time), an interactive self-checking mini-quiz (tiny
+  vanilla-JS), and web code-playgrounds rendered as `<iframe srcdoc>` live
+  previews (non-web code shown as labelled blocks). Pure frontend + additive:
+  `src/ilm/exportHtml.ts` (`buildLessonHtml()`), wired in `IlmApp.tsx`
+  (`downloadHtml`). JSON export and renderer untouched.
+- **2026-07-08 (8)** — **Export JSON button.** Top-bar "↓ Export JSON" (shown once a
+  run completes + is approved) downloads the full result object — the exact shape
+  the backend publishes to `conceptUnits.json`. Frontend-only:
+  `IlmApp.tsx` (`downloadJson`), `.ilm-dlbtn` in `ilm.css`.
+- **2026-07-08 (7)** — **Windows UTF-8 fix.** The pipeline prints/writes Unicode
+  glyphs (`→ ⚠ ✓ ·`) and reads UTF-8 source docs, but on Windows the console +
+  default file encoding is `cp1252`, whose `charmap` codec can't encode/decode
+  them → `UnicodeEncodeError`/`DecodeError` (crashed mid-run, e.g. writing
+  `concept_units.json`). Fixes: (1) `agent/__init__.py` reconfigures
+  `stdout`/`stderr` to UTF-8 on import (every entry point gets it); (2) all file
+  writes now pass `encoding="utf-8"` (`orchestrator.py` output + usage.jsonl,
+  `logging_store.py`, `memory.py`, `runner.py`, `llm.py` parse-fail dump); (3) all
+  content/JSON reads now pass `encoding="utf-8"` (`orchestrator.py` doc read,
+  `server.py` sample/units, `config.py` .env, `memory.py`, `rubrics.py`,
+  `evals/run_evals.py`). Also note: the `npm run dev` scripts are Unix-only
+  (`fuser`, `.venv/bin/python`); on Windows launch the two servers directly
+  (`.venv/Scripts/python.exe -m agent.server` + `npx vite`); Vite binds IPv6
+  (`localhost:5173`), API binds IPv4 (`127.0.0.1:5174`).
 - **2026-07-08 (6)** — Sharper image text: strengthened the image prompt (`_STYLE`)
   to demand ≤3-5 short, large, high-contrast, correctly-spelled labels (no tiny/
   gibberish text, prefer icons), and raised default WebP quality 80→90 so small

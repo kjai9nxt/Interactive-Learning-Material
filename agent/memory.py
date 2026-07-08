@@ -41,7 +41,7 @@ _DEFAULT: dict[str, Any] = {
 def load() -> dict[str, Any]:
     if config.MEMORY_PATH.exists():
         try:
-            return json.loads(config.MEMORY_PATH.read_text())
+            return json.loads(config.MEMORY_PATH.read_text(encoding="utf-8"))
         except Exception:
             pass
     save(_DEFAULT)
@@ -50,7 +50,7 @@ def load() -> dict[str, Any]:
 
 def save(mem: dict[str, Any]) -> None:
     config.MEMORY_PATH.parent.mkdir(parents=True, exist_ok=True)
-    config.MEMORY_PATH.write_text(json.dumps(mem, indent=2))
+    config.MEMORY_PATH.write_text(json.dumps(mem, indent=2), encoding="utf-8")
 
 
 def as_prompt_block(mem: dict[str, Any] | None = None) -> str:

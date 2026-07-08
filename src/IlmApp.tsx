@@ -6,6 +6,7 @@ import type { ConceptUnitsFile } from "./ilm/types";
 import ThemeToggle from "./components/ThemeToggle";
 import Ingest from "./ilm/Ingest";
 import Lesson from "./ilm/Lesson";
+import { buildLessonHtml } from "./ilm/exportHtml";
 
 /* ══════════════════════════════════════════════════════════════════════
    ILM APP — controller. Shows the Ingest screen, then renders the generated
@@ -30,6 +31,43 @@ function App() {
   const rejected = data?.rejected || [];
   const docTitle = data ? data.doc.replace(/\.md$/, "").replace(/[_-]/g, " ") : "";
 
+  // Export the generated + approved output as a JSON file the user can save and
+  // reuse (same shape the renderer consumes / the backend publishes). Serializes
+  // the full result object in the browser — no server round-trip needed.
+  const downloadJson = () => {
+    if (!data) return;
+    const slug = data.doc.replace(/\.md$/, "").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+    const fname = `ilm_${slug || "lesson"}_${data.run_id || "output"}.json`;
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fname;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  // Export the generated + approved output as a self-contained HTML lesson —
+  // one .html file (styling inlined, images embedded as data URLs, interactive
+  // quiz) that opens in any browser with no React app or server.
+  const downloadHtml = async () => {
+    if (!data) return;
+    const slug = data.doc.replace(/\.md$/, "").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+    const fname = `ilm_${slug || "lesson"}_${data.run_id || "output"}.html`;
+    const html = await buildLessonHtml(data);
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fname;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className={`mq-root theme-${theme}`}>
       <div className="mq-progress">
@@ -37,6 +75,16 @@ function App() {
           Interactive Learning Material {data && <span>· {data.doc}</span>}
         </div>
         <div style={{ flex: 1 }} />
+        {data && (
+          <button className="ilm-dlbtn" onClick={downloadHtml} title="Download the lesson as a standalone HTML file">
+            ↓ Export HTML
+          </button>
+        )}
+        {data && (
+          <button className="ilm-dlbtn" onClick={downloadJson} title="Download the generated Concept Units as JSON">
+            ↓ Export JSON
+          </button>
+        )}
         {data && (
           <button className="ilm-newbtn" onClick={() => setData(null)}>← New material</button>
         )}

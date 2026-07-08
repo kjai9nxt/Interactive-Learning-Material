@@ -201,7 +201,7 @@ def chat_json(messages: list[dict[str, str]], *, json_retries: int = 3, **kwargs
 def _dump_failed_json(raw: str, err: Exception | None) -> None:
     try:
         path = config.RUNS_DIR / "last_json_parse_fail.txt"
-        path.write_text(f"# parse error: {err}\n\n{raw}")
+        path.write_text(f"# parse error: {err}\n\n{raw}", encoding="utf-8")
     except Exception:
         pass
 

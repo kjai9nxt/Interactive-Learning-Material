@@ -134,7 +134,7 @@ def run_pipeline(
 ) -> dict[str, Any]:
     """Run the pipeline on a Markdown file on disk."""
     return run_on_text(
-        doc_path.read_text(), doc_path.name,
+        doc_path.read_text(encoding="utf-8"), doc_path.name,
         auto_approve=auto_approve, use_llm_audit=use_llm_audit,
         publish=publish, limit=limit,
     )
@@ -520,7 +520,7 @@ def run_on_text(
     usage_line = {"run_id": run_id, "at": __import__("datetime").datetime.now(
         __import__("datetime").timezone.utc).isoformat(), "doc": doc_name,
         "gen_model": config.GEN_MODEL, "image_model": config.IMAGE_MODEL, **usage}
-    with (config.RUNS_DIR / "usage.jsonl").open("a") as f:
+    with (config.RUNS_DIR / "usage.jsonl").open("a", encoding="utf-8") as f:
         f.write(json.dumps(usage_line) + "\n")
     log.event("usage", **usage)
     print(f"Usage: {usage['total_tokens']} tokens · {usage['chat_calls']} chat + "
@@ -539,7 +539,7 @@ def run_on_text(
         "rejected": rejected,
     }
     out_path = config.OUTPUT_DIR / "concept_units.json"
-    out_path.write_text(json.dumps(out, indent=2, ensure_ascii=False))
+    out_path.write_text(json.dumps(out, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"Wrote {out_path}")
 
     if publish and approved:
