@@ -7,6 +7,7 @@ transient errors.
 from __future__ import annotations
 
 import json
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -17,6 +18,41 @@ from . import config
 
 class LLMError(RuntimeError):
     pass
+
+
+# ── Token / cost usage accounting ──────────────────────────────────────────
+# Every OpenRouter response carries a `usage` block; we accumulate it process-wide
+# so the orchestrator can snapshot per-run spend into the trace (runs/usage.jsonl)
+# and the CLAUDE.md harness can report "how many tokens this is costing".
+_USAGE_LOCK = threading.Lock()
+_USAGE: dict[str, int] = {
+    "chat_calls": 0, "image_calls": 0,
+    "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0,
+}
+
+
+def _record_usage(kind: str, usage: dict[str, Any] | None) -> None:
+    with _USAGE_LOCK:
+        _USAGE[f"{kind}_calls"] = _USAGE.get(f"{kind}_calls", 0) + 1
+        if usage:
+            _USAGE["prompt_tokens"] += int(usage.get("prompt_tokens", 0) or 0)
+            _USAGE["completion_tokens"] += int(usage.get("completion_tokens", 0) or 0)
+            _USAGE["total_tokens"] += int(
+                usage.get("total_tokens",
+                          (usage.get("prompt_tokens", 0) or 0) + (usage.get("completion_tokens", 0) or 0)))
+
+
+def usage_snapshot() -> dict[str, int]:
+    """Current accumulated usage (thread-safe copy)."""
+    with _USAGE_LOCK:
+        return dict(_USAGE)
+
+
+def reset_usage() -> None:
+    """Zero the counters — call at the start of a run to get per-run figures."""
+    with _USAGE_LOCK:
+        for k in _USAGE:
+            _USAGE[k] = 0
 
 
 def chat(
@@ -58,6 +94,7 @@ def chat(
         try:
             with urllib.request.urlopen(req, timeout=config.REQUEST_TIMEOUT) as resp:
                 data = json.load(resp)
+            _record_usage("chat", data.get("usage"))
             return data["choices"][0]["message"]["content"]
         except urllib.error.HTTPError as e:
             detail = e.read().decode()[:400]
@@ -69,6 +106,52 @@ def chat(
             last_err = e
         time.sleep(1.5 * (attempt + 1))
     raise LLMError(f"LLM call failed after {retries} attempts: {last_err}")
+
+
+def generate_image(prompt: str, *, model: str | None = None, retries: int = 2) -> str:
+    """Generate ONE image and return it as a data URL (data:image/png;base64,…).
+
+    Uses OpenRouter's image-output modality (the model returns images on
+    message.images[*].image_url.url). Raises LLMError if no image comes back.
+    """
+    if not config.OPENROUTER_API_KEY:
+        raise LLMError("OPENROUTER_API_KEY is not set (check your .env).")
+
+    payload: dict[str, Any] = {
+        "model": model or config.IMAGE_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "modalities": ["image", "text"],
+    }
+    body = json.dumps(payload).encode()
+    headers = {
+        "Authorization": f"Bearer {config.OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://localhost/ilm",
+        "X-Title": "ILM Agent V1",
+    }
+
+    last_err: Exception | None = None
+    for attempt in range(retries):
+        req = urllib.request.Request(config.OPENROUTER_URL, data=body, headers=headers)
+        try:
+            with urllib.request.urlopen(req, timeout=config.REQUEST_TIMEOUT) as resp:
+                data = json.load(resp)
+            _record_usage("image", data.get("usage"))
+            images = (data["choices"][0]["message"] or {}).get("images") or []
+            if images:
+                url = (images[0].get("image_url") or {}).get("url", "")
+                if url.startswith("data:"):
+                    return url
+            last_err = LLMError("model returned no image")
+        except urllib.error.HTTPError as e:
+            detail = e.read().decode()[:400]
+            last_err = LLMError(f"HTTP {e.code}: {detail}")
+            if e.code not in (429, 500, 502, 503, 524):
+                raise last_err
+        except Exception as e:  # network / timeout / parse
+            last_err = e
+        time.sleep(1.5 * (attempt + 1))
+    raise LLMError(f"image generation failed after {retries} attempts: {last_err}")
 
 
 def chat_json(messages: list[dict[str, str]], *, json_retries: int = 3, **kwargs: Any) -> Any:

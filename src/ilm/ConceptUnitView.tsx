@@ -2,6 +2,7 @@
    This module's public export is buildUnitSlides() (a slide-data builder), not a
    hot-reloadable component; Visual/ScenarioBody are internal helpers. Fast Refresh
    has nothing to refresh here, so the rule doesn't apply. */
+import { useLayoutEffect, useRef } from "react";
 import type { ConceptUnit, Scenario } from "./types";
 import type { CarouselSlide } from "../components/SectionCarousel";
 import CodePlayground from "../components/CodePlayground";
@@ -16,11 +17,71 @@ import CodeRunner from "../components/CodeRunner";
 // c++, …) gets an editable runner that executes server-side.
 const WEB_LANGS = new Set(["html", "css", "js", "javascript", "web"]);
 
-function Visual({ html, label }: { html: string; label: string }) {
+export function Visual({ image, html, label }: { image?: string; html?: string; label: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  // The injected SVGs come from the agent, which sometimes emits a viewBox that
+  // is smaller than the markup it actually draws (e.g. a third box at x=428
+  // width=160 ends at 588 but the viewBox is only 520 wide). The overflowing
+  // part is then clipped, so diagrams look "half". Here we measure the SVG's
+  // real content bounds via getBBox() and grow the viewBox to fit, then drop the
+  // fixed width/height so the corrected viewBox governs responsive scaling.
+  // This self-heals any generator overflow — current and future — for free.
+  useLayoutEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    const svg = root.querySelector("svg");
+    if (!svg) return;
+    let bbox: DOMRect;
+    try {
+      bbox = (svg as SVGGraphicsElement).getBBox();
+    } catch {
+      return; // not yet laid out / not measurable
+    }
+    if (!bbox.width || !bbox.height) return;
+
+    const pad = 6;
+    const minX = Math.min(0, bbox.x) - pad;
+    const minY = Math.min(0, bbox.y) - pad;
+    const width = Math.max(bbox.x + bbox.width, 0) - minX + pad;
+    const height = Math.max(bbox.y + bbox.height, 0) - minY + pad;
+
+    const cur = (svg.getAttribute("viewBox") || "").split(/[\s,]+/).map(Number);
+    const fits =
+      cur.length === 4 &&
+      minX >= cur[0] - 0.5 &&
+      minY >= cur[1] - 0.5 &&
+      minX + width <= cur[0] + cur[2] + 0.5 &&
+      minY + height <= cur[1] + cur[3] + 0.5;
+
+    if (!fits) {
+      svg.setAttribute(
+        "viewBox",
+        `${minX.toFixed(1)} ${minY.toFixed(1)} ${width.toFixed(1)} ${height.toFixed(1)}`,
+      );
+      // Re-pin the intrinsic size to the corrected box so the existing
+      // `max-width:100%; height:auto` CSS shrinks-to-fit without upscaling,
+      // and the aspect ratio matches the content we just measured.
+      svg.setAttribute("width", width.toFixed(1));
+      svg.setAttribute("height", height.toFixed(1));
+    }
+  }, [html]);
+
+  // Preferred path: an AI-generated raster illustration (data URL or /ilm-images
+  // path). Legacy units carry inline-SVG `html` instead, handled below. (Declared
+  // after the hook so hooks always run in the same order — rules-of-hooks.)
+  if (image && image.trim()) {
+    return (
+      <figure className="ilm-visual" aria-label={label}>
+        <img className="ilm-visual-img" src={image} alt={label} loading="lazy" />
+      </figure>
+    );
+  }
+
   if (!html || !html.trim()) return null;
   return (
     <figure className="ilm-visual" aria-label={label}>
-      <div className="ilm-visual-inner" dangerouslySetInnerHTML={{ __html: html }} />
+      <div ref={ref} className="ilm-visual-inner" dangerouslySetInnerHTML={{ __html: html }} />
     </figure>
   );
 }
@@ -38,7 +99,9 @@ function ScenarioBody({ s }: { s: Scenario }) {
   return (
     <div>
       <p className="ilm-scenario-text">{s.text}</p>
-      {s.visual_html && <Visual html={s.visual_html} label="Scenario illustration" />}
+      {(s.visual_image || s.visual_html) && (
+        <Visual image={s.visual_image} html={s.visual_html} label="Scenario illustration" />
+      )}
       {hasWebPlayground && (
         <CodePlayground
           initialHtml={cp!.html || (lang === "html" ? cp!.code || "" : "")}
@@ -62,13 +125,13 @@ export function UnitContent({ unit }: { unit: ConceptUnit }) {
       <section className="ilm-block">
         <div className="ilm-block-label">What it is</div>
         <p className="ilm-explanation">{unit.explanation.text}</p>
-        <Visual html={unit.explanation.visual_diagram_html} label={`${unit.title} diagram`} />
+        <Visual image={unit.explanation.visual_image} html={unit.explanation.visual_diagram_html} label={`${unit.title} diagram`} />
       </section>
 
       <section className="ilm-block ilm-analogy">
         <div className="ilm-block-label">Think of it like this</div>
         <p className="ilm-analogy-text">{unit.analogy.text}</p>
-        <Visual html={unit.analogy.visual_html} label={`${unit.title} analogy`} />
+        <Visual image={unit.analogy.visual_image} html={unit.analogy.visual_html} label={`${unit.title} analogy`} />
       </section>
 
       {scenarios.length > 0 && (
@@ -100,7 +163,7 @@ export function buildUnitSlides(unit: ConceptUnit): CarouselSlide[] {
         <div>
           <h4>What it is</h4>
           <p className="ilm-explanation">{unit.explanation.text}</p>
-          <Visual html={unit.explanation.visual_diagram_html} label={`${unit.title} diagram`} />
+          <Visual image={unit.explanation.visual_image} html={unit.explanation.visual_diagram_html} label={`${unit.title} diagram`} />
         </div>
       ),
     },
@@ -110,7 +173,7 @@ export function buildUnitSlides(unit: ConceptUnit): CarouselSlide[] {
         <div className="ilm-analogy-slide">
           <h4>Think of it like this</h4>
           <p className="ilm-analogy-text">{unit.analogy.text}</p>
-          <Visual html={unit.analogy.visual_html} label={`${unit.title} analogy`} />
+          <Visual image={unit.analogy.visual_image} html={unit.analogy.visual_html} label={`${unit.title} analogy`} />
         </div>
       ),
     },

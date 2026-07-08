@@ -45,7 +45,7 @@ CONCEPT: {title}
 SUMMARY: {summary}
 SOURCE SPAN (the ONLY facts the questions and answers may rely on):
 \"\"\"{span}\"\"\"
-
+{reviewer_feedback}
 Return JSON:
 {{"questions": [
   {{"question": "...", "options": ["A","B","C","D"], "correct_index": 0,
@@ -55,7 +55,20 @@ Return JSON:
 """
 
 
-def generate_quiz(concept: Concept, *, memory_block: str = "") -> MiniQuiz:
+def _feedback_block(feedback: str) -> str:
+    """Reviewer feedback injected LATE so it overrides the defaults above (but keep
+    4 questions and stay grounded in the SOURCE SPAN)."""
+    if not feedback.strip():
+        return ""
+    return (
+        "\nREVIEWER FEEDBACK — HIGHEST PRIORITY. Apply this exactly when regenerating; "
+        "it overrides the default instructions above, but still return 4 questions and "
+        f"never test anything the SOURCE SPAN does not state:\n{feedback.strip()}\n"
+    )
+
+
+def generate_quiz(concept: Concept, *, memory_block: str = "",
+                  reviewer_feedback: str = "") -> MiniQuiz:
     data = llm.chat_json(
         [
             {"role": "system", "content": SYSTEM},
@@ -64,6 +77,7 @@ def generate_quiz(concept: Concept, *, memory_block: str = "") -> MiniQuiz:
                 title=concept.title,
                 summary=concept.summary,
                 span=concept.source_span,
+                reviewer_feedback=_feedback_block(reviewer_feedback),
             )},
         ],
         temperature=0.5,

@@ -1,7 +1,7 @@
 {
   "meta": {
     "project": "ILM — Interactive Learning Material (V1, workflow v2)",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "created": "2026-06-11",
     "pipeline_step": "Skill 1 + dedupe + Eval gate 1",
     "diagram_node": "Skill 1: concept-extraction -> Keep only NEW concepts -> Eval gate 1",
@@ -10,14 +10,17 @@
       "pass",
       "flag"
     ],
-    "note": "Split from ilm_eval_set.json v0.1.0; cases unchanged."
+    "note": "v0.3.0: realigned to updated rubrics.json — added the new clubbing rules 7.0 (<=2 subheadings/unit), 8.0 (<=3 commands/unit), 9.0 (no clubbing of separate simple headings), each with a bad/flag boundary case (CPT-08/09/10) and a good/pass twin (CPT-08b/09b/10b), plus supporting spans S6-S8; Granularity (4.0, CPT-04) now references these clubbing allowances."
   },
   "source_spans": {
     "S1": "An AI agent is a program that uses a language model to decide which actions to take. It runs in a loop: observe the current state, choose a tool, execute it, and feed the result back into the model. The loop ends when the model decides the task is complete.",
     "S2": "Tool calling lets the model request that the host program run a specific function, such as a web search or a calculator, and return the result to the model.",
     "S3": "A system prompt is a fixed instruction given to the model before the conversation starts. It sets the agent's role, rules, and output format.",
     "S4": "Retrieval-augmented generation (RAG) fetches relevant passages from a document store and adds them to the prompt, so the model can answer using information it was never trained on. The model's weights are not changed.",
-    "S5": "A human-in-the-loop gate requires a person to approve the agent's output before it takes effect."
+    "S5": "A human-in-the-loop gate requires a person to approve the agent's output before it takes effect.",
+    "S6": "Heading 'Python Functions' has three subheadings: 'Defining a function' (the def keyword and body), 'Calling a function' (passing arguments), and 'Return values' (how a function hands a result back). Each subheading teaches a distinct mechanic.",
+    "S7": "Heading 'Inspecting a Git repo' walks through four commands: git status (what changed), git log (history), git diff (line-level changes), and git show (a single commit's contents).",
+    "S8": "Two separate top-level headings, each with no subheadings: 'What is a variable' (a named box that holds a value) and 'What is a constant' (a named value that never changes)."
   },
   "cases": [
     {
@@ -144,8 +147,8 @@
         }
       },
       "expected_verdict": "flag",
-      "failure_mode": "The bundle has a unifying theme ('getting outside information'), which makes it look like one concept. But each half needs its own explanation, analogy, and quiz — it is two teachable units.",
-      "judge_instructions": "Flag if the concept requires teaching two separable mechanisms. Test: could a quiz question about one half be answered without the other half? If yes, it is two concepts.",
+      "failure_mode": "The bundle has a unifying theme ('getting outside information'), which makes it look like one concept. But each half needs its own explanation, analogy, and quiz — it is two teachable units. These are two separate top-level mechanisms (S2, S4), not a permitted clubbing under cases 7.0/8.0/9.0.",
+      "judge_instructions": "Flag if the concept requires teaching two separable mechanisms beyond the clubbing allowances in cases 7.0 (<=2 subheadings of one main heading), 8.0 (<=3 commands under one heading), and 9.0 (a single simple heading). Test: could a quiz question about one half be answered without the other half? If yes, and the bundle is not a permitted clubbing, it is two concepts.",
       "metadata": {
         "polarity": "bad",
         "agent": "concept_extractor",
@@ -220,6 +223,186 @@
         "taxonomy_tags": ["correct-titling", "vague-title", "specificity"],
         "findings": ["vague_title"],
         "notes": "Negative case: accurate but over-broad title that could label any concept in the doc. Vagueness (not mismatch) is the edge being tested."
+      }
+    },
+    {
+      "id": "CPT-08",
+      "rubric_case_id": 7.0,
+      "criterion": "Main heading has multiple subheadings",
+      "edge_case": "One main heading whose three subheadings are clubbed into a single concept unit — one over the 2-subheading allowance",
+      "grader": "llm",
+      "polarity": "bad",
+      "input": {
+        "polarity": "bad",
+        "candidate_concept": {
+          "id": "c_110",
+          "title": "Python Functions",
+          "summary": "Defining a function, calling a function, and return values, all in one unit.",
+          "source_span": "S6",
+          "clubbed_subheadings": ["Defining a function", "Calling a function", "Return values"]
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "The main heading 'Python Functions' has three subheadings. The rubric allows clubbing at most 2 subheadings into one concept unit; clubbing all 3 exceeds that, so it must be split (e.g. 2 + 1). Boundary case: 2 would pass, 3 flags.",
+      "judge_instructions": "Count the subheadings of the same main heading clubbed into this concept unit. Pass if <=2 are clubbed; flag if >2 subheadings of the main heading are clubbed into a single unit.",
+      "metadata": {
+        "polarity": "bad",
+        "agent": "concept_extractor",
+        "artefact_kind": "concept_unit",
+        "slide_type": null,
+        "taxonomy_tags": ["granularity", "clubbing", "subheadings", "boundary"],
+        "findings": ["too_many_subheadings_clubbed"],
+        "notes": "Negative case for the new clubbing rule (rubric 7.0): >2 subheadings of one main heading clubbed into a single Learning Concept Unit."
+      }
+    },
+    {
+      "id": "CPT-08b",
+      "rubric_case_id": 7.0,
+      "criterion": "Main heading has multiple subheadings",
+      "edge_case": "Exactly two subheadings of one main heading clubbed into a single concept unit — at the 2-subheading allowance",
+      "grader": "llm",
+      "polarity": "good",
+      "input": {
+        "polarity": "good",
+        "candidate_concept": {
+          "id": "c_110b",
+          "title": "Defining and calling a function",
+          "summary": "How to define a function and how to call it, taught together as one unit.",
+          "source_span": "S6",
+          "clubbed_subheadings": ["Defining a function", "Calling a function"]
+        }
+      },
+      "expected_verdict": "pass",
+      "failure_mode": null,
+      "judge_instructions": "Count the subheadings of the same main heading clubbed into this concept unit. The rubric permits clubbing up to 2 subheadings; exactly 2 sits on the allowance and must pass. A judge that flags this is over-strict.",
+      "metadata": {
+        "polarity": "good",
+        "agent": "concept_extractor",
+        "artefact_kind": "concept_unit",
+        "slide_type": null,
+        "taxonomy_tags": ["granularity", "clubbing", "subheadings", "boundary", "anchor"],
+        "findings": [],
+        "notes": "Positive boundary twin of CPT-08 (rubric 7.0): exactly 2 subheadings clubbed is the permitted maximum and must pass."
+      }
+    },
+    {
+      "id": "CPT-09",
+      "rubric_case_id": 8.0,
+      "criterion": "Multiple Commands in single Heading",
+      "edge_case": "Four commands under one heading clubbed into a single concept unit — one over the 3-command allowance",
+      "grader": "llm",
+      "polarity": "bad",
+      "input": {
+        "polarity": "bad",
+        "candidate_concept": {
+          "id": "c_111",
+          "title": "Inspecting a Git repo",
+          "summary": "git status, git log, git diff, and git show taught together as one unit.",
+          "source_span": "S7",
+          "clubbed_commands": ["git status", "git log", "git diff", "git show"]
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "The heading lists four commands. The rubric allows clubbing at most 3 commands into one concept unit; clubbing all 4 exceeds that, so it must be split. Boundary case: 3 would pass, 4 flags.",
+      "judge_instructions": "Count the commands under the same heading clubbed into this concept unit. Pass if <=3 are clubbed; flag if >3 commands of the heading are clubbed into a single unit.",
+      "metadata": {
+        "polarity": "bad",
+        "agent": "concept_extractor",
+        "artefact_kind": "concept_unit",
+        "slide_type": null,
+        "taxonomy_tags": ["granularity", "clubbing", "commands", "boundary"],
+        "findings": ["too_many_commands_clubbed"],
+        "notes": "Negative case for the new clubbing rule (rubric 8.0): >3 commands of one heading clubbed into a single Learning Concept Unit."
+      }
+    },
+    {
+      "id": "CPT-09b",
+      "rubric_case_id": 8.0,
+      "criterion": "Multiple Commands in single Heading",
+      "edge_case": "Exactly three commands under one heading clubbed into a single concept unit — at the 3-command allowance",
+      "grader": "llm",
+      "polarity": "good",
+      "input": {
+        "polarity": "good",
+        "candidate_concept": {
+          "id": "c_111b",
+          "title": "Inspecting a Git repo",
+          "summary": "git status, git log, and git diff taught together as one unit.",
+          "source_span": "S7",
+          "clubbed_commands": ["git status", "git log", "git diff"]
+        }
+      },
+      "expected_verdict": "pass",
+      "failure_mode": null,
+      "judge_instructions": "Count the commands under the same heading clubbed into this concept unit. The rubric permits clubbing up to 3 commands; exactly 3 sits on the allowance and must pass. A judge that flags this is over-strict.",
+      "metadata": {
+        "polarity": "good",
+        "agent": "concept_extractor",
+        "artefact_kind": "concept_unit",
+        "slide_type": null,
+        "taxonomy_tags": ["granularity", "clubbing", "commands", "boundary", "anchor"],
+        "findings": [],
+        "notes": "Positive boundary twin of CPT-09 (rubric 8.0): exactly 3 commands clubbed is the permitted maximum and must pass."
+      }
+    },
+    {
+      "id": "CPT-10",
+      "rubric_case_id": 9.0,
+      "criterion": "One main simple heading with no subheadings or subconcepts.",
+      "edge_case": "Two separate simple headings (each with no subheadings) clubbed into one concept unit",
+      "grader": "llm",
+      "polarity": "bad",
+      "input": {
+        "polarity": "bad",
+        "candidate_concept": {
+          "id": "c_112",
+          "title": "Variables and constants",
+          "summary": "What a variable is and what a constant is, combined into one unit.",
+          "source_span": "S8",
+          "clubbed_headings": ["What is a variable", "What is a constant"]
+        }
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "These are two separate simple top-level headings, each with no subheadings. The rubric says a single simple heading is one Learning Concept Unit; clubbing two distinct simple headings together is not permitted and must be split into two units.",
+      "judge_instructions": "A single simple heading with no subheadings is one concept unit (pass). Flag if >=2 separate simple headings (each with no subheadings) are clubbed into a single Learning Concept Unit.",
+      "metadata": {
+        "polarity": "bad",
+        "agent": "concept_extractor",
+        "artefact_kind": "concept_unit",
+        "slide_type": null,
+        "taxonomy_tags": ["granularity", "clubbing", "simple-headings", "boundary"],
+        "findings": ["separate_simple_headings_clubbed"],
+        "notes": "Negative case for the new clubbing rule (rubric 9.0): two separate simple headings clubbed as one Learning Concept Unit."
+      }
+    },
+    {
+      "id": "CPT-10b",
+      "rubric_case_id": 9.0,
+      "criterion": "One main simple heading with no subheadings or subconcepts.",
+      "edge_case": "A single simple heading with no subheadings treated as one concept unit",
+      "grader": "llm",
+      "polarity": "good",
+      "input": {
+        "polarity": "good",
+        "candidate_concept": {
+          "id": "c_112b",
+          "title": "What is a variable",
+          "summary": "A named box that holds a value.",
+          "source_span": "S8",
+          "clubbed_headings": ["What is a variable"]
+        }
+      },
+      "expected_verdict": "pass",
+      "failure_mode": null,
+      "judge_instructions": "A single simple heading with no subheadings is exactly one Learning Concept Unit and must pass. Flag only when >=2 separate simple headings are clubbed together; this unit clubs none, so a judge that flags it is over-strict.",
+      "metadata": {
+        "polarity": "good",
+        "agent": "concept_extractor",
+        "artefact_kind": "concept_unit",
+        "slide_type": null,
+        "taxonomy_tags": ["granularity", "clubbing", "simple-headings", "anchor"],
+        "findings": [],
+        "notes": "Positive twin of CPT-10 (rubric 9.0): one simple heading treated as a single unit, the permitted case, must pass."
       }
     },
     {

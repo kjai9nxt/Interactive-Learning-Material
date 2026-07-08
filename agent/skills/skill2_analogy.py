@@ -1,16 +1,17 @@
 """Skill 2: analogy-generation (AI).
 
-Input: concept + source span. Output: {analogy text, visual_html, grounding}.
-Done-when: faithful, clear, explicit mapping, passes the Analogy rubric.
+Input: concept + source span. Output: {analogy text, grounding, generated
+illustration}. Done-when: faithful, clear, explicit mapping, passes the Analogy
+rubric. The supporting visual is now an AI-generated raster illustration (curated
+by the human at the review gate), not a hand-rolled inline SVG.
 """
 from __future__ import annotations
 
-from .. import llm
+from .. import image_gen, llm
 from ..models import Analogy, Concept
-from ..visual_spec import VISUAL_SPEC
 
 SYSTEM = (
-    "You write short teaching analogies with a clear, polished supporting visual. "
+    "You write short teaching analogies. "
     "They must be self-contained, map explicitly to the concept, and never imply "
     "anything the source does not say."
 )
@@ -34,40 +35,56 @@ Hard rules (Analogy rubric):
 - NO BANNED REFERENCES: no movies, actors, politics, sports, or brands.
 - FAITHFUL: introduce no claim about the concept beyond the SOURCE SPAN.
 - LENGTH: at most 3 short sentences.
-- The VISUAL should illustrate the EVERYDAY SCENE of the analogy and visually
-  echo the mapping (label the analogy side and the concept side so the parallel
-  is obvious).
-
-{visual_spec}
 
 CONCEPT: {title}
 SUMMARY: {summary}
 SOURCE SPAN (the only facts you may rely on):
 \"\"\"{span}\"\"\"
-
+{reviewer_feedback}
 Return JSON:
-{{"analogy": "...", "visual_html": "<svg ...>...</svg>",
+{{"analogy": "...",
   "grounding_check": "one line: which source phrase each mapped element traces to"}}
 """
 
 
-def generate_analogy(concept: Concept, *, memory_block: str = "") -> Analogy:
+def _feedback_block(feedback: str) -> str:
+    """Reviewer feedback injected LATE (after the rules) so it OVERRIDES the
+    defaults above — the only thing it may not override is grounding/faithfulness."""
+    if not feedback.strip():
+        return ""
+    return (
+        "\nREVIEWER FEEDBACK — HIGHEST PRIORITY. Apply this exactly when regenerating; "
+        "it overrides the default instructions above (but never invent facts the "
+        f"SOURCE SPAN does not support):\n{feedback.strip()}\n"
+    )
+
+
+def generate_analogy(concept: Concept, *, memory_block: str = "",
+                     reviewer_feedback: str = "", with_image: bool = True) -> Analogy:
     data = llm.chat_json(
         [
             {"role": "system", "content": SYSTEM},
             {"role": "user", "content": PROMPT.format(
                 memory=memory_block,
-                visual_spec=VISUAL_SPEC,
                 title=concept.title,
                 summary=concept.summary,
                 span=concept.source_span,
+                reviewer_feedback=_feedback_block(reviewer_feedback),
             )},
         ],
         temperature=0.6,
-        max_tokens=1400,  # 3-sentence analogy + one small simple SVG
+        max_tokens=600,  # 3-sentence analogy + grounding line
     )
+    text = data["analogy"].strip()
+    visual_image = ""
+    if with_image:
+        try:
+            visual_image = image_gen.generate_visual(
+                image_gen.KIND_ANALOGY, concept.title, text)
+        except Exception as e:  # never let image failure sink the unit
+            print(f"   [skill2] analogy image failed for {concept.title}: {e}")
     return Analogy(
-        text=data["analogy"].strip(),
-        visual_html=data.get("visual_html", "").strip(),
+        text=text,
+        visual_image=visual_image,
         grounding_check=data.get("grounding_check", "").strip(),
     )

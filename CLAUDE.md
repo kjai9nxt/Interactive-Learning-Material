@@ -1,0 +1,171 @@
+# CLAUDE.md — Project Harness
+
+> **Read this first, every session.** Claude Code auto-loads this file, so a new
+> terminal gets the full picture here instead of re-scraping the repo (which burns
+> tokens). Keep it accurate: **whenever you make a non-trivial change, update the
+> "Change log" and any section it touches.** Cost/token spend is tracked in
+> `runs/usage.jsonl` (see "Token & cost usage").
+
+## What this project is
+
+**Interactive Learning Material (ILM) V1.** Turns a static Markdown reading
+material into eval-governed, human-approved **Concept Units**, rendered as a React
+lesson. Plain Python + a thin OpenRouter LLM client (no LangChain) for the agent;
+React + Vite for the renderer. Full narrative + PRD pointer live in `README.md`.
+
+Pipeline: `parse → Skill 1 extract concepts → eval gate 1 → per concept {Skill 2
+analogy, Skill 3 explainer+scenarios, Skill 4 MCQs} → assemble+validate → Skill 5
+eval-audit (gate 2, auto-retry) → 2 human gates → publish conceptUnits.json →
+React renderer`. Logging to `runs/runs.jsonl` feeds a self-evolving loop.
+
+## How to run
+
+```bash
+npm run dev            # both: Flask agent API (5174) + Vite web (5173)
+# API alone:  .venv/bin/python -m agent.server
+# CLI run:    .venv/bin/python -m agent.orchestrator [doc.md] [--auto-approve] [--no-llm-audit] [--limit N] [--no-publish]
+npx tsc -b             # typecheck the frontend
+```
+
+Config is env-driven (`.env`, gitignored). Key vars: `OPENROUTER_API_KEY`,
+`ILM_GEN_MODEL`, `ILM_JUDGE_MODEL`, `ILM_IMAGE_MODEL`, `ILM_MAX_RETRIES`,
+`ILM_MAX_WORKERS`. See `agent/config.py`.
+
+## Architecture map (where things live)
+
+### Backend — `agent/`
+| File | Role |
+|------|------|
+| `orchestrator.py` | Wires the whole pipeline. `run_on_text()` is the entry; `build_unit()` builds/retries one unit; `_apply_image_decision()` + `_persist_unit_images()` handle gate-2 image curation. |
+| `config.py` | Paths, models, knobs. Image model + `public/ilm-images` dirs. |
+| `llm.py` | OpenRouter client: `chat()`, `chat_json()`, **`generate_image()`** (image modality), and **token/image usage accounting** (`usage_snapshot()`/`reset_usage()`). |
+| `image_gen.py` | Builds image prompts, generates raster visuals, `persist_data_url()` → writes PNG to `public/ilm-images/<run_id>/` and returns a short URL. |
+| `models.py` | Pydantic `ConceptUnit` schema — the core contract. Visuals: `visual_image` (raster, current) + legacy `visual_*_html` (optional, SVG fallback). |
+| `skills/skill1_extract.py` | Concept extraction. |
+| `skills/skill2_analogy.py` | Analogy text **+ generated analogy image**. |
+| `skills/skill3_explainer.py` | Explanation + scenarios (+ code playground) **+ generated images** (explanation & each scenario), made concurrently. |
+| `skills/skill4_mcq.py` | Mini-quiz MCQs. |
+| `skills/skill5_audit.py` | Eval gate 2 (code graders + LLM judge). Judge only sees text, not image data. |
+| `graders/code_graders.py` | Deterministic checks. `check_visual_present()` accepts a raster image OR legacy SVG. |
+| `server.py` | Flask async-job API. Endpoints: `/api/generate`, `/api/status/<id>`, `/api/review/<id>`, **`/api/image`** (stateless (re)generate one visual for the gate), `/api/run`, `/api/units`, `/api/health`, `/api/sample`. |
+| `human_gate.py` | CLI review path (`--auto-approve` for unattended). |
+| `memory.py` / `memory_store.json` | Reviewer feedback → learned rules injected into skills. |
+| `logging_store.py` | `RunLogger` → one JSON line per run in `runs/runs.jsonl` (includes a `usage` event). |
+| `rubrics.json`, `parse_chunk.py`, `runner.py` | Rubrics; markdown chunking; server-side code execution for playgrounds. |
+
+### Frontend — `src/ilm/`
+| File | Role |
+|------|------|
+| `Ingest.tsx` | Ingest screen; drives the job, polls status, renders gates. `generateImage()` calls `/api/image`. |
+| `ReviewGates.tsx` | `PartitionGate` (gate 1) + `UnitsGate` (gate 2). Gate 2 has the per-image **keep/drop + regenerate-with-feedback** control (`ImageControl`). |
+| `ConceptUnitView.tsx` | Renders a unit. `Visual` prefers a raster `image`, falls back to legacy inline SVG `html`. |
+| `types.ts` | TS mirror of the schema + gate payloads/decisions. |
+| `Lesson.tsx`, `ilm.css` | Lesson shell; styles. |
+| `../components/CodePlayground.tsx`, `CodeRunner.tsx` | Web live-preview / server-run code. |
+| `../data/conceptUnits.json` | Published output the renderer reads. |
+
+## Visual subsystem (current design)
+
+Visuals are **AI-generated raster images** (model `google/gemini-2.5-flash-image`
+via OpenRouter, verified reachable on the project key). One image per
+Explanation / Analogy / Scenario is generated during the build.
+
+**Whole-unit regeneration (gate 2):** a per-unit "↻ Regenerate this unit with
+feedback" action rebuilds that unit's *content* applying the note (feedback is
+injected into `memory_block` → all skill prompts), re-audits, and re-opens the gate
+for re-review. Implemented as a loop in the orchestrator gate-2 block keyed off
+`action:"regenerate"`; prior status/note are forwarded so choices persist across
+rounds. (The plain note without regenerate still only feeds next-run memory.)
+
+**Human curation (gate 2):** each image is optional. The reviewer can **keep** or
+**drop** it (not everything needs a visual), and **regenerate** any with feedback.
+Dropped → field cleared; kept → persisted to `public/ilm-images/<run_id>/*.png`
+(Vite serves it at `/ilm-images/…`) so `conceptUnits.json` stays small.
+Generated images are **gitignored** (regenerated per run).
+
+Legacy inline-SVG visuals (`visual_diagram_html`, `visual_html`) are no longer
+generated but still **render as a fallback** for already-published units. The old
+`visual_spec.py` (SVG spec) is now unused by the skills.
+
+## Data contract quick ref (`models.py` / `types.ts`)
+- `ConceptUnit`: `explanation{text, visual_image?, visual_diagram_html?}`,
+  `analogy{text, visual_image?, visual_html?, grounding_check}`,
+  `scenarios[]{text, visual_image?, code_playground?}`, `mini_quiz{questions[]}`,
+  `review{status, reviewer?, notes?}`.
+- Gate 2 decision: `reviews[unitId] = {status, note, images{explanation, analogy,
+  scenarios[]}}` where an image value `""` means dropped.
+
+## Token & cost usage
+
+Every OpenRouter call's `usage` is accumulated per run and written to
+**`runs/usage.jsonl`** (one line per run: `chat_calls`, `image_calls`,
+`prompt/completion/total_tokens`, models). Also embedded in each run's
+`concept_units.json` (`usage` key) and in the `runs/runs.jsonl` trace.
+
+- Quick total: `cat runs/usage.jsonl | jq -s 'map(.total_tokens)|add'`.
+- **Image calls dominate cost** — each ~1 image ≈ ~$0.03–0.04 on gemini flash
+  image, and a full unit generates ~4 images (explanation + analogy + 2
+  scenarios). Dropping images at the gate does NOT refund generation; to cut spend
+  before generation, reduce concepts (`--limit`) or lower models.
+- **Dev tip (saved preference):** keep `ILM_GEN_MODEL`/`ILM_JUDGE_MODEL` on a
+  cheap tier while iterating.
+
+## Gotchas / conventions
+- **Key rotation:** `OPENROUTER_API_KEY` was shared in plaintext — should be rotated.
+- **Not every OpenRouter id is reachable** on this key; image gen requires a model
+  that returns the `image` modality (`google/gemini-2.5-flash-image` works;
+  `…-image-preview` 404s).
+- Image failures never sink a unit — skills catch and continue with no image.
+- Concepts generate concurrently (`ILM_MAX_WORKERS`); the LLM client is thread-safe.
+- Work autonomously — finish end-to-end without yes/no prompts (saved preference).
+
+## Change log
+- **2026-07-08 (6)** — Sharper image text: strengthened the image prompt (`_STYLE`)
+  to demand ≤3-5 short, large, high-contrast, correctly-spelled labels (no tiny/
+  gibberish text, prefer icons), and raised default WebP quality 80→90 so small
+  labels don't blur. Also capped visual *display* size (360×320) in `ilm.css`.
+- **2026-07-08 (5)** — Regeneration is now **per-part**, not whole-unit. Each unit at
+  gate 2 has independent feedback+regenerate for Explanation / Analogy / Quiz and per
+  Scenario (regenerate + 🗑 remove). Only that part hits the LLM; its image
+  auto-refreshes. Backend: `orchestrator.regenerate_part()` mutates one part in place,
+  `skill3.generate_one_scenario()` + `build_explainer(include_scenarios=False)`,
+  `unit_display()` shared helper, `POST /api/regenerate-part` over live units exposed
+  via `units_sink`/`GATE_UNITS` (changed units re-audited on Publish). Removed the old
+  whole-unit `regenerate-unit` endpoint + `_regenerated`/`REGEN` path. Frontend:
+  `PartControl`, per-part wiring in `ReviewGates.tsx`/`Ingest.tsx`.
+- **2026-07-08 (4)** — Shrunk generated images ~**36×** (890 KB PNG → ~24 KB). All
+  visuals are now downscaled (longest side `ILM_IMAGE_MAX_DIM`=1024) and re-encoded
+  to WebP (`ILM_IMAGE_QUALITY`=80) in `image_gen.compress_data_url()`, applied in
+  `generate_visual()`. Added **Pillow** dep. Tunable via `ILM_IMAGE_MAX_DIM/QUALITY/FORMAT`.
+- **2026-07-08 (3)** — Unit regeneration is now **in place, single-unit**, mirroring
+  the image flow. New stateless `POST /api/regenerate-unit/<job_id>` +
+  `orchestrator.regenerate_unit()` rebuild ONLY that unit, stash it in server-side
+  `REGEN[job_id]`, and it's swapped into the run via `decision["_regenerated"]` on
+  Publish (removed the gate round-trip loop). Frontend holds `unitsState` and swaps
+  just that card — no other unit re-renders. Per-**image** regenerate now **requires
+  feedback** (first-time generate still optional). Touched `orchestrator.py`,
+  `server.py`, `ReviewGates.tsx`, `Ingest.tsx`, `types.ts`, `ilm.css`.
+- **2026-07-08 (2)** — Made regenerate feedback *authoritative* and the UI *local*.
+  Feedback is now injected as a HIGH-PRIORITY late override inside each skill prompt
+  (new `reviewer_feedback` param on skills 2/3/4 + `build_unit`), so "remove Scenario
+  2" actually drops it — skill3 scenario count is now 1–2. Frontend: the gate stays
+  on screen during a single-unit regen (no drop to global progress), remounts fresh
+  via a `gateSeq` key, and shows an inline "Regenerating this unit…" spinner. Only
+  the clicked unit rebuilds (backend was already single-unit; this fixes the *look*).
+  Touched skills 2/3/4, `orchestrator.py`, `Ingest.tsx`, `ReviewGates.tsx`, `ilm.css`.
+- **2026-07-08** — Whole-unit feedback now **regenerates the unit's content** in
+  gate 2 (was: fed only next-run memory). New per-unit "↻ Regenerate with feedback"
+  action → orchestrator gate-2 regeneration loop (`action:"regenerate"`, feedback
+  injected via `memory_block`, re-audit, re-open gate); prior status/note forwarded
+  in the payload so choices persist across rounds. Touched `orchestrator.py`,
+  `ReviewGates.tsx`, `types.ts`, `ilm.css`.
+- **2026-07-07** — Switched visuals from inline SVG to **AI-generated raster
+  images** (`agent/image_gen.py`, `llm.generate_image`, `ILM_IMAGE_MODEL`). Gate 2
+  gained per-image **keep/drop + regenerate-with-feedback** (`ImageControl` in
+  `ReviewGates.tsx`, `/api/image` endpoint, `_apply_image_decision`/
+  `_persist_unit_images` in orchestrator). Images persisted to gitignored
+  `public/ilm-images/`. Added **token/image usage tracking** →
+  `runs/usage.jsonl` + `usage` in output/trace. Added this harness (`CLAUDE.md`).
+  Legacy SVG kept as render-only fallback; `visual_spec.py` now unused.
+</content>
+</invoke>

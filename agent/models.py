@@ -30,14 +30,20 @@ class Concept(BaseModel):
 # ── Skill 3: explainer (text + visual) + scenarios ─────────────────────────
 class Explanation(BaseModel):
     text: str = Field(..., description="2-4 sentences, grounded in source")
-    visual_diagram_html: str = Field(..., description="inline SVG/HTML diagram")
+    # AI-generated raster illustration (data URL during the run, /ilm-images/… URL
+    # once published). This is the visual the reviewer curates at the human gate.
+    visual_image: str = Field(default="", description="generated illustration (data URL or /ilm-images path)")
+    # Legacy inline-SVG diagram — no longer generated, kept optional so already
+    # published units still validate/render via the frontend fallback.
+    visual_diagram_html: str = Field(default="", description="legacy inline SVG/HTML diagram")
 
 
 class Scenario(BaseModel):
     text: str = Field(..., description="<=3 sentences, a concrete instance")
-    # Inline SVG that illustrates THIS real-world example (like the analogy/explanation
-    # visuals). Optional, but the generator should provide one for most scenarios.
-    visual_html: str = Field(default="", description="inline SVG illustrating the scenario")
+    # AI-generated raster illustration of this example (curated at the human gate).
+    visual_image: str = Field(default="", description="generated illustration (data URL or /ilm-images path)")
+    # Legacy inline SVG — optional, kept for back-compat.
+    visual_html: str = Field(default="", description="legacy inline SVG illustrating the scenario")
     # Present only when the concept involves code (rubric: Example Scenarios #6).
     code_playground: Optional[dict] = None  # {"language", "html"/"css"/"code"}
 
@@ -45,7 +51,10 @@ class Scenario(BaseModel):
 # ── Skill 2: analogy ───────────────────────────────────────────────────────
 class Analogy(BaseModel):
     text: str = Field(..., description="<=3 sentences, explicit mapping")
-    visual_html: str = Field(..., description="inline SVG/HTML supporting the analogy")
+    # AI-generated raster illustration of the analogy (curated at the human gate).
+    visual_image: str = Field(default="", description="generated illustration (data URL or /ilm-images path)")
+    # Legacy inline SVG — optional, kept for back-compat.
+    visual_html: str = Field(default="", description="legacy inline SVG/HTML supporting the analogy")
     grounding_check: str = Field(..., description="how the analogy traces to source")
 
 

@@ -6,3 +6,4 @@ python-dotenv>=1.0
 flask>=3.0
 flask-cors>=4.0
 json-repair>=0.25  # tolerant parsing of LLM JSON (unescaped quotes in verbatim spans)
+Pillow>=10.0  # downscale + WebP-recompress AI-generated visuals (shrinks ~950KB PNG → ~tens of KB)

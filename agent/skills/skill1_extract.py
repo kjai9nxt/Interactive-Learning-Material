@@ -55,10 +55,22 @@ def extract_concepts(
     *,
     past_materials: list[str] | None = None,
     memory_block: str = "",
+    reviewer_feedback: str = "",
 ) -> list[Concept]:
+    """`reviewer_feedback` is set when a human rejected the previous partition at
+    the approval gate (e.g. "merge the two <head> concepts into one"). It is
+    injected with HIGH priority so this re-extraction obeys the correction."""
     past = "\n".join(f"- {p}" for p in (past_materials or [])) or "(none)"
+    guidance = memory_block
+    if reviewer_feedback.strip():
+        guidance = (
+            f"{memory_block}\n\n"
+            "REVIEWER FEEDBACK ON YOUR PREVIOUS PARTITION — apply this exactly; it "
+            "overrides your earlier grouping choices (but never invent ungrounded "
+            f"concepts):\n{reviewer_feedback.strip()}"
+        )
     prompt = PROMPT.format(
-        memory=memory_block,
+        memory=guidance,
         past=past,
         doc=chunks_brief(chunks),
     )

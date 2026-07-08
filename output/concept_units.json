@@ -1,180 +1,189 @@
 {
-  "run_id": "r_c4cb8417",
-  "doc": "1 Introduction to Loops.md",
-  "generator_model": "anthropic/claude-sonnet-4.6",
-  "generated_units": 7,
-  "published_units": 7,
+  "run_id": "r_e2379755",
+  "doc": "Session 2.md",
+  "generator_model": "anthropic/claude-haiku-4.5",
+  "image_model": "google/gemini-2.5-flash-image",
+  "usage": {
+    "chat_calls": 33,
+    "image_calls": 13,
+    "prompt_tokens": 35143,
+    "completion_tokens": 22995,
+    "total_tokens": 58138
+  },
+  "generated_units": 3,
+  "published_units": 3,
   "units": [
     {
       "id": "c1",
-      "title": "What Loops Are and Why They Exist",
-      "summary": "Loops execute a block of code repeatedly as long as a specified condition is true, enabling automation of repetitive tasks.",
-      "source_span": "Loops are used to execute a block of code several times, as long as a specified condition is true. This allows us to automate repetitive tasks in a program.\n\nJavaScript executes code in a sequence, where each block of code is executed once. However, with loops, you can control the flow to make certain blocks of code execute multiple times, depending on the condition.",
-      "is_code_concept": false,
+      "title": "Container Element (div)",
+      "summary": "The HTML div element is used to define a container that groups other HTML elements together.",
+      "source_span": "The HTML `div` element defines a container.\n\n```html\n<div>\n  <h1>Tourism</h1>\n  <p>Plan your trip wherever you want to go</p>\n  <button>Get Started</button>\n</div>\n```",
+      "is_code_concept": true,
       "explanation": {
-        "text": "Normally, JavaScript runs each block of code once, in order. A loop lets you run the same block of code multiple times, as long as a specified condition (a test that is either true or false) stays true. This lets a program automate repetitive tasks instead of writing the same code over and over.",
-        "visual_diagram_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-main\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n    <marker id=\"arr-back\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink-light)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card 1: Condition -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"74\" width=\"130\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"81\" y=\"106\" text-anchor=\"middle\" font-size=\"14\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Condition</text>\n    <text x=\"81\" y=\"128\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">Is it still true?</text>\n  </g>\n\n  <!-- Arrow: Condition -> Run Block -->\n  <line x1=\"146\" y1=\"110\" x2=\"188\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-main)\"/>\n  <text x=\"167\" y=\"103\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">yes</text>\n\n  <!-- Card 2: Run Block (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"190\" y=\"74\" width=\"140\" height=\"72\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"1.8\"/>\n    <text x=\"260\" y=\"106\" text-anchor=\"middle\" font-size=\"14\" font-weight=\"700\" style=\"fill:var(--indigo)\">Run Block</text>\n    <text x=\"260\" y=\"128\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--indigo)\">code executes</text>\n  </g>\n\n  <!-- Curved back-arrow from Run Block bottom back to Condition bottom -->\n  <path d=\"M260,146 Q260,180 81,180 Q81,180 81,146\" fill=\"none\" style=\"stroke:var(--svg-ink-light)\" stroke-width=\"1.6\" stroke-dasharray=\"5,3\" marker-end=\"url(#arr-back)\"/>\n  <text x=\"170\" y=\"198\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">repeat: check condition again</text>\n\n  <!-- Arrow: Condition -> Stop -->\n  <line x1=\"330\" y1=\"110\" x2=\"372\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-main)\"/>\n\n  <!-- Card 3: Stop -->\n  <g class=\"ilm-node\">\n    <rect x=\"374\" y=\"74\" width=\"130\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"439\" y=\"106\" text-anchor=\"middle\" font-size=\"14\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Stop</text>\n    <text x=\"439\" y=\"128\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">condition is false</text>\n  </g>\n  <text x=\"351\" y=\"103\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">no</text>\n</svg>"
+        "text": "A `div` is an HTML element that acts as a container—a box that holds and groups other HTML elements together. You use it to organize related content on a webpage, like grouping a heading, text, and a button into one section.",
+        "visual_image": "/ilm-images/r_e2379755/c1-explanation.webp",
+        "visual_diagram_html": ""
       },
       "analogy": {
-        "text": "Think of a vending machine that keeps dispensing snacks as long as you keep pressing the button — the button press is like the condition that must stay true, and each snack dispensed is like one execution of the code block. Just as the machine stops when you release the button, a loop stops executing its block when the condition is no longer true.",
-        "visual_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\"><defs><marker id=\"arr-loop\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\"><path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/></marker></defs><g class=\"ilm-node\"><rect x=\"16\" y=\"78\" width=\"130\" height=\"64\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/><text x=\"81\" y=\"106\" text-anchor=\"middle\" font-size=\"14\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Button Held</text><text x=\"81\" y=\"126\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">= condition is true</text></g><line x1=\"146\" y1=\"110\" x2=\"188\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-loop)\"/><g class=\"ilm-node\"><rect x=\"188\" y=\"66\" width=\"144\" height=\"88\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"2\"/><text x=\"260\" y=\"100\" text-anchor=\"middle\" font-size=\"14\" font-weight=\"700\" style=\"fill:var(--indigo)\">Snack Dispensed</text><text x=\"260\" y=\"120\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">= code block runs</text><text x=\"260\" y=\"140\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">again and again</text></g><line x1=\"332\" y1=\"110\" x2=\"374\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-loop)\"/><g class=\"ilm-node\"><rect x=\"374\" y=\"78\" width=\"130\" height=\"64\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/><text x=\"439\" y=\"106\" text-anchor=\"middle\" font-size=\"14\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Button Released</text><text x=\"439\" y=\"126\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">= condition false, stop</text></g></svg>",
-        "grounding_check": "'button held = condition is true' traces to 'as long as a specified condition is true'; 'snack dispensed = code block runs again and again' traces to 'execute a block of code several times'; 'button released = condition false, stop' traces to 'as long as a specified condition is true' (loop stops when condition is no longer true)"
+        "text": "A div is like a cardboard box that holds different items together. Just as the box itself is the container and the items inside (a book, a toy, a pen) are the separate things being grouped, the div element is the container and the h1, p, and button inside it are the separate HTML elements being grouped together.",
+        "visual_image": "/ilm-images/r_e2379755/c1-analogy.webp",
+        "visual_html": "",
+        "grounding_check": "Box = 'div element defines a container'; items inside (book, toy, pen) = 'other HTML elements' (h1, p, button in source example)"
       },
       "scenarios": [
         {
-          "text": "You want to print a greeting message 5 times. Instead of writing the same print statement 5 times, a loop runs that one block of code repeatedly until the condition (count has not yet reached 5) becomes false.",
-          "visual_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-s1a\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n    <marker id=\"arr-s1b\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink-light)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card 1: count < 5? -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"74\" width=\"130\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"81\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">count &lt; 5?</text>\n    <text x=\"81\" y=\"126\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">condition check</text>\n  </g>\n\n  <line x1=\"146\" y1=\"110\" x2=\"188\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s1a)\"/>\n  <text x=\"167\" y=\"103\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">yes</text>\n\n  <!-- Card 2: Print greeting (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"190\" y=\"74\" width=\"148\" height=\"72\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"1.8\"/>\n    <text x=\"264\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--indigo)\">Print greeting</text>\n    <text x=\"264\" y=\"126\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--indigo)\">block runs once</text>\n  </g>\n\n  <path d=\"M264,146 Q264,182 81,182 Q81,182 81,146\" fill=\"none\" style=\"stroke:var(--svg-ink-light)\" stroke-width=\"1.6\" stroke-dasharray=\"5,3\" marker-end=\"url(#arr-s1b)\"/>\n  <text x=\"172\" y=\"200\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">repeat until count reaches 5</text>\n\n  <line x1=\"338\" y1=\"110\" x2=\"374\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s1a)\"/>\n\n  <!-- Card 3: Done -->\n  <g class=\"ilm-node\">\n    <rect x=\"376\" y=\"74\" width=\"128\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"440\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Done</text>\n    <text x=\"440\" y=\"126\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">count = 5, stop</text>\n  </g>\n  <text x=\"356\" y=\"103\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">no</text>\n</svg>",
-          "code_playground": null
-        },
-        {
-          "text": "A program needs to add up every number from 1 to 10. A loop runs the addition block repeatedly — once per number — until all 10 numbers have been processed and the condition is no longer true.",
-          "visual_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-s2a\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n    <marker id=\"arr-s2b\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink-light)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card 1: num <= 10? -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"74\" width=\"134\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"83\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">num &lt;= 10?</text>\n    <text x=\"83\" y=\"126\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">condition check</text>\n  </g>\n\n  <line x1=\"150\" y1=\"110\" x2=\"192\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s2a)\"/>\n  <text x=\"171\" y=\"103\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">yes</text>\n\n  <!-- Card 2: Add num to total (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"194\" y=\"74\" width=\"148\" height=\"72\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"1.8\"/>\n    <text x=\"268\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--indigo)\">Add num</text>\n    <text x=\"268\" y=\"126\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--indigo)\">total += num</text>\n  </g>\n\n  <path d=\"M268,146 Q268,182 83,182 Q83,182 83,146\" fill=\"none\" style=\"stroke:var(--svg-ink-light)\" stroke-width=\"1.6\" stroke-dasharray=\"5,3\" marker-end=\"url(#arr-s2b)\"/>\n  <text x=\"175\" y=\"200\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">repeat for next number</text>\n\n  <line x1=\"342\" y1=\"110\" x2=\"378\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s2a)\"/>\n\n  <!-- Card 3: Total ready -->\n  <g class=\"ilm-node\">\n    <rect x=\"380\" y=\"74\" width=\"124\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)",
-          "code_playground": null
+          "text": "You're building a tourism website and want to group a heading, description, and button together as one promotional section. You wrap all three inside a `div` so they stay together as a unit.",
+          "visual_image": "/ilm-images/r_e2379755/c1-scenario1.webp",
+          "visual_html": "",
+          "code_playground": {
+            "language": "html",
+            "html": "<div>\n  <h1>Tourism</h1>\n  <p>Plan your trip wherever you want to go</p>\n  <button>Get Started</button>\n</div>"
+          }
         }
       ],
       "mini_quiz": {
         "questions": [
           {
-            "question": "According to the source, a loop keeps executing a block of code as long as what is true?",
+            "question": "What is the main purpose of the HTML div element?",
             "options": [
-              "A specified condition",
-              "A fixed number of lines",
-              "The program has memory",
-              "The user gives input"
+              "To define a container that groups other HTML elements together",
+              "To create a line break between elements",
+              "To add styling directly to text",
+              "To embed images on a page"
             ],
             "correct_index": 0,
-            "explanation": "The source states loops execute code 'as long as a specified condition is true.' The other options are not mentioned in the source as the controlling factor.",
+            "explanation": "The source states that the div element 'defines a container' that groups other HTML elements together. The other options describe different HTML elements or features, not the div's purpose.",
             "difficulty": "easy",
             "aspect": "recall"
           },
           {
-            "question": "What does the source say loops allow us to automate?",
+            "question": "In the example, what elements are grouped inside the div container?",
             "options": [
-              "Repetitive tasks",
-              "Memory management",
-              "User authentication",
-              "File storage"
+              "An h1 heading, a paragraph, and a button",
+              "Only a paragraph and a button",
+              "Only an h1 heading",
+              "A div, an h1, and a link"
             ],
             "correct_index": 0,
-            "explanation": "The source explicitly says loops 'allow us to automate repetitive tasks in a program.' The other options are not mentioned in the source.",
+            "explanation": "The source example shows an h1, a p, and a button nested inside the div tags. The other options either omit elements or include elements not present in the example.",
             "difficulty": "easy",
             "aspect": "recall"
           },
           {
-            "question": "Without loops, how many times does JavaScript execute each block of code in a sequence?",
+            "question": "Which of the following is a valid way to use a div element?",
             "options": [
-              "Once",
-              "Twice",
-              "Indefinitely",
-              "Zero times"
+              "Wrapping multiple elements like headings, paragraphs, and buttons inside it",
+              "Using it instead of a paragraph tag to display text",
+              "Placing it only around single words",
+              "Nesting divs is not allowed in HTML"
             ],
             "correct_index": 0,
-            "explanation": "The source states 'each block of code is executed once' in normal sequential execution. Loops are what change this default behavior.",
-            "difficulty": "easy",
-            "aspect": "recall"
-          },
-          {
-            "question": "What does a loop control in a program's execution, according to the source?",
-            "options": [
-              "The flow of execution",
-              "The speed of the processor",
-              "The amount of memory used",
-              "The number of variables"
-            ],
-            "correct_index": 0,
-            "explanation": "The source says 'with loops, you can control the flow to make certain blocks of code execute multiple times.' The other options are not mentioned in the source.",
+            "explanation": "The source example demonstrates that a div groups multiple different types of elements (h1, p, button) together, which is its valid use. The other options either misrepresent the div's function or state false restrictions.",
             "difficulty": "easy",
             "aspect": "understanding"
+          },
+          {
+            "question": "What does the opening tag `<div>` do?",
+            "options": [
+              "Marks the start of a container that groups elements",
+              "Creates a new paragraph on the page",
+              "Defines a heading level",
+              "Closes a container"
+            ],
+            "correct_index": 0,
+            "explanation": "The opening `<div>` tag begins the container, as shown in the source example where it appears before the grouped elements. The closing tag `</div>` ends it. The other options describe different HTML tags or the wrong tag function.",
+            "difficulty": "easy",
+            "aspect": "recall"
           }
         ]
       },
       "review": {
         "status": "approved",
-        "reviewer": "auto-gate",
-        "notes": "auto-approved (clean audit)"
+        "reviewer": "web-human",
+        "notes": null
       }
     },
     {
       "id": "c2",
-      "title": "The While Loop: Syntax and Behaviour",
-      "summary": "A while loop checks a condition before each iteration and keeps executing its code block for as long as that condition evaluates to true.",
-      "source_span": "The **while loop** allows us to execute a block of code repeatedly, as long as a given condition evaluates to true.\n\nSyntax:\n```js\nwhile (condition) {\n    // code to execute\n}\n```\n\n* **Condition**: The loop will run as long as this condition evaluates to `true`.\n\nExample:\n```js\nlet a = 1;\nwhile (a <= 3) {\n    console.log(a);\n    a++;\n}\n```\n\n**Output:**\n\n```\n1\n2\n3\n```\n\nIn this example, the value of `a` is printed three times, and after each print, the value of `a` is incremented by 1.",
+      "title": "CSS Rule Syntax",
+      "summary": "CSS rules consist of a selector followed by a block containing one or more property-value pairs.",
+      "source_span": "```\nselector {\n  property1: value1;\n  property2: value2;\n}\n```",
       "is_code_concept": true,
       "explanation": {
-        "text": "A while loop runs a block of code over and over as long as a condition (a true/false test) stays true. Before each repetition, it checks the condition; if the condition is true, it runs the block again; if false, it stops. In the source example, `a` starts at 1 and the loop keeps running while `a <= 3`, printing 1, 2, then 3 before stopping.",
-        "visual_diagram_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-main\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card 1: Start -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"78\" width=\"110\" height=\"64\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"71\" y=\"107\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Start</text>\n    <text x=\"71\" y=\"127\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">let a = 1</text>\n  </g>\n\n  <!-- Arrow 1 -->\n  <line x1=\"126\" y1=\"110\" x2=\"162\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-main)\"/>\n\n  <!-- Card 2: Check Condition (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"163\" y=\"68\" width=\"148\" height=\"84\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"2\"/>\n    <text x=\"237\" y=\"100\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--indigo)\">Check Condition</text>\n    <text x=\"237\" y=\"120\" text-anchor=\"middle\" font-size=\"12\" font-family=\"JetBrains Mono, monospace\" style=\"fill:var(--svg-text)\">a &lt;= 3 ?</text>\n    <text x=\"237\" y=\"140\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">before each run</text>\n  </g>\n\n  <!-- Arrow 2 -->\n  <line x1=\"311\" y1=\"110\" x2=\"347\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-main)\"/>\n\n  <!-- Card 3: Run Block -->\n  <g class=\"ilm-node\">\n    <rect x=\"348\" y=\"68\" width=\"140\" height=\"84\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"418\" y=\"100\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Run Block</text>\n    <text x=\"418\" y=\"120\" text-anchor=\"middle\" font-size=\"11\" font-family=\"JetBrains Mono, monospace\" style=\"fill:var(--svg-text)\">console.log(a)</text>\n    <text x=\"418\" y=\"138\" text-anchor=\"middle\" font-size=\"11\" font-family=\"JetBrains Mono, monospace\" style=\"fill:var(--svg-text)\">a++</text>\n  </g>\n\n  <!-- Loop-back label inside a small card -->\n  <g class=\"ilm-node\">\n    <rect x=\"163\" y=\"178\" width=\"148\" height=\"34\" rx=\"8\" style=\"fill:var(--svg-surface2);stroke:var(--svg-ink-light)\" stroke-width=\"1.2\"/>\n    <text x=\"237\" y=\"200\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">false → stop</text>\n  </g>\n\n  <!-- Loop-back arrow from Run Block bottom to Check Condition -->\n  <path d=\"M418,152 Q418,172 237,172 Q237,178 237,178\" fill=\"none\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.5\" stroke-dasharray=\"5,3\" marker-end=\"url(#arr-main)\"/>\n</svg>"
+        "text": "A CSS rule is a block of code that styles elements on a web page. It has two main parts: a selector (which picks which elements to style) and a declaration block (the curly braces containing one or more property-value pairs). Each property-value pair tells the browser what style to apply—for example, `color: blue;` makes text blue.",
+        "visual_image": "/ilm-images/r_e2379755/c2-explanation.webp",
+        "visual_diagram_html": ""
       },
       "analogy": {
-        "text": "Think of a while loop like a water dispenser that checks whether your cup is still empty before each pour: the cup-is-empty check is like the condition the loop tests before every iteration, and the act of pouring water is like the code block the loop executes. As long as the cup is still empty (condition is true), the dispenser keeps pouring; the moment the cup is full (condition becomes false), it stops.",
-        "visual_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-wl\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card 1: Check condition -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"70\" width=\"138\" height=\"72\" rx=\"10\"\n          style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"85\" y=\"101\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\"\n          style=\"fill:var(--svg-text)\">Cup empty?</text>\n    <text x=\"85\" y=\"120\" text-anchor=\"middle\" font-size=\"11\"\n          style=\"fill:var(--svg-ink-light)\">= check condition</text>\n  </g>\n\n  <!-- Arrow 1 -->\n  <line x1=\"154\" y1=\"106\" x2=\"192\" y2=\"106\"\n        style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-wl)\"/>\n\n  <!-- Card 2: YES branch (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"192\" y=\"70\" width=\"138\" height=\"72\" rx=\"10\"\n          style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"2\"/>\n    <text x=\"261\" y=\"101\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\"\n          style=\"fill:var(--indigo)\">Pour water</text>\n    <text x=\"261\" y=\"120\" text-anchor=\"middle\" font-size=\"11\"\n          style=\"fill:var(--svg-ink-light)\">= execute code block</text>\n  </g>\n\n  <!-- Arrow 2 -->\n  <line x1=\"330\" y1=\"106\" x2=\"368\" y2=\"106\"\n        style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-wl)\"/>\n\n  <!-- Card 3: Cup full → stop -->\n  <g class=\"ilm-node\">\n    <rect x=\"368\" y=\"70\" width=\"136\" height=\"72\" rx=\"10\"\n          style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"436\" y=\"101\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\"\n          style=\"fill:var(--svg-text)\">Cup full → stop</text>\n    <text x=\"436\" y=\"120\" text-anchor=\"middle\" font-size=\"11\"\n          style=\"fill:var(--svg-ink-light)\">= condition false, loop ends</text>\n  </g>\n\n  <!-- Loop-back arrow label inside a small card -->\n  <path d=\"M261,142 Q261,180 85,180 Q85,155 85,142\"\n        fill=\"none\" style=\"stroke:var(--svg-ink-light)\" stroke-width=\"1.4\" stroke-dasharray=\"5,3\"\n        marker-end=\"url(#arr-wl)\"/>\n  <text x=\"180\" y=\"198\" text-anchor=\"middle\" font-size=\"11\"\n        style=\"fill:var(--svg-ink-light)\">still empty? check again</text>\n</svg>",
-        "grounding_check": "'cup empty check' traces to 'The loop will run as long as this condition evaluates to true'; 'pour water' traces to 'execute a block of code repeatedly'; 'cup full → stop' traces to 'as long as a given condition evaluates to true' (loop stops when condition is no longer true)"
+        "text": "A CSS rule is like a mailing address label on a package. The selector (like 'h1') is the address that identifies which package to label, just as the selector identifies which HTML element to style. The curly braces contain property-value pairs (like 'color: blue;'), just like the label contains multiple pieces of information—each property is one line of the address, and each value is the specific detail for that line.",
+        "visual_image": "/ilm-images/r_e2379755/c2-analogy.webp",
+        "visual_html": "",
+        "grounding_check": "selector → 'selector' in source; property-value pairs → 'property1: value1; property2: value2' in source; block structure → 'block containing one or more property-value pairs' in source"
       },
       "scenarios": [
         {
-          "text": "You want to print the numbers 1, 2, and 3 in order. You set `a = 1` and write `while (a <= 3)`, so the loop checks whether `a` is still 3 or less before each print, stopping automatically once `a` reaches 4.",
-          "visual_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-s1\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card 1 -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"74\" width=\"120\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"76\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Initial Value</text>\n    <text x=\"76\" y=\"126\" text-anchor=\"middle\" font-size=\"12\" font-family=\"JetBrains Mono, monospace\" style=\"fill:var(--svg-text)\">let a = 1</text>\n  </g>\n\n  <line x1=\"136\" y1=\"110\" x2=\"172\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s1)\"/>\n\n  <!-- Card 2 accent -->\n  <g class=\"ilm-node\">\n    <rect x=\"173\" y=\"68\" width=\"148\" height=\"84\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"2\"/>\n    <text x=\"247\" y=\"98\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--indigo)\">Condition</text>\n    <text x=\"247\" y=\"118\" text-anchor=\"middle\" font-size=\"12\" font-family=\"JetBrains Mono, monospace\" style=\"fill:var(--svg-text)\">a &lt;= 3</text>\n    <text x=\"247\" y=\"138\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">true → keep going</text>\n  </g>\n\n  <line x1=\"321\" y1=\"110\" x2=\"357\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s1)\"/>\n\n  <!-- Card 3 -->\n  <g class=\"ilm-node\">\n    <rect x=\"358\" y=\"68\" width=\"146\" height=\"84\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"431\" y=\"98\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Output</text>\n    <text x=\"431\" y=\"120\" text-anchor=\"middle\" font-size=\"13\" font-family=\"JetBrains Mono, monospace\" style=\"fill:var(--svg-text)\">1</text>\n    <text x=\"431\" y=\"138\" text-anchor=\"middle\" font-size=\"13\" font-family=\"JetBrains Mono, monospace\" style=\"fill:var(--svg-text)\">2  3</text>\n  </g>\n\n  <!-- Stop note -->\n  <g class=\"ilm-node\">\n    <rect x=\"173\" y=\"178\" width=\"148\" height=\"32\" rx=\"8\" style=\"fill:var(--svg-surface2);stroke:var(--svg-ink-light)\" stroke-width=\"1.2\"/>\n    <text x=\"247\" y=\"199\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">a=4 → false → stop</text>\n  </g>\n</svg>",
+          "text": "You want to make all paragraph text red and larger. You write a CSS rule with `p` as the selector and two property-value pairs inside the braces: `color: red;` and `font-size: 18px;`.",
+          "visual_image": "/ilm-images/r_e2379755/c2-scenario1.webp",
+          "visual_html": "",
           "code_playground": {
-            "language": "javascript",
-            "code": "let a = 1;\nwhile (a <= 3) {\n    console.log(a);\n    a++;\n}"
+            "language": "html",
+            "html": "<!DOCTYPE html>\n<html>\n<head>\n<style>\np {\n  color: red;\n  font-size: 18px;\n}\n</style>\n</head>\n<body>\n<p>This paragraph is red and larger.</p>\n<p>This one too.</p>\n</body>\n</html>",
+            "css": null,
+            "js": null
           }
-        },
-        {
-          "text": "You want to count down from 5 to 1. You set `a = 5` and write `while (a >= 1)`, so the loop checks whether `a` is still 1 or more before each print, then decrements `a` each time until the condition becomes false.",
-          "visual_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-s2\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card 1 -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"74\" width=\"120\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"76\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Initial Value</text>\n    <text x=\"76\" y=\"126\" text-anchor=\"middle\" font-size=\"12\" font-family=\"JetBrains Mono, monospace\" style=\"fill:var(--svg-text)\">let a = 5</text>\n  </g>\n\n  <line x1=\"136\" y1=\"110\" x2=\"172\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s2)\"/>\n\n  <!-- Card 2 accent -->\n  <g class=\"ilm-node\">\n    <rect x=\"173\" y=\"68\" width=\"148\" height=\"84\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"2\"/>\n    <text x=\"247\" y=\"98\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--indigo)\">Condition</text>\n    <text x=\"247\" y=\"118\" text-anchor=\"middle\" font-size=\"12\" font-family=\"JetBrains Mono, monospace\" style=\"fill:var(--svg-text)\">a &gt;= 1</text>\n    <text x=\"247\" y=\"138\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">true → keep going</text>\n  </g>\n\n  <line x1=\"321\" y1=\"110\" x2=\"357\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s2)\"/>\n\n  <!-- Card 3 -->\n  <g class=\"ilm-node\">\n    <rect x=\"358\" y=\"68\" width=\"146\" height=\"84\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"431\" y=\"98\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Output</text>",
-          "code_playground": null
         }
       ],
       "mini_quiz": {
         "questions": [
           {
-            "question": "When does a while loop keep running?",
+            "question": "What two main parts make up a CSS rule?",
             "options": [
-              "As long as the condition is true",
-              "Until the condition becomes true",
-              "A fixed number of times",
-              "Once, then stops"
+              "A selector and a declaration block",
+              "A property and a value",
+              "An HTML element and a style",
+              "A class name and a color"
             ],
             "correct_index": 0,
-            "explanation": "The source span states the loop runs 'as long as a given condition evaluates to true.' The other options describe different behaviours not stated in the span.",
+            "explanation": "The source shows a CSS rule has a selector (like the word before the curly braces) followed by a block in curly braces containing properties and values. The other options describe parts within a rule or confuse CSS with HTML, but not the two main parts of the rule itself.",
             "difficulty": "easy",
             "aspect": "recall"
           },
           {
-            "question": "In the example, what happens to the value of `a` after each print?",
+            "question": "In a CSS rule, what goes inside the curly braces?",
             "options": [
-              "It is incremented by 1",
-              "It is reset to 1",
-              "It is decremented by 1",
-              "It is multiplied by 2"
+              "One or more property-value pairs",
+              "Only the selector name",
+              "HTML element tags",
+              "Just the color value"
             ],
             "correct_index": 0,
-            "explanation": "The source span says 'after each print, the value of `a` is incremented by 1' using `a++`. The other options describe operations not shown in the example.",
+            "explanation": "The source explicitly states the block contains 'one or more property-value pairs' separated by semicolons. The other options either describe the selector (which goes outside the braces) or are too narrow.",
             "difficulty": "easy",
             "aspect": "recall"
           },
           {
-            "question": "What is the starting value of `a` in the example?",
+            "question": "What character ends each property-value pair in a CSS rule?",
             "options": [
-              "1",
-              "0",
-              "3",
-              "2"
+              "A semicolon",
+              "A comma",
+              "A colon",
+              "A period"
             ],
             "correct_index": 0,
-            "explanation": "The source span shows `let a = 1;` as the first line of the example. The other values are not the initial value assigned.",
+            "explanation": "The source shows each property-value pair ends with a semicolon (e.g., `property1: value1;`). A colon separates the property from its value, not the pair itself; commas and periods are not used in this context.",
             "difficulty": "easy",
             "aspect": "recall"
           },
           {
-            "question": "How many times is the value of `a` printed in the example?",
+            "question": "How many property-value pairs must a CSS declaration block contain?",
             "options": [
-              "Three times",
-              "Once",
-              "Twice",
-              "Four times"
+              "At least one",
+              "Exactly one",
+              "At least two",
+              "Exactly two"
             ],
             "correct_index": 0,
-            "explanation": "The source span states 'the value of `a` is printed three times,' matching the output 1, 2, 3. The other counts do not match the stated output.",
+            "explanation": "The source states the block contains 'one or more property-value pairs,' meaning it can have one or many. The other options are too restrictive and contradict the 'one or more' phrasing.",
             "difficulty": "easy",
             "aspect": "understanding"
           }
@@ -182,189 +191,90 @@
       },
       "review": {
         "status": "approved",
-        "reviewer": "auto-gate",
-        "notes": "auto-approved (clean audit)"
+        "reviewer": "web-human",
+        "notes": null
       }
     },
     {
       "id": "c3",
-      "title": "The do-while Loop: Guaranteed First Execution",
-      "summary": "A do-while loop executes its code block first and checks the condition afterward, guaranteeing the block runs at least once regardless of whether the condition is true or false.",
-      "source_span": "A **do-while loop** is similar to the while loop, except that it guarantees the code inside the loop will execute at least once, regardless of whether the condition is true or false.\n\nSyntax:\n```js\ndo {\n    // code to execute\n} while (condition);\n```\n\n* The block of code is executed first, then the condition is checked. If the condition is true, the loop continues.\n\nExample:\n```js\nlet a = 1;\ndo {\n    console.log(a);\n    a++;\n} while (a <= 3);\n```\n\n**Output:**\n\n```\n1\n2\n3\n```\n\nEven if the condition is true initially, the code will run at least once.",
+      "title": "Text Align Property",
+      "summary": "The CSS text-align property controls the horizontal alignment of text within an HTML element, with options including center, left, and right.",
+      "source_span": "The CSS `text-align` property specifies the horizontal alignment of the text in an HTML element.\n\n```css\n.h-center {\n  text-align: center;\n}\n```\n\n| Value  | Description                   |\n| ------ | ----------------------------- |\n| center | Aligns the text to the center |\n| left   | Aligns the text to the left   |\n| right  | Aligns the text to the right  |",
       "is_code_concept": true,
       "explanation": {
-        "text": "A do-while loop runs its block of code first, then checks the condition — so the block always executes at least once, no matter what the condition is. If the condition is true after that first run, the loop keeps going; if false, it stops. This is the key difference from a regular while loop, which checks the condition before running anything.",
-        "visual_diagram_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-main\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card 1: Start -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"78\" width=\"110\" height=\"64\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"71\" y=\"106\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Loop Starts</text>\n    <text x=\"71\" y=\"126\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">(any condition)</text>\n  </g>\n\n  <!-- Arrow 1 -->\n  <line x1=\"126\" y1=\"110\" x2=\"164\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-main)\"/>\n\n  <!-- Card 2: Run Block (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"165\" y=\"70\" width=\"150\" height=\"80\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"2\"/>\n    <text x=\"240\" y=\"103\" text-anchor=\"middle\" font-size=\"14\" font-weight=\"700\" style=\"fill:var(--indigo)\">Run Code Block</text>\n    <text x=\"240\" y=\"123\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">always runs first</text>\n  </g>\n\n  <!-- Arrow 2 -->\n  <line x1=\"315\" y1=\"110\" x2=\"353\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-main)\"/>\n\n  <!-- Card 3: Check Condition -->\n  <g class=\"ilm-node\">\n    <rect x=\"354\" y=\"78\" width=\"148\" height=\"64\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"428\" y=\"106\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Check Condition</text>\n    <text x=\"428\" y=\"126\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">true → repeat / false → stop</text>\n  </g>\n\n  <!-- Loop-back arrow label inside a small card at bottom -->\n  <path d=\"M428 142 Q428 190 240 190 Q165 190 165 150\" fill=\"none\" style=\"stroke:var(--svg-ink-light)\" stroke-width=\"1.4\" stroke-dasharray=\"5,3\" marker-end=\"url(#arr-main)\"/>\n  <text x=\"296\" y=\"207\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">if condition is true, repeat</text>\n</svg>"
+        "text": "The CSS `text-align` property controls where text lines up horizontally inside an HTML element. You can choose to align text to the center, left, or right side of its container.",
+        "visual_image": "/ilm-images/r_e2379755/c3-explanation.webp",
+        "visual_diagram_html": ""
       },
       "analogy": {
-        "text": "Think of a vending machine that always dispenses one item before checking whether you have enough credit to continue — just like the do-while loop's code block always runs once before the condition is checked. The item dispensed is like the first guaranteed execution of the code block, and the credit check is like the condition evaluated afterward. If you have enough credit (condition is true), the machine keeps going; otherwise it stops.",
-        "visual_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\"><defs><marker id=\"arr-dw\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\"><path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/></marker></defs><g class=\"ilm-node\"><rect x=\"16\" y=\"74\" width=\"130\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/><text x=\"81\" y=\"106\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--svg-text)\">Dispense Item</text><text x=\"81\" y=\"126\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">(code block runs)</text></g><line x1=\"146\" y1=\"110\" x2=\"186\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-dw)\"/><g class=\"ilm-node\"><rect x=\"188\" y=\"74\" width=\"144\" height=\"72\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"1.8\"/><text x=\"260\" y=\"106\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--indigo)\">Credit Check</text><text x=\"260\" y=\"126\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">(condition checked)</text></g><line x1=\"332\" y1=\"110\" x2=\"372\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-dw)\"/><g class=\"ilm-node\"><rect x=\"374\" y=\"74\" width=\"130\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/><text x=\"439\" y=\"99\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--svg-text)\">True → repeat</text><text x=\"439\" y=\"119\" text-anchor=\"middle\" font-size=\"12\" style=\"fill:var(--svg-text)\">False → stop</text><text x=\"439\" y=\"137\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">(loop continues?)</text></g><text x=\"260\" y=\"30\" text-anchor=\"middle\" font-size=\"12\" font-weight=\"600\" style=\"fill:var(--svg-ink-light)\">Vending Machine → do-while Loop</text><text x=\"81\" y=\"168\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">Always happens first</text><text x=\"260\" y=\"168\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--indigo)\">Checked after</text></svg>",
-        "grounding_check": "'Dispense Item / code block runs' traces to 'The block of code is executed first'; 'Credit Check / condition checked' traces to 'then the condition is checked'; 'True → repeat / False → stop' traces to 'If the condition is true, the loop continues' and the guarantee of 'at least once regardless of whether the condition is true or false'."
+        "text": "Imagine arranging books on a shelf. The shelf itself is like the HTML element, and the books are like the text. Just as you can push all books to the left side, center them in the middle, or push them to the right side of the shelf, the text-align property pushes text to the left, center, or right within its element.",
+        "visual_image": "/ilm-images/r_e2379755/c3-analogy.webp",
+        "visual_html": "",
+        "grounding_check": "shelf = HTML element ('in an HTML element'), books = text ('alignment of the text'), left/center/right positions = the three alignment values (center, left, right)"
       },
       "scenarios": [
         {
-          "text": "You set `a = 1` and write a do-while loop that prints `a` and increments it while `a <= 3`. The block runs immediately, printing 1, then 2, then 3, before the condition finally becomes false and the loop stops.",
-          "visual_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-s1\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card: a = 1 -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"78\" width=\"110\" height=\"64\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"71\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">a = 1</text>\n    <text x=\"71\" y=\"124\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">start value</text>\n  </g>\n\n  <line x1=\"126\" y1=\"110\" x2=\"162\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s1)\"/>\n\n  <!-- Card: do block (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"163\" y=\"68\" width=\"160\" height=\"84\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"2\"/>\n    <text x=\"243\" y=\"100\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--indigo)\">do { print a; a++ }</text>\n    <text x=\"243\" y=\"120\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">runs before any check</text>\n    <text x=\"243\" y=\"140\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">prints 1, then 2, then 3</text>\n  </g>\n\n  <line x1=\"323\" y1=\"110\" x2=\"359\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s1)\"/>\n\n  <!-- Card: condition false -->\n  <g class=\"ilm-node\">\n    <rect x=\"360\" y=\"78\" width=\"144\" height=\"64\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"432\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">a &lt;= 3? false</text>\n    <text x=\"432\" y=\"124\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">loop stops</text>\n  </g>\n</svg>",
+          "text": "A website header needs the page title centered above the navigation menu. You apply `text-align: center` to the title element so it displays in the middle of the page width.",
+          "visual_image": "/ilm-images/r_e2379755/c3-scenario1.webp",
+          "visual_html": "",
           "code_playground": {
-            "language": "javascript",
-            "code": "let a = 1;\ndo {\n    console.log(a);\n    a++;\n} while (a <= 3);"
-          }
-        },
-        {
-          "text": "You set `a = 10` — already greater than 3 — but the do-while loop still prints 10 once before checking `a <= 3`, which is immediately false, so the loop exits after that single run.",
-          "visual_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-s2\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card: a = 10 -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"78\" width=\"110\" height=\"64\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"71\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">a = 10</text>\n    <text x=\"71\" y=\"124\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">fails condition</text>\n  </g>\n\n  <line x1=\"126\" y1=\"110\" x2=\"162\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s2)\"/>\n\n  <!-- Card: do block runs once (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"163\" y=\"68\" width=\"168\" height=\"84\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"2\"/>\n    <text x=\"247\" y=\"100\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--indigo)\">do { print a; a++ }</text>\n    <text x=\"247\" y=\"120\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">block runs first anyway</text>\n    <text x=\"247\" y=\"140\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">prints 10 once</text>\n  </g>\n\n  <line x1=\"331\" y1=\"110\" x2=\"367\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s2)\"/>\n\n  <!-- Card: condition false, stop -->\n  <g class=\"ilm-node\">\n    <rect x=\"368\" y=\"78\" width=\"136\" height=\"64\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"436\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">a &lt;= 3? false</text>\n    <text x=\"436\" y=\"124\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">exits immediately</text>\n  </g>\n</svg>",
-          "code_playground": {
-            "language": "javascript",
-            "code": "let a = 10;\ndo {\n    console.log(a);\n    a++;\n} while (a <= 3);\n// Even though a starts at 10 (already > 3),\n// the block runs once and prints 10."
+            "language": "html",
+            "html": "<div class=\"header\">\n  <h1>Welcome to My Site</h1>\n  <p>Your destination for learning</p>\n</div>",
+            "css": ".header {\n  background-color: #f0f0f0;\n  padding: 20px;\n}\n\n.header h1 {\n  text-align: center;\n  color: #333;\n}\n\n.header p {\n  text-align: center;\n  color: #666;\n}"
           }
         }
       ],
       "mini_quiz": {
         "questions": [
           {
-            "question": "When does a do-while loop check its condition?",
+            "question": "What does the CSS text-align property control?",
             "options": [
-              "After the code block runs",
-              "Before the code block runs",
-              "At the same time as the code block runs",
-              "Only on the first iteration"
+              "Horizontal alignment of text",
+              "Vertical alignment of text",
+              "The font size of text",
+              "The color of text"
             ],
             "correct_index": 0,
-            "explanation": "The source span states the block executes first, then the condition is checked. A while loop checks before running, but a do-while checks after.",
+            "explanation": "The source states that text-align specifies the horizontal alignment of text in an HTML element. Vertical alignment, font size, and color are controlled by different CSS properties, not text-align.",
             "difficulty": "easy",
             "aspect": "recall"
           },
           {
-            "question": "What is the minimum number of times a do-while loop's code block will run?",
+            "question": "Which text-align value centers text horizontally?",
             "options": [
-              "At least once",
-              "Zero times",
-              "Exactly twice",
-              "It depends on the condition before the loop starts"
+              "center",
+              "middle",
+              "align-center",
+              "horizontal"
             ],
             "correct_index": 0,
-            "explanation": "The source span explicitly states the code inside the loop will execute at least once, regardless of whether the condition is true or false.",
+            "explanation": "The source table shows that the value 'center' aligns text to the center. 'Middle' is used for vertical alignment in other contexts, 'align-center' is not a valid text-align value, and 'horizontal' is not an alignment value.",
             "difficulty": "easy",
             "aspect": "recall"
           },
           {
-            "question": "In the example, what is the first value printed by the do-while loop?",
+            "question": "What happens when you set text-align to left?",
             "options": [
-              "1",
-              "0",
-              "3",
-              "2"
+              "Text aligns to the left",
+              "Text aligns to the right",
+              "Text centers on the page",
+              "Text spreads evenly across the element"
             ],
             "correct_index": 0,
-            "explanation": "The variable 'a' starts at 1, and the code block runs first before any condition check, so 1 is printed first. The loop then increments and continues.",
-            "difficulty": "easy",
-            "aspect": "recall"
-          },
-          {
-            "question": "What happens if the do-while loop's condition is false from the very start?",
-            "options": [
-              "The code block still runs once",
-              "The code block never runs",
-              "The loop runs forever",
-              "An error is thrown"
-            ],
-            "correct_index": 0,
-            "explanation": "The source span states the code runs at least once 'regardless of whether the condition is true or false,' so even a false condition does not prevent the first execution.",
-            "difficulty": "easy",
-            "aspect": "understanding"
-          }
-        ]
-      },
-      "review": {
-        "status": "approved",
-        "reviewer": "auto-gate",
-        "notes": "auto-approved (clean audit)"
-      }
-    },
-    {
-      "id": "c4",
-      "title": "Using a Counter Variable to Control Loop Iterations",
-      "summary": "A counter variable is initialized before the loop and updated inside the loop each iteration so that the loop's condition eventually becomes false and the loop terminates.",
-      "source_span": "```js\nlet a = 5;\nlet counter = 0;\nwhile (counter < 3) {\n    a = a + 1;\n    console.log(a);\n    counter = counter + 1;\n}\nconsole.log(\"End\");\n```\n\n**Output:**\n\n```\n6\n7\n8\nEnd\n```\n\n* Here, `a` starts at 5, and the while loop increments `a` three times, printing the updated value each time. The counter variable is incremented with each loop iteration.\n\nHere, we have added initialization (`let counter = 0;`) and updated the counter within the loop (`counter = counter + 1;`), which ensures the loop will terminate after three iterations.",
-      "is_code_concept": true,
-      "explanation": {
-        "text": "A counter variable is set to a starting value before the loop begins. Inside the loop, the counter is updated (increased by 1) on every iteration. When the counter reaches the limit in the loop's condition, the condition becomes false and the loop stops.",
-        "visual_diagram_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs><marker id=\"arr-exp\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\"><path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/></marker></defs>\n\n  <!-- Card 1: Initialize -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"74\" width=\"130\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"81\" y=\"107\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Initialize</text>\n    <text x=\"81\" y=\"128\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">counter = 0</text>\n  </g>\n\n  <line x1=\"146\" y1=\"110\" x2=\"182\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-exp)\"/>\n\n  <!-- Card 2: Check Condition (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"184\" y=\"74\" width=\"148\" height=\"72\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"1.8\"/>\n    <text x=\"258\" y=\"107\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--indigo)\">Check Condition</text>\n    <text x=\"258\" y=\"128\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--indigo)\">counter &lt; 3 ?</text>\n  </g>\n\n  <line x1=\"332\" y1=\"110\" x2=\"368\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-exp)\"/>\n\n  <!-- Card 3: Update Counter -->\n  <g class=\"ilm-node\">\n    <rect x=\"370\" y=\"74\" width=\"134\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"437\" y=\"107\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Update</text>\n    <text x=\"437\" y=\"128\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">counter = counter+1</text>\n  </g>\n\n  <!-- Bottom label -->\n  <text x=\"260\" y=\"175\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">Loop repeats until condition is false → loop stops</text>\n</svg>"
-      },
-      "analogy": {
-        "text": "Think of a jar of tokens where you start with zero tokens and add one token each time you complete a task — just like the counter variable is initialized to 0 before the loop and incremented by 1 each iteration. The rule 'keep working while you have fewer than 3 tokens' is like the loop's condition (`counter < 3`), which eventually becomes false once the token count reaches 3, stopping all further work.",
-        "visual_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-ctr\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card 1: Start (jar empty) -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"60\" width=\"118\" height=\"100\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"75\" y=\"100\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--svg-text)\">Jar Empty</text>\n    <text x=\"75\" y=\"118\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">0 tokens</text>\n    <text x=\"75\" y=\"140\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">counter = 0</text>\n  </g>\n\n  <!-- Arrow 1 -->\n  <line x1=\"134\" y1=\"110\" x2=\"172\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-ctr)\"/>\n\n  <!-- Card 2: Check rule (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"174\" y=\"60\" width=\"148\" height=\"100\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"2\"/>\n    <text x=\"248\" y=\"95\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--indigo)\">Check Rule</text>\n    <text x=\"248\" y=\"113\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">tokens &lt; 3?</text>\n    <text x=\"248\" y=\"131\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">counter &lt; 3?</text>\n    <text x=\"248\" y=\"149\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--indigo)\">loop condition</text>\n  </g>\n\n  <!-- Arrow 2 -->\n  <line x1=\"322\" y1=\"110\" x2=\"360\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-ctr)\"/>\n\n  <!-- Card 3: Add token each task -->\n  <g class=\"ilm-node\">\n    <rect x=\"362\" y=\"60\" width=\"140\" height=\"100\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"432\" y=\"95\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--svg-text)\">Add Token</text>\n    <text x=\"432\" y=\"113\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">+1 each task</text>\n    <text x=\"432\" y=\"131\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">counter = counter+1</text>\n    <text x=\"432\" y=\"149\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">→ stops at 3</text>\n  </g>\n\n  <!-- Bottom label row -->\n  <text x=\"75\" y=\"185\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">EVERYDAY SCENE</text>\n  <text x=\"248\" y=\"185\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">EVERYDAY / CONCEPT</text>\n  <text x=\"432\" y=\"185\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">CONCEPT</text>\n</svg>",
-        "grounding_check": "'jar empty / 0 tokens' traces to 'initialization (let counter = 0)'; 'tokens < 3 / counter < 3' traces to 'while (counter < 3)'; 'add token each task / counter = counter + 1' traces to 'updated the counter within the loop (counter = counter + 1), which ensures the loop will terminate after three iterations'"
-      },
-      "scenarios": [
-        {
-          "text": "You want to print the numbers 6, 7, and 8 by starting with a = 5 and running a loop exactly 3 times. A counter starts at 0, and each iteration adds 1 to both a and the counter; when the counter reaches 3, the loop ends and 'End' is printed.",
-          "visual_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs><marker id=\"arr-s1\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\"><path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/></marker></defs>\n\n  <!-- Card 1 -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"70\" width=\"120\" height=\"80\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"76\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Start</text>\n    <text x=\"76\" y=\"122\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">a=5, counter=0</text>\n  </g>\n\n  <line x1=\"136\" y1=\"110\" x2=\"172\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s1)\"/>\n\n  <!-- Card 2 (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"174\" y=\"70\" width=\"150\" height=\"80\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"1.8\"/>\n    <text x=\"249\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--indigo)\">Each Iteration</text>\n    <text x=\"249\" y=\"122\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--indigo)\">a+1, counter+1</text>\n  </g>\n\n  <line x1=\"324\" y1=\"110\" x2=\"360\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s1)\"/>\n\n  <!-- Card 3 -->\n  <g class=\"ilm-node\">\n    <rect x=\"362\" y=\"70\" width=\"142\" height=\"80\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"433\" y=\"101\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Output</text>\n    <text x=\"433\" y=\"119\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">6, 7, 8</text>\n    <text x=\"433\" y=\"136\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">then \"End\"</text>\n  </g>\n\n  <text x=\"260\" y=\"182\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">counter hits 3 → condition false → loop stops</text>\n</svg>",
-          "code_playground": {
-            "language": "javascript",
-            "code": "let a = 5;\nlet counter = 0;\nwhile (counter < 3) {\n    a = a + 1;\n    console.log(a);\n    counter = counter + 1;\n}\nconsole.log(\"End\");"
-          }
-        },
-        {
-          "text": "You want to run a loop exactly 5 times instead of 3. You initialize the counter to 0 and change the condition to counter < 5; the loop body increments the counter each time, and the loop stops once the counter reaches 5.",
-          "visual_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs><marker id=\"arr-s2\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\"><path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/></marker></defs>\n\n  <!-- Card 1 -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"70\" width=\"120\" height=\"80\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"76\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Start</text>\n    <text x=\"76\" y=\"122\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">counter=0</text>\n  </g>\n\n  <line x1=\"136\" y1=\"110\" x2=\"172\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s2)\"/>\n\n  <!-- Card 2 (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"174\" y=\"70\" width=\"158\" height=\"80\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"1.8\"/>\n    <text x=\"253\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--indigo)\">Condition</text>\n    <text x=\"253\" y=\"122\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--indigo)\">counter &lt; 5</text>\n  </g>\n\n  <line x1=\"332\" y1=\"110\" x2=\"368\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s2)\"/>\n\n  <!-- Card 3 -->\n  <g class=\"ilm-node\">\n    <rect x=\"370\" y=\"70\" width=\"134\" height=\"80\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"437\" y=\"101\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Stops</text>\n    <text x=\"437\" y=\"119\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">after 5 runs</text>\n    <text x=\"437\" y=\"136\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">counter = 5</text>\n  </g>\n\n  <text x=\"260\" y=\"182\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">counter updated each iteration until limit reached</text>\n</svg>",
-          "code_playground": {
-            "language": "javascript",
-            "code": "let a = 5;\nlet counter = 0;\nwhile (counter < 5) {\n    a = a + 1;\n    console.log(a);\n    counter = counter + 1;\n}\nconsole.log(\"End\");"
-          }
-        }
-      ],
-      "mini_quiz": {
-        "questions": [
-          {
-            "question": "What value is the counter variable set to before the loop begins?",
-            "options": [
-              "0",
-              "1",
-              "3",
-              "5"
-            ],
-            "correct_index": 0,
-            "explanation": "The source span shows 'let counter = 0;' as the initialization before the loop. 1 and 3 are common guesses but not what the code states; 5 is the starting value of 'a', not the counter.",
-            "difficulty": "easy",
-            "aspect": "recall"
-          },
-          {
-            "question": "How many times does the while loop run before it stops?",
-            "options": [
-              "Three times",
-              "Five times",
-              "Once",
-              "Twice"
-            ],
-            "correct_index": 0,
-            "explanation": "The source span states 'the while loop increments a three times' and 'ensures the loop will terminate after three iterations.' The other numbers do not match what the span says.",
-            "difficulty": "easy",
-            "aspect": "recall"
-          },
-          {
-            "question": "Where in the code is the counter variable updated?",
-            "options": [
-              "Inside the loop",
-              "Before the loop",
-              "After the loop",
-              "In the while condition"
-            ],
-            "correct_index": 0,
-            "explanation": "The source span says the counter is 'updated within the loop (counter = counter + 1).' Updating it before or after the loop, or only in the condition, are common beginner mistakes that would not correctly control the iterations.",
+            "explanation": "The source table states that the 'left' value aligns text to the left. The other options describe different alignment behaviors that do not match the 'left' value.",
             "difficulty": "easy",
             "aspect": "understanding"
           },
           {
-            "question": "What is the last value printed by console.log(a) before 'End' appears?",
+            "question": "Which of these is a valid text-align value shown in the source?",
             "options": [
-              "8",
-              "6",
-              "7",
-              "5"
+              "right",
+              "justify",
+              "top",
+              "bottom"
             ],
             "correct_index": 0,
-            "explanation": "The source span's output shows 6, 7, 8, End — so 8 is the last value of 'a' printed before 'End'. 6 and 7 are printed earlier; 5 is the initial value of 'a' and is never printed.",
+            "explanation": "The source table lists 'right' as a valid value that aligns text to the right. 'Justify', 'top', and 'bottom' are not mentioned in the source span as valid text-align values.",
             "difficulty": "easy",
             "aspect": "recall"
           }
@@ -372,287 +282,8 @@
       },
       "review": {
         "status": "approved",
-        "reviewer": "auto-gate",
-        "notes": "auto-approved (clean audit)"
-      }
-    },
-    {
-      "id": "c5",
-      "title": "Common Mistake: Missing Counter Initialization",
-      "summary": "Using a counter variable in a loop's condition without declaring and initializing it before the loop is an error that must be fixed by properly initializing the variable first.",
-      "source_span": "Mistake 1: Missing Initialization\n**Error Example:**\n\n```js\nlet a = 5;\nwhile (counter < 3) {\n    a = a + 1;\n    console.log(a);\n    counter = counter + 1;\n}\nconsole.log(\"End\");\n```\n\n* **Fix**: Ensure that the `counter` variable is properly initialized before the loop starts.",
-      "is_code_concept": true,
-      "explanation": {
-        "text": "A counter variable is a number you use in a loop's condition (the test that decides whether to keep looping). If you write `while (counter < 3)` but never declare and set `counter` to a starting value before the loop, JavaScript does not know what `counter` is and the code breaks. The fix is to initialize (declare and give a value to) the counter variable before the loop begins.",
-        "visual_diagram_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-main\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card 1: Missing counter -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"70\" width=\"140\" height=\"80\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"86\" y=\"105\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">No counter</text>\n    <text x=\"86\" y=\"125\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">while (counter &lt; 3)</text>\n    <text x=\"86\" y=\"141\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">← counter unknown</text>\n  </g>\n\n  <!-- Arrow 1 -->\n  <line x1=\"156\" y1=\"110\" x2=\"192\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-main)\"/>\n\n  <!-- Card 2: Fix (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"192\" y=\"70\" width=\"148\" height=\"80\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"1.8\"/>\n    <text x=\"266\" y=\"103\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--indigo)\">Initialize first</text>\n    <text x=\"266\" y=\"123\" text-anchor=\"middle\" font-size=\"11\" font-family=\"JetBrains Mono, monospace\" style=\"fill:var(--svg-text)\">let counter = 0;</text>\n    <text x=\"266\" y=\"141\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">before the loop</text>\n  </g>\n\n  <!-- Arrow 2 -->\n  <line x1=\"340\" y1=\"110\" x2=\"376\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-main)\"/>\n\n  <!-- Card 3: Loop works -->\n  <g class=\"ilm-node\">\n    <rect x=\"376\" y=\"70\" width=\"128\" height=\"80\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"440\" y=\"105\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Loop runs</text>\n    <text x=\"440\" y=\"125\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">counter has a</text>\n    <text x=\"440\" y=\"141\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">known value ✓</text>\n  </g>\n</svg>"
-      },
-      "analogy": {
-        "text": "Using `counter` in a loop without first declaring it is like trying to count items into a jar that doesn't exist yet — the jar (the `counter` variable) must be created and set to a starting number before you can add to it, just like the fix requires initializing `counter` before the loop begins.",
-        "visual_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\"><defs><marker id=\"arr-ci\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\"><path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/></marker></defs><g class=\"ilm-node\"><rect x=\"16\" y=\"74\" width=\"130\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/><text x=\"81\" y=\"106\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--svg-text)\">No jar yet</text><text x=\"81\" y=\"126\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">counter undeclared</text></g><line x1=\"146\" y1=\"110\" x2=\"188\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-ci)\"/><g class=\"ilm-node\"><rect x=\"188\" y=\"74\" width=\"144\" height=\"72\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"2\"/><text x=\"260\" y=\"106\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--indigo)\">Create the jar</text><text x=\"260\" y=\"126\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">let counter = 0</text></g><line x1=\"332\" y1=\"110\" x2=\"374\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-ci)\"/><g class=\"ilm-node\"><rect x=\"374\" y=\"74\" width=\"130\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/><text x=\"439\" y=\"106\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--svg-text)\">Count items</text><text x=\"439\" y=\"126\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">loop runs safely</text></g></svg>",
-        "grounding_check": "\"jar doesn't exist yet\" traces to the error example where counter is used but never declared; \"created and set to a starting number\" traces to \"Ensure that the counter variable is properly initialized before the loop starts\"; \"add to it\" traces to \"counter = counter + 1\" inside the loop."
-      },
-      "scenarios": [
-        {
-          "text": "A learner writes `while (counter < 3)` to repeat a block of code three times, but forgets to write `let counter = 0;` before the loop. The variable `counter` is undefined, so the loop cannot run correctly.",
-          "visual_html": "<svg viewBox=\"0 0 360 300\" width=\"360\" height=\"300\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-s1\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card: Broken code -->\n  <g class=\"ilm-node\">\n    <rect x=\"20\" y=\"20\" width=\"320\" height=\"90\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"180\" y=\"48\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Broken Code</text>\n    <text x=\"180\" y=\"68\" text-anchor=\"middle\" font-size=\"11\" font-family=\"JetBrains Mono, monospace\" style=\"fill:var(--svg-ink-light)\">while (counter &lt; 3) { ... }</text>\n    <text x=\"180\" y=\"88\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">counter was never declared</text>\n    <text x=\"180\" y=\"103\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">→ Error!</text>\n  </g>\n\n  <!-- Arrow down -->\n  <line x1=\"180\" y1=\"110\" x2=\"180\" y2=\"148\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s1)\"/>\n\n  <!-- Card: Fix (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"20\" y=\"148\" width=\"320\" height=\"80\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"1.8\"/>\n    <text x=\"180\" y=\"175\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--indigo)\">Fix: Add initialization</text>\n    <text x=\"180\" y=\"197\" text-anchor=\"middle\" font-size=\"11\" font-family=\"JetBrains Mono, monospace\" style=\"fill:var(--svg-text)\">let counter = 0;</text>\n    <text x=\"180\" y=\"217\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">placed before the while loop</text>\n  </g>\n\n  <!-- Arrow down -->\n  <line x1=\"180\" y1=\"228\" x2=\"180\" y2=\"258\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s1)\"/>\n\n  <!-- Card: Result -->\n  <g class=\"ilm-node\">\n    <rect x=\"20\" y=\"258\" width=\"320\" height=\"26\" rx=\"8\" style=\"fill:var(--svg-surface2);stroke:var(--svg-ink)\" stroke-width=\"1.4\"/>\n    <text x=\"180\" y=\"276\" text-anchor=\"middle\" font-size=\"12\" style=\"fill:var(--svg-text)\">Loop runs correctly ✓</text>\n  </g>\n</svg>",
-          "code_playground": {
-            "language": "javascript",
-            "code": "let a = 5;\nlet counter = 0; // Fix: counter is now initialized before the loop\nwhile (counter < 3) {\n    a = a + 1;\n    console.log(a);\n    counter = counter + 1;\n}\nconsole.log(\"End\");"
-          }
-        },
-        {
-          "text": "A learner copies the loop body correctly — updating `counter` inside the loop with `counter = counter + 1` — but still omits `let counter = 0;` at the top. Even though the update line is there, the loop still fails because `counter` has no starting value.",
-          "visual_html": "<svg viewBox=\"0 0 360 300\" width=\"360\" height=\"300\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-s2\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card: Has update, missing init -->\n  <g class=\"ilm-node\">\n    <rect x=\"20\" y=\"20\" width=\"320\" height=\"100\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"180\" y=\"48\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Update exists, init missing</text>\n    <text x=\"180\" y=\"70\" text-anchor=\"middle\" font-size=\"11\" font-family=\"JetBrains Mono, monospace\" style=\"fill:var(--svg-ink-light)\">while (counter &lt; 3) {</text>\n    <text x=\"180\" y=\"88\" text-anchor=\"middle\" font-size=\"11\" font-family=\"JetBrains Mono, monospace\" style=\"fill:var(--svg-ink-light)\">  counter = counter + 1;</text>\n    <text x=\"180\" y=\"108\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">counter still unknown → Error</text>\n  </g>\n\n  <!-- Arrow -->\n  <line x1=\"180\" y1=\"120\" x2=\"180\" y2=\"158\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s2)\"/>\n\n  <!-- Card: Fix (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"20\" y=\"158\" width=\"320\" height=\"80\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"1.8\"/>\n    <text x=\"180\" y=\"185\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--indigo)\">Fix: Initialize counter</text>\n    <text x=\"180\" y=\"207\" text-anchor=\"middle\" font-size=\"11\" font-family=\"JetBrains Mono, monospace\" style=\"fill:var(--svg-text)\">let counter = 0; ← add this</text>\n    <text x=\"180\" y=\"227\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">before the while loop</text>\n  </g>\n\n  <!-- Arrow -->\n  <line x1=\"180\" y1=\"238\" x2=\"180\" y2=\"265\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s2)\"/>\n\n  <!-- Card: Result -->\n  <g class=\"ilm-node\">\n    <rect x=\"20\" y=\"265\" width=\"320\" height=\"26\" rx=\"8\" style=\"fill:var(--svg-surface2);stroke:var(--svg-ink)\" stroke-width=\"1.4\"/>\n    <text x=\"180\" y=\"283\" text-anchor=\"middle\" font-size=\"12\" style=\"fill:var(--svg-text)\">Loop runs correctly ✓</text>\n  </g>\n</svg>",
-          "code_playground": null
-        }
-      ],
-      "mini_quiz": {
-        "questions": [
-          {
-            "question": "What is missing in the error example that causes the problem?",
-            "options": [
-              "counter is never initialized before the loop",
-              "the while keyword is spelled wrong",
-              "the variable a is not declared",
-              "console.log is placed outside the loop"
-            ],
-            "correct_index": 0,
-            "explanation": "The source span shows that 'counter' is used in the loop condition but never declared or given a starting value before the loop. The other options describe things that are not the stated problem.",
-            "difficulty": "easy",
-            "aspect": "recall"
-          },
-          {
-            "question": "Where should the counter variable be initialized, according to the fix?",
-            "options": [
-              "before the loop starts",
-              "inside the loop body",
-              "after the loop ends",
-              "inside the while condition"
-            ],
-            "correct_index": 0,
-            "explanation": "The fix in the source span states: 'Ensure that the counter variable is properly initialized before the loop starts.' The other positions do not match what the fix says.",
-            "difficulty": "easy",
-            "aspect": "recall"
-          },
-          {
-            "question": "Which variable is used in the loop's condition in the error example?",
-            "options": [
-              "counter",
-              "a",
-              "End",
-              "console"
-            ],
-            "correct_index": 0,
-            "explanation": "The while condition in the error example reads 'while (counter < 3)', so 'counter' is the variable used. The variable 'a' is used inside the loop body, not in the condition.",
-            "difficulty": "easy",
-            "aspect": "recall"
-          },
-          {
-            "question": "What does the fix say must be done to the counter variable?",
-            "options": [
-              "properly initialized before the loop",
-              "removed from the loop body",
-              "declared inside the while condition",
-              "replaced with the variable a"
-            ],
-            "correct_index": 0,
-            "explanation": "The source span's fix explicitly states: 'Ensure that the counter variable is properly initialized before the loop starts.' The other options do not match the stated fix.",
-            "difficulty": "easy",
-            "aspect": "understanding"
-          }
-        ]
-      },
-      "review": {
-        "status": "approved",
-        "reviewer": "auto-gate",
-        "notes": "auto-approved (clean audit)"
-      }
-    },
-    {
-      "id": "c6",
-      "title": "Common Mistake: Incorrect Termination Condition Causing an Infinite Loop",
-      "summary": "If a loop's condition never evaluates to false — for example, when it is stored in a variable that is not re-evaluated each iteration — the loop runs indefinitely.",
-      "source_span": "Mistake 2: Incorrect Termination Condition\nAn incorrect termination condition can cause an infinite loop.\n\n**Error Example:**\n\n```js\nlet a = 10;\nlet counter = 0;\nlet condition = (counter < 3);\nwhile (condition) {\n    a = a + 1;\n    console.log(a);\n    counter = counter + 1;\n}\n```\n\n* **Issue**: This code may continue indefinitely if the condition doesn't evaluate to false when expected.\n* **Fix**: Ensure that the condition properly becomes `false` to terminate the loop.",
-      "is_code_concept": true,
-      "explanation": {
-        "text": "A `while` loop keeps running as long as its condition is `true`. If you store the condition in a variable (like `let condition = (counter < 3)`) before the loop starts, that variable is set once and never updated — so the loop can never see it become `false` and runs forever. The fix is to make sure the condition is checked fresh each iteration, not locked into a variable.",
-        "visual_diagram_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-main\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card 1: Condition stored in variable -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"70\" width=\"138\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"85\" y=\"101\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Condition stored</text>\n    <text x=\"85\" y=\"120\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">in a variable once</text>\n  </g>\n\n  <!-- Arrow 1 -->\n  <line x1=\"154\" y1=\"106\" x2=\"192\" y2=\"106\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-main)\"/>\n\n  <!-- Card 2: Loop checks frozen value (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"192\" y=\"58\" width=\"148\" height=\"96\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"2\"/>\n    <text x=\"266\" y=\"97\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--indigo)\">Loop checks</text>\n    <text x=\"266\" y=\"116\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--indigo)\">frozen value —</text>\n    <text x=\"266\" y=\"134\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--indigo)\">never re-evaluated</text>\n  </g>\n\n  <!-- Arrow 2 -->\n  <line x1=\"340\" y1=\"106\" x2=\"378\" y2=\"106\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-main)\"/>\n\n  <!-- Card 3: Infinite loop -->\n  <g class=\"ilm-node\">\n    <rect x=\"378\" y=\"70\" width=\"126\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"441\" y=\"101\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Infinite loop</text>\n    <text x=\"441\" y=\"120\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">never terminates</text>\n  </g>\n</svg>"
-      },
-      "analogy": {
-        "text": "Imagine a thermostat timer set by reading the temperature once at the start of the day and then never checking again — the reading is frozen in time, just like the variable `condition` is evaluated once and stored, never re-checked each loop iteration. Because the timer's frozen reading never changes, the heating never shuts off, just like the loop never terminates because `condition` never becomes false.",
-        "visual_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-thermo\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card 1: Temperature read once -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"60\" width=\"130\" height=\"90\" rx=\"10\"\n          style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"81\" y=\"98\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\"\n          style=\"fill:var(--svg-text)\">Read once</text>\n    <text x=\"81\" y=\"116\" text-anchor=\"middle\" font-size=\"11\"\n          style=\"fill:var(--svg-ink-light)\">Thermostat checks</text>\n    <text x=\"81\" y=\"131\" text-anchor=\"middle\" font-size=\"11\"\n          style=\"fill:var(--svg-ink-light)\">temp at start only</text>\n  </g>\n\n  <!-- Arrow 1 -->\n  <line x1=\"146\" y1=\"105\" x2=\"182\" y2=\"105\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-thermo)\"/>\n\n  <!-- Card 2: Frozen reading (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"183\" y=\"60\" width=\"148\" height=\"90\" rx=\"10\"\n          style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"2\"/>\n    <text x=\"257\" y=\"98\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\"\n          style=\"fill:var(--indigo)\">Frozen reading</text>\n    <text x=\"257\" y=\"116\" text-anchor=\"middle\" font-size=\"11\"\n          style=\"fill:var(--svg-ink-light)\">= condition stored</text>\n    <text x=\"257\" y=\"131\" text-anchor=\"middle\" font-size=\"11\"\n          style=\"fill:var(--svg-ink-light)\">in variable, not live</text>\n  </g>\n\n  <!-- Arrow 2 -->\n  <line x1=\"331\" y1=\"105\" x2=\"367\" y2=\"105\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-thermo)\"/>\n\n  <!-- Card 3: Never shuts off -->\n  <g class=\"ilm-node\">\n    <rect x=\"368\" y=\"60\" width=\"136\" height=\"90\" rx=\"10\"\n          style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"436\" y=\"98\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\"\n          style=\"fill:var(--svg-text)\">Never stops</text>\n    <text x=\"436\" y=\"116\" text-anchor=\"middle\" font-size=\"11\"\n          style=\"fill:var(--svg-ink-light)\">Heating runs forever</text>\n    <text x=\"436\" y=\"131\" text-anchor=\"middle\" font-size=\"11\"\n          style=\"fill:var(--svg-ink-light)\">= infinite loop</text>\n  </g>\n\n  <!-- Bottom labels row -->\n  <text x=\"81\" y=\"175\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">Everyday scene</text>\n  <text x=\"257\" y=\"175\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--indigo)\">Concept part</text>\n  <text x=\"436\" y=\"175\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">Result</text>\n</svg>",
-        "grounding_check": "'Frozen reading = condition stored in variable, not live' traces to 'let condition = (counter < 3)' — a value stored once; 'Never stops = infinite loop' traces to 'This code may continue indefinitely if the condition doesn't evaluate to false when expected.'"
-      },
-      "scenarios": [
-        {
-          "text": "A student writes `let done = (count >= 5)` before a `while (done)` loop, intending to stop after 5 steps. Because `done` is set to `false` at the start and never rechecked, the loop body never runs at all — or if `done` starts `true`, it runs forever without updating.",
-          "visual_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-s1\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n  </defs>\n\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"72\" width=\"138\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"85\" y=\"103\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">done = (count&gt;=5)</text>\n    <text x=\"85\" y=\"122\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">set once, frozen</text>\n  </g>\n\n  <line x1=\"154\" y1=\"108\" x2=\"192\" y2=\"108\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s1)\"/>\n\n  <g class=\"ilm-node\">\n    <rect x=\"192\" y=\"60\" width=\"148\" height=\"96\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"2\"/>\n    <text x=\"266\" y=\"97\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--indigo)\">while (done)</text>\n    <text x=\"266\" y=\"116\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--indigo)\">checks old value</text>\n    <text x=\"266\" y=\"135\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--indigo)\">count ignored</text>\n  </g>\n\n  <line x1=\"340\" y1=\"108\" x2=\"378\" y2=\"108\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s1)\"/>\n\n  <g class=\"ilm-node\">\n    <rect x=\"378\" y=\"72\" width=\"126\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"441\" y=\"103\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Loop never</text>\n    <text x=\"441\" y=\"122\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">stops (or never runs)</text>\n  </g>\n</svg>",
-          "code_playground": {
-            "language": "javascript",
-            "code": "// Bug: condition stored in a variable, never re-evaluated\nlet a = 10;\nlet counter = 0;\nlet condition = (counter < 3); // evaluated ONCE here — always true\n\n// Uncomment below to see the infinite loop (DO NOT run as-is):\n// while (condition) {\n//     a = a + 1;\n//     console.log(a);\n//     counter = counter + 1;\n// }\n\n// Fix: use the expression directly in the while condition\nwhile (counter < 3) {\n    a = a + 1;\n    console.log(a);\n    counter = counter + 1;\n}\nconsole.log('Loop finished. counter =', counter);"
-          }
-        },
-        {
-          "text": "A developer stores `let running = (items > 0)` before a loop that removes items one by one. Because `running` is never updated inside the loop, the loop keeps going even after `items` reaches zero.",
-          "visual_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-s2\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n  </defs>\n\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"72\" width=\"148\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"90\" y=\"103\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">running=(items&gt;0)</text>\n    <text x=\"90\" y=\"122\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">frozen at start</text>\n  </g>\n\n  <line x1=\"164\" y1=\"108\" x2=\"200\" y2=\"108\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s2)\"/>\n\n  <g class=\"ilm-node\">\n    <rect x=\"200\" y=\"60\" width=\"148\" height=\"96\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"2\"/>\n    <text x=\"274\" y=\"97\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--indigo)\">while (running)</text>\n    <text x=\"274\" y=\"116\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--indigo)\">items changes,</text>\n    <text x=\"274\" y=\"135\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--indigo)\">running does not</text>\n  </g>\n\n  <line x1=\"348\" y1=\"108\" x2=\"384\" y2=\"108\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s2)\"/>\n\n  <g class=\"ilm-node\">\n    <rect x=\"384\" y=\"72\" width=\"120\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"444\" y=\"103\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Infinite loop</text>\n    <text x=\"444\" y=\"122\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">items ignored</text>\n  </g>\n</svg>",
-          "code_playground": null
-        }
-      ],
-      "mini_quiz": {
-        "questions": [
-          {
-            "question": "What problem can an incorrect termination condition cause in a loop?",
-            "options": [
-              "An infinite loop",
-              "A syntax error",
-              "A skipped iteration",
-              "A variable reset"
-            ],
-            "correct_index": 0,
-            "explanation": "The source span states directly that an incorrect termination condition can cause an infinite loop. The other options describe different kinds of problems not mentioned in the span.",
-            "difficulty": "easy",
-            "aspect": "recall"
-          },
-          {
-            "question": "In the error example, where is the loop condition stored?",
-            "options": [
-              "In a variable called condition",
-              "Inside the while keyword",
-              "In the counter variable",
-              "In the variable a"
-            ],
-            "correct_index": 0,
-            "explanation": "The code shows `let condition = (counter < 3)` — the condition is stored in a separate variable named condition. The while loop then checks that variable, not a live expression.",
-            "difficulty": "easy",
-            "aspect": "recall"
-          },
-          {
-            "question": "Why does the loop in the error example risk running indefinitely?",
-            "options": [
-              "The condition variable is not re-evaluated each iteration",
-              "The counter is never incremented",
-              "The variable a starts too high",
-              "The while keyword is misspelled"
-            ],
-            "correct_index": 0,
-            "explanation": "The condition is captured once in a variable, so it is not re-evaluated as counter changes each iteration. The counter is actually incremented inside the loop, so that is not the issue.",
-            "difficulty": "easy",
-            "aspect": "understanding"
-          },
-          {
-            "question": "According to the fix described in the source, what must the condition do to stop the loop?",
-            "options": [
-              "Properly become false",
-              "Reach a value of zero",
-              "Throw an error",
-              "Reset the counter to 3"
-            ],
-            "correct_index": 0,
-            "explanation": "The source span states the fix is to 'ensure that the condition properly becomes false to terminate the loop.' The other options are not mentioned as the fix.",
-            "difficulty": "easy",
-            "aspect": "recall"
-          }
-        ]
-      },
-      "review": {
-        "status": "approved",
-        "reviewer": "auto-gate",
-        "notes": "auto-approved (clean audit)"
-      }
-    },
-    {
-      "id": "c7",
-      "title": "Common Mistake: Not Updating the Counter Variable Inside the Loop",
-      "summary": "If the counter variable is never updated inside the loop body, the condition never becomes false and the loop runs indefinitely.",
-      "source_span": "Mistake 3: Not Updating the Counter Variable\nIf the counter variable is not updated inside the loop, it may result in an infinite loop.\n\n**Error Example:**\n\n```js\nlet a = 1;\nlet counter = 1;\nwhile (counter < 3) {\n    a = a + 1;\n    console.log(a);\n}\nconsole.log(\"End\");\n```\n\n* **Fix**: Always update the counter variable to prevent an infinite loop.",
-      "is_code_concept": true,
-      "explanation": {
-        "text": "A `while` loop checks a condition before each run. If the variable used in that condition (the counter) is never changed inside the loop body, the condition stays true forever and the loop never stops — this is called an infinite loop. The fix is to update the counter inside the loop so the condition can eventually become false.",
-        "visual_diagram_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-main\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card 1: counter starts -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"74\" width=\"130\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"81\" y=\"106\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">counter = 1</text>\n    <text x=\"81\" y=\"126\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">loop starts</text>\n  </g>\n\n  <!-- Arrow 1 -->\n  <line x1=\"146\" y1=\"110\" x2=\"186\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-main)\"/>\n\n  <!-- Card 2: condition check (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"188\" y=\"74\" width=\"144\" height=\"72\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"2\"/>\n    <text x=\"260\" y=\"106\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--indigo)\">counter &lt; 3 ?</text>\n    <text x=\"260\" y=\"126\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--indigo)\">never updated!</text>\n  </g>\n\n  <!-- Arrow 2 -->\n  <line x1=\"332\" y1=\"110\" x2=\"372\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-main)\"/>\n\n  <!-- Card 3: result -->\n  <g class=\"ilm-node\">\n    <rect x=\"374\" y=\"74\" width=\"130\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"439\" y=\"106\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Infinite Loop</text>\n    <text x=\"439\" y=\"126\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">\"End\" never prints</text>\n  </g>\n</svg>"
-      },
-      "analogy": {
-        "text": "Imagine a security guard checking whether a gate counter reads below 3 before letting anyone through — but the counter is never advanced, so it always reads 1, and the guard keeps opening the gate forever. Just like the stuck counter (always 1) corresponds to the counter variable that is never updated inside the loop, the guard's endless checking corresponds to the loop condition that never becomes false, causing the loop to run indefinitely.",
-        "visual_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-ctr\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card 1: Counter stuck at 1 -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"70\" width=\"138\" height=\"80\" rx=\"10\"\n          style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"85\" y=\"103\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\"\n          style=\"fill:var(--svg-text)\">Counter stuck</text>\n    <text x=\"85\" y=\"121\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\"\n          style=\"fill:var(--svg-text)\">at 1 (forever)</text>\n    <text x=\"85\" y=\"140\" text-anchor=\"middle\" font-size=\"11\"\n          style=\"fill:var(--svg-ink-light)\">never updated</text>\n  </g>\n\n  <!-- Arrow 1 -->\n  <line x1=\"154\" y1=\"110\" x2=\"192\" y2=\"110\"\n        style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-ctr)\"/>\n\n  <!-- Card 2: Condition never false (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"194\" y=\"60\" width=\"148\" height=\"100\" rx=\"10\"\n          style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"2\"/>\n    <text x=\"268\" y=\"97\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\"\n          style=\"fill:var(--indigo)\">Condition</text>\n    <text x=\"268\" y=\"115\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\"\n          style=\"fill:var(--indigo)\">never false</text>\n    <text x=\"268\" y=\"135\" text-anchor=\"middle\" font-size=\"11\"\n          style=\"fill:var(--svg-ink-light)\">counter &lt; 3 always true</text>\n  </g>\n\n  <!-- Arrow 2 -->\n  <line x1=\"342\" y1=\"110\" x2=\"380\" y2=\"110\"\n        style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-ctr)\"/>\n\n  <!-- Card 3: Infinite loop -->\n  <g class=\"ilm-node\">\n    <rect x=\"382\" y=\"70\" width=\"122\" height=\"80\" rx=\"10\"\n          style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"443\" y=\"103\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\"\n          style=\"fill:var(--svg-text)\">Loop runs</text>\n    <text x=\"443\" y=\"121\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\"\n          style=\"fill:var(--svg-text)\">forever</text>\n    <text x=\"443\" y=\"140\" text-anchor=\"middle\" font-size=\"11\"\n          style=\"fill:var(--svg-ink-light)\">infinite loop</text>\n  </g>\n\n  <!-- Bottom labels: analogy side -->\n  <text x=\"85\" y=\"172\" text-anchor=\"middle\" font-size=\"11\"\n        style=\"fill:var(--svg-ink-light)\">🔢 guard's counter</text>\n  <text x=\"268\" y=\"182\" text-anchor=\"middle\" font-size=\"11\"\n        style=\"fill:var(--svg-ink-light)\">🚪 guard keeps checking</text>\n  <text x=\"443\" y=\"172\" text-anchor=\"middle\" font-size=\"11\"\n        style=\"fill:var(--svg-ink-light)\">🔁 gate opens endlessly</text>\n\n  <!-- Top label row: concept side -->\n  <text x=\"85\" y=\"52\" text-anchor=\"middle\" font-size=\"11\"\n        style=\"fill:var(--svg-ink-light)\">counter variable</text>\n  <text x=\"268\" y=\"42\" text-anchor=\"middle\" font-size=\"11\"\n        style=\"fill:var(--svg-ink-light)\">loop condition</text>\n  <text x=\"443\" y=\"52\" text-anchor=\"middle\" font-size=\"11\\",
-        "grounding_check": ""
-      },
-      "scenarios": [
-        {
-          "text": "You write a `while` loop with `counter < 3` as the condition, but inside the loop you only update a different variable `a` and forget to change `counter`. Because `counter` stays at 1, the condition is always true and the loop prints forever without ever reaching `console.log(\"End\")`.",
-          "visual_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-s1\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card 1 -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"74\" width=\"130\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"81\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">counter = 1</text>\n    <text x=\"81\" y=\"124\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">a updated, not counter</text>\n  </g>\n\n  <!-- Arrow -->\n  <line x1=\"146\" y1=\"110\" x2=\"186\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s1)\"/>\n\n  <!-- Card 2 (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"188\" y=\"74\" width=\"144\" height=\"72\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"2\"/>\n    <text x=\"260\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--indigo)\">counter still 1</text>\n    <text x=\"260\" y=\"124\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--indigo)\">condition always true</text>\n  </g>\n\n  <!-- Arrow -->\n  <line x1=\"332\" y1=\"110\" x2=\"372\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s1)\"/>\n\n  <!-- Card 3 -->\n  <g class=\"ilm-node\">\n    <rect x=\"374\" y=\"74\" width=\"130\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"439\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Loops forever</text>\n    <text x=\"439\" y=\"124\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">\"End\" never reached</text>\n  </g>\n</svg>",
-          "code_playground": {
-            "language": "javascript",
-            "code": "// BUG: counter is never updated — this would loop forever.\n// We limit to 5 iterations here just to show the problem safely.\nlet a = 1;\nlet counter = 1;\nlet iterations = 0;\nwhile (counter < 3) {\n    a = a + 1;\n    console.log(\"a is now:\", a, \"| counter is still:\", counter);\n    iterations++;\n    if (iterations >= 5) {\n        console.log(\"Stopped early — counter never changed, loop would never end!\");\n        break;\n    }\n}\n// console.log(\"End\") would never be reached without the break above."
-          }
-        },
-        {
-          "text": "You fix the bug by adding `counter = counter + 1` inside the loop body. Now `counter` increases each iteration, reaches 3, the condition `counter < 3` becomes false, and the loop exits so `console.log(\"End\")` finally runs.",
-          "visual_html": "<svg viewBox=\"0 0 520 220\" width=\"520\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Inter, system-ui, sans-serif\">\n  <defs>\n    <marker id=\"arr-s2\" markerWidth=\"9\" markerHeight=\"9\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" style=\"fill:var(--svg-ink)\"/>\n    </marker>\n  </defs>\n\n  <!-- Card 1 -->\n  <g class=\"ilm-node\">\n    <rect x=\"16\" y=\"74\" width=\"130\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"81\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">counter = 1</text>\n    <text x=\"81\" y=\"124\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">loop begins</text>\n  </g>\n\n  <!-- Arrow -->\n  <line x1=\"146\" y1=\"110\" x2=\"186\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s2)\"/>\n\n  <!-- Card 2 (accent) -->\n  <g class=\"ilm-node\">\n    <rect x=\"188\" y=\"74\" width=\"144\" height=\"72\" rx=\"10\" style=\"fill:var(--indigo-soft);stroke:var(--indigo)\" stroke-width=\"2\"/>\n    <text x=\"260\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"700\" style=\"fill:var(--indigo)\">counter += 1</text>\n    <text x=\"260\" y=\"124\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--indigo)\">updated each loop</text>\n  </g>\n\n  <!-- Arrow -->\n  <line x1=\"332\" y1=\"110\" x2=\"372\" y2=\"110\" style=\"stroke:var(--svg-ink)\" stroke-width=\"1.8\" marker-end=\"url(#arr-s2)\"/>\n\n  <!-- Card 3 -->\n  <g class=\"ilm-node\">\n    <rect x=\"374\" y=\"74\" width=\"130\" height=\"72\" rx=\"10\" style=\"fill:var(--svg-surface);stroke:var(--svg-ink)\" stroke-width=\"1.6\"/>\n    <text x=\"439\" y=\"104\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"600\" style=\"fill:var(--svg-text)\">Loop exits</text>\n    <text x=\"439\" y=\"124\" text-anchor=\"middle\" font-size=\"11\" style=\"fill:var(--svg-ink-light)\">\"End\" prints</text>\n  </g>\n</svg>",
-          "code_playground": {
-            "language": "javascript",
-            "code": "// FIX: counter is updated inside the loop.\nlet a = 1;\nlet counter = 1;\nwhile (counter < 3) {\n    a = a + 1;\n    console.log(\"a is now:\", a, \"| counter is:\", counter);\n    counter = counter + 1; // <-- the fix\n}\nconsole.log(\"End\");"
-          }
-        }
-      ],
-      "mini_quiz": {
-        "questions": [
-          {
-            "question": "What happens if the counter variable is never updated inside a while loop?",
-            "options": [
-              "The loop runs indefinitely",
-              "The loop skips one iteration",
-              "The loop runs exactly once",
-              "The program crashes immediately"
-            ],
-            "correct_index": 0,
-            "explanation": "The source span states that not updating the counter variable 'may result in an infinite loop,' meaning the loop runs indefinitely. The other options describe different behaviors not mentioned in the source.",
-            "difficulty": "easy",
-            "aspect": "recall"
-          },
-          {
-            "question": "In the error example, which variable is updated inside the loop body?",
-            "options": [
-              "a",
-              "counter",
-              "Both a and counter",
-              "Neither variable"
-            ],
-            "correct_index": 0,
-            "explanation": "The code shows 'a = a + 1' inside the loop, so only 'a' is updated. The counter variable is never changed inside the loop, which is the mistake being demonstrated.",
-            "difficulty": "easy",
-            "aspect": "recall"
-          },
-          {
-            "question": "In the error example, what is the starting value of the counter variable?",
-            "options": [
-              "1",
-              "0",
-              "3",
-              "2"
-            ],
-            "correct_index": 0,
-            "explanation": "The source span shows 'let counter = 1', so counter starts at 1. Beginners often assume loops start at 0, making 0 a common wrong guess.",
-            "difficulty": "easy",
-            "aspect": "recall"
-          },
-          {
-            "question": "According to the fix, where must the counter variable be updated to prevent an infinite loop?",
-            "options": [
-              "Inside the loop",
-              "Before the loop",
-              "After the loop",
-              "In the loop condition"
-            ],
-            "correct_index": 0,
-            "explanation": "The source span's fix states: 'Always update the counter variable' — and the mistake is that it is not updated inside the loop body. Updating it before or after the loop does not change its value during each iteration.",
-            "difficulty": "easy",
-            "aspect": "understanding"
-          }
-        ]
-      },
-      "review": {
-        "status": "approved",
-        "reviewer": "auto-gate",
-        "notes": "auto-approved (clean audit)"
+        "reviewer": "web-human",
+        "notes": null
       }
     }
   ],

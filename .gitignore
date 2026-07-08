@@ -18,6 +18,9 @@ __pycache__/
 *.pyc
 .env
 
+# Generated raster visuals (regenerated per run; not source)
+public/ilm-images/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -15,6 +15,33 @@
   ],
   "gold_examples": [],
   "reviewer_corrections": [
-    "Always state explicitly which axis (main vs cross) a property acts on."
+    "Always state explicitly which axis (main vs cross) a property acts on.",
+    "[unit:Container Element (div)] keep only 1 scenaqrio here , Rest all is fine",
+    "[unit:CSS Rule Syntax] Drop both the scenarios from this unit , not needed",
+    "[unit:Text Align Property] Drop Analogy from this unit and also drop thje Scenario from this unit",
+    "[unit:Container Element (div)] I dont want to keep scenario 2 in this concept unit",
+    "[partition] You missed to add one concept unit for the css syntax ewhy ?"
+  ],
+  "feedback_log": [
+    {
+      "stage": "unit:Container Element (div)",
+      "note": "keep only 1 scenaqrio here , Rest all is fine"
+    },
+    {
+      "stage": "unit:CSS Rule Syntax",
+      "note": "Drop both the scenarios from this unit , not needed"
+    },
+    {
+      "stage": "unit:Text Align Property",
+      "note": "Drop Analogy from this unit and also drop thje Scenario from this unit"
+    },
+    {
+      "stage": "unit:Container Element (div)",
+      "note": "I dont want to keep scenario 2 in this concept unit"
+    },
+    {
+      "stage": "partition",
+      "note": "You missed to add one concept unit for the css syntax ewhy ?"
+    }
   ]
 }

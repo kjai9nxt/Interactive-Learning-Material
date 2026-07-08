@@ -1,7 +1,7 @@
 {
   "meta": {
     "project": "ILM \u2014 Interactive Learning Material (V1, workflow v2)",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "created": "2026-06-11",
     "pipeline_step": "Skill 2 (analogy)",
     "diagram_node": "Skill 2: analogy",
@@ -10,7 +10,7 @@
       "pass",
       "flag"
     ],
-    "note": "Split from ilm_eval_set.json v0.1.0; cases unchanged."
+    "note": "v0.3.0: realigned to updated rubrics.json — Correlation (3.0) threshold relaxed from >=2 to >=1 mapped element; ANA-03 reworked to the new bound and ANA-03b added as the 0-element flag twin."
   },
   "source_spans": {
     "S1": "An AI agent is a program that uses a language model to decide which actions to take. It runs in a loop: observe the current state, choose a tool, execute it, and feed the result back into the model. The loop ends when the model decides the task is complete.",
@@ -55,16 +55,31 @@
       "id": "ANA-03",
       "rubric_case_id": 3.0,
       "criterion": "Correlation (mapping)",
-      "edge_case": "Boundary: exactly 2 mapped elements \u2014 must PASS",
+      "edge_case": "Boundary: exactly 1 mapped element \u2014 must PASS under the relaxed >=1 rule",
       "grader": "llm",
       "input": {
         "concept": "RAG",
         "source_span": "S4",
-        "candidate": "RAG is like an open-book exam: the book is the document store, and reading the relevant page before answering is the retrieval step. You don't memorize anything new \u2014 you just look it up."
+        "candidate": "RAG is like an open-book exam: the book is the document store you consult before answering."
       },
       "expected_verdict": "pass",
       "failure_mode": null,
-      "judge_instructions": "Count explicit element mappings (book -> document store; reading the page -> retrieval). Exactly 2 = pass; this case sits on the lower bound of the rubric (>=2)."
+      "judge_instructions": "Count explicit element mappings to specific parts of the concept (here: book -> document store). The rubric now requires >=1 such mapping, so a single concrete mapping passes; a grader that still demands >=2 has not been updated."
+    },
+    {
+      "id": "ANA-03b",
+      "rubric_case_id": 3.0,
+      "criterion": "Correlation (mapping)",
+      "edge_case": "Boundary: zero mapped elements (purely decorative) \u2014 must FLAG",
+      "grader": "llm",
+      "input": {
+        "concept": "RAG",
+        "source_span": "S4",
+        "candidate": "RAG is like studying hard before a big exam \u2014 you just feel more prepared and confident going in."
+      },
+      "expected_verdict": "flag",
+      "failure_mode": "The analogy evokes a mood but maps no element to a specific part of the concept (no document store, no retrieval step). Paired with ANA-03 this pins the new lower bound: >=1 concrete mapping passes, 0 mappings flags.",
+      "judge_instructions": "Flag if fewer than 1 element of the analogy maps to a specific part of the concept. A purely decorative or mood-setting analogy with no concrete correspondence fails."
     },
     {
       "id": "ANA-04",

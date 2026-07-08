@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import type { ConceptUnitsFile } from "./types";
+import type { ConceptUnitsFile, GatePayload, UnitReviewItem } from "./types";
+import { PartitionGate, UnitsGate } from "./ReviewGates";
 
 /* Ingest screen — paste or upload a Markdown reading material, then run the
    agent pipeline (POST /api/generate) and hand the result to the renderer. */
@@ -9,9 +10,9 @@ import type { ConceptUnitsFile } from "./types";
 const STEPS = [
   "Parse & chunk the document",
   "Skill 1 — extract concepts",
-  "Eval gate 1 — coverage & grounding",
+  "Human gate 1 — approve the concept split",
   "Skills 2–5 — generate units + eval-audit",
-  "Human gate — approve clean units",
+  "Human gate 2 — review & approve units",
 ];
 const STAGE_INDEX: Record<string, number> = {
   queued: 0, starting: 0, parsing: 0,
@@ -35,7 +36,14 @@ export default function Ingest({ onResult }: { onResult: (data: ConceptUnitsFile
   const [progress, setProgress] = useState<{ stage: string; total?: number; done?: number }>({ stage: "queued" });
   const [elapsed, setElapsed] = useState(0);
   const [model, setModel] = useState<string>("");
+  const [gate, setGate] = useState<GatePayload | null>(null);
+  // Bumped every time a gate (re)opens, used as a React key so the gate component
+  // remounts with fresh data after a regeneration round (its useState initializers
+  // re-run) instead of showing stale content.
+  const [gateSeq, setGateSeq] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const jobRef = useRef<string | null>(null);
 
   useEffect(() => {
     fetch("/api/health").then((r) => r.json()).then((d) => setModel(d.gen_model || "")).catch(() => {});
@@ -68,11 +76,29 @@ export default function Ingest({ onResult }: { onResult: (data: ConceptUnitsFile
     reader.readAsText(f);
   };
 
+  // Poll the job until it either finishes, errors, or pauses at a human gate.
+  // On a gate we surface the payload and stop; submitReview() resumes the poll.
+  const pollUntilGateOrDone = async (jobId: string) => {
+    for (;;) {
+      await new Promise((r) => setTimeout(r, 1200));
+      const stRes = await fetch(`/api/status/${jobId}`);
+      const st = await safeJson(stRes);
+      if (!stRes.ok) throw new Error(st.error || "Lost the job");
+      if (st.progress) setProgress(st.progress);
+      if (st.state === "awaiting" && st.review) {
+        setGate(st.review as GatePayload);
+        setGateSeq((n) => n + 1);  // force a fresh mount of the gate
+        return;
+      }
+      if (st.state === "done") { setBusy(false); onResult(st.result as ConceptUnitsFile); return; }
+      if (st.state === "error") throw new Error(st.error || "Generation failed");
+    }
+  };
+
   const generate = async () => {
     if (!markdown.trim()) { setError("Paste or upload some Markdown first."); return; }
-    setError(null); setBusy(true); setElapsed(0); setProgress({ stage: "queued" });
+    setError(null); setBusy(true); setGate(null); setElapsed(0); setProgress({ stage: "queued" });
     try {
-      // 1) start the job
       const startRes = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -80,25 +106,114 @@ export default function Ingest({ onResult }: { onResult: (data: ConceptUnitsFile
       });
       const start = await safeJson(startRes);
       if (!startRes.ok) throw new Error(start.error || `Request failed (${startRes.status})`);
-      const jobId = start.job_id as string;
-
-      // 2) poll status until done / error
-      for (;;) {
-        await new Promise((r) => setTimeout(r, 1200));
-        const stRes = await fetch(`/api/status/${jobId}`);
-        const st = await safeJson(stRes);
-        if (!stRes.ok) throw new Error(st.error || "Lost the job");
-        if (st.progress) setProgress(st.progress);
-        if (st.state === "done") { onResult(st.result as ConceptUnitsFile); return; }
-        if (st.state === "error") throw new Error(st.error || "Generation failed");
-      }
+      jobRef.current = start.job_id as string;
+      await pollUntilGateOrDone(jobRef.current);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Generation failed. Check that the backend is running.");
       setBusy(false);
     }
   };
 
+  // Send a human decision for the current gate, then resume polling.
+  const submitReview = async (decision: unknown) => {
+    const jobId = jobRef.current;
+    if (!jobId) return;
+    setSubmitting(true); setError(null);
+    try {
+      const res = await fetch(`/api/review/${jobId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(decision),
+      });
+      const body = await safeJson(res);
+      if (!res.ok) throw new Error(body.error || "Could not submit review");
+      // Keep the current gate on screen (don't drop to the global progress view):
+      // a "regenerate" reopens the gate with just that unit rebuilt, and pollUntil
+      // will swap in the fresh payload. A "publish" ends at state==="done".
+      await pollUntilGateOrDone(jobId);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not submit your review.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Generate / regenerate a single visual for the review gate (stateless — does
+  // not touch the paused job). Returns the new image as a data URL.
+  const generateImage = async (
+    kind: "explanation" | "analogy" | "scenario",
+    title: string,
+    text: string,
+    feedback: string,
+  ): Promise<string> => {
+    const res = await fetch("/api/image", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind, title, text, feedback }),
+    });
+    const body = await safeJson(res);
+    if (!res.ok) throw new Error(body.error || "Image generation failed");
+    return body.image as string;
+  };
+
+  // Regenerate ONE PART of a unit in place. Only that part is rebuilt on the backend
+  // (its image auto-refreshes); returns the updated unit display for that one card.
+  const regeneratePart = async (
+    unitId: string,
+    opts: {
+      part: "explanation" | "analogy" | "quiz" | "scenario";
+      scenarioIndex?: number;
+      op?: "regenerate" | "remove" | "add";
+      feedback: string;
+    },
+  ): Promise<UnitReviewItem> => {
+    const jobId = jobRef.current;
+    if (!jobId) throw new Error("No active job to regenerate against.");
+    const res = await fetch(`/api/regenerate-part/${jobId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        unit_id: unitId,
+        part: opts.part,
+        scenario_index: opts.scenarioIndex,
+        op: opts.op ?? "regenerate",
+        feedback: opts.feedback,
+      }),
+    });
+    const body = await safeJson(res);
+    if (!res.ok) throw new Error(body.error || "Regeneration failed");
+    return body as UnitReviewItem;
+  };
+
   const wordCount = markdown.trim() ? markdown.trim().split(/\s+/).length : 0;
+
+  if (gate) {
+    return (
+      <div className="ingest">
+        <div className="ingest-card rg-card">
+          {gate.kind === "partition" ? (
+            <PartitionGate
+              key={gateSeq}
+              concepts={gate.concepts}
+              submitting={submitting}
+              onApprove={(concepts, feedback) => submitReview({ action: "approve", concepts, feedback })}
+              onRevise={(feedback) => submitReview({ action: "revise", feedback })}
+            />
+          ) : (
+            <UnitsGate
+              key={gateSeq}
+              units={gate.units}
+              submitting={submitting}
+              onGenerateImage={generateImage}
+              onRegeneratePart={regeneratePart}
+              onSubmit={(reviews) => submitReview({ reviews })}
+            />
+          )}
+          {error && <div className="ingest-error">{error}</div>}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="ingest">

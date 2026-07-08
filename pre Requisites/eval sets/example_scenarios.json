@@ -10,7 +10,7 @@
       "pass",
       "flag"
     ],
-    "note": "Split from ilm_eval_set.json v0.1.0; cases unchanged. WARNING: the rubric xlsx defines Example Scenarios but workflow v2 has no scenario node. Either add a 'Skill: scenarios' box to the per-concept loop or drop this sheet; keeping the eval set so either decision is covered."
+    "note": "v0.3.0: realigned to updated rubrics.json — criterion 8.0 repurposed from 'Distinct (no duplicates)' to 'Example Requirement' (an example should appear only when the concept needs one); SCN-08 (flag: example present though not required) and SCN-08b (pass: example present because required) cover both polarities. WARNING: the rubric xlsx defines Example Scenarios but workflow v2 has no scenario node. Either add a 'Skill: scenarios' box to the per-concept loop or drop this sheet; keeping the eval set so either decision is covered."
   },
   "source_spans": {
     "S1": "An AI agent is a program that uses a language model to decide which actions to take. It runs in a loop: observe the current state, choose a tool, execute it, and feed the result back into the model. The loop ends when the model decides the task is complete.",
@@ -131,19 +131,36 @@
     {
       "id": "SCN-08",
       "rubric_case_id": 8.0,
-      "criterion": "Distinct (no duplicates)",
-      "edge_case": "Two scenarios with different surface settings but the identical underlying situation",
+      "criterion": "Example Requirement",
+      "edge_case": "A self-evident concept gets an example anyway \u2014 example present though the concept does not require one",
       "grader": "llm",
       "input": {
-        "concept": "Human-in-the-loop gate",
-        "candidate_scenarios": [
-          "A bank's email agent drafts complaint responses; a support lead approves each one before it is sent.",
-          "An insurance firm's email assistant writes replies to customer grievances; a team supervisor signs off on every reply before it goes out."
-        ]
+        "concept": "System prompt",
+        "source_span": "S3",
+        "concept_requires_example": false,
+        "candidate": "A system prompt is a fixed instruction given before the conversation starts; it sets the agent's role, rules, and output format. For instance, picture an engineer typing those role-and-rules instructions into a text box before chatting \u2014 that act is the system prompt."
       },
       "expected_verdict": "flag",
-      "failure_mode": "Bank->insurance, complaints->grievances, lead->supervisor \u2014 pure synonym substitution. Embedding-distance or n-gram dedup may pass it; the situation (email + manager approval) is identical.",
-      "judge_instructions": "Flag if two scenarios share the same actor-action-approval structure regardless of industry or wording. Distinctness means a different situation, not a different vocabulary."
+      "failure_mode": "The concept is simple and self-explanatory from the explanation, so the rubric says no example is required. Tacking on an 'for instance' restatement adds an example the concept does not call for. The new criterion flags examples that appear even when the concept does not require one (it is no longer about duplicate scenarios).",
+      "judge_instructions": "Judge whether the concept actually requires a worked example to be understood. Pass only when an example is present because the concept needs it; flag when an example is supplied for a concept that is already clear without one."
+    },
+    {
+      "id": "SCN-08b",
+      "rubric_case_id": 8.0,
+      "criterion": "Example Requirement",
+      "edge_case": "A concept that genuinely needs an example to be understood gets one — example present because the concept requires it",
+      "grader": "llm",
+      "polarity": "good",
+      "input": {
+        "polarity": "good",
+        "concept": "The agent loop",
+        "source_span": "S1",
+        "concept_requires_example": true,
+        "candidate": "A research agent is asked to find the cheapest flight. It observes the request, picks a flight-search tool, runs it, reads the results, then picks a price-comparison tool and runs that — repeating observe-choose-execute until it has an answer, at which point the loop ends."
+      },
+      "expected_verdict": "pass",
+      "failure_mode": null,
+      "judge_instructions": "The agent loop is a process concept that is hard to grasp from the definition alone, so a concrete example is warranted. Pass when an example is present because the concept needs it; this is the positive twin of SCN-08. A judge that flags a needed, on-concept example is over-strict."
     }
   ]
 }

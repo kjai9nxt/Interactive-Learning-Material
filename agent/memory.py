@@ -33,7 +33,8 @@ _DEFAULT: dict[str, Any] = {
         "answer that relies on outside knowledge (ethics, best practices, etc.).",
     ],
     "gold_examples": [],
-    "reviewer_corrections": [],   # appended by the human gate
+    "reviewer_corrections": [],   # appended by the human gate (injected into prompts)
+    "feedback_log": [],           # structured audit trail of every human note
 }
 
 
@@ -69,7 +70,22 @@ def as_prompt_block(mem: dict[str, Any] | None = None) -> str:
     return "\n".join(lines)
 
 
-def record_correction(note: str) -> None:
+def record_correction(note: str, *, stage: str | None = None) -> None:
+    """Persist a human correction so future runs learn from it.
+
+    The note is (a) appended to `reviewer_corrections`, which `as_prompt_block`
+    injects into Skills 1-4 on the NEXT run (this is the self-improving loop — the
+    agent sees the lesson and stops repeating the mistake), and (b) logged in
+    `feedback_log` with its pipeline stage for an auditable history. `stage` tags
+    WHERE the feedback came from (e.g. "partition", "unit:Heading Element") so the
+    injected rule keeps its context."""
+    note = (note or "").strip()
+    if not note:
+        return
     mem = load()
-    mem.setdefault("reviewer_corrections", []).append(note)
+    tagged = f"[{stage}] {note}" if stage else note
+    corr = mem.setdefault("reviewer_corrections", [])
+    if tagged not in corr:                      # never inject the same lesson twice
+        corr.append(tagged)
+    mem.setdefault("feedback_log", []).append({"stage": stage or "general", "note": note})
     save(mem)

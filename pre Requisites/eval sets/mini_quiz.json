@@ -1,7 +1,7 @@
 {
   "meta": {
     "project": "ILM \u2014 Interactive Learning Material (V1, workflow v2)",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "created": "2026-06-11",
     "pipeline_step": "Skill 4 (MCQs)",
     "diagram_node": "Skill 4: MCQs",
@@ -10,7 +10,7 @@
       "pass",
       "flag"
     ],
-    "note": "Split from ilm_eval_set.json v0.1.0; cases unchanged."
+    "note": "v0.3.0: realigned to updated rubrics.json — Number of questions (10.0) hard-fail floor lowered from <4 to <3, so QUZ-07's under-boundary sub-case now uses 2 instead of 3; criterion 13.0 cased as 'Difficulty Mix'."
   },
   "source_spans": {
     "S1": "An AI agent is a program that uses a language model to decide which actions to take. It runs in a loop: observe the current state, choose a tool, execute it, and feed the result back into the model. The loop ends when the model decides the task is complete.",
@@ -170,7 +170,7 @@
       "id": "QUZ-07",
       "rubric_case_id": 10.0,
       "criterion": "Number of questions",
-      "edge_case": "Boundary pair: 5 questions (max) must PASS; 6 must FLAG",
+      "edge_case": "Boundary pair: 5 questions (max) must PASS; 6 must FLAG; the hard-fail floor is now <3 (2 must FLAG)",
       "grader": "code",
       "input": {
         "candidate_quizzes": [
@@ -191,14 +191,14 @@
           },
           {
             "quiz_id": "q_boundary_under_flag",
-            "question_count": 3,
+            "question_count": 2,
             "expected": "flag"
           }
         ]
       },
       "expected_verdict": "flag",
-      "failure_mode": "Four sub-cases pinning both boundaries of the 4-5 range. The top-level expected_verdict applies to the set check: the grader must produce exactly the per-quiz expectations listed; the two out-of-range quizzes must flag.",
-      "judge_instructions": "Code grader: assert 4 <= question_count <= 5. Run all four sub-cases; an off-by-one error at either boundary fails this eval case."
+      "failure_mode": "Sub-cases pinning the boundaries. The updated rubric keeps the pass band at 4-5 but lowers the hard-fail floor to 'fewer than 3', so the under-boundary case now uses 2 (still a flag) instead of 3, which is no longer an automatic fail. The top-level expected_verdict applies to the set check: any out-of-range quiz makes the batch flag.",
+      "judge_instructions": "Code grader: the pass band is 4 <= question_count <= 5 and the hard-fail floor is question_count < 3. Run all four sub-cases; the 6-question and 2-question quizzes must flag."
     },
     {
       "id": "QUZ-08",
@@ -227,7 +227,7 @@
     {
       "id": "QUZ-09",
       "rubric_case_id": 13.0,
-      "criterion": "Difficulty mix",
+      "criterion": "Difficulty Mix",
       "edge_case": "Labels show a mix but actual difficulty is uniform",
       "grader": "llm",
       "input": {

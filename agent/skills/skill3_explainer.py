@@ -1,24 +1,28 @@
 """Skill 3: explainer-builder (AI).
 
-Input: concept + summary + span. Output: a renderable explainer (text + inline
-visual) PLUS example scenarios (the rubric defines Example Scenarios; we attach
-them here so the per-concept loop stays at 5 skills — see example_scenarios.json
-note). Done-when: a learner can see the concept.
+Input: concept + summary + span. Output: a renderable explainer (text + generated
+illustration) PLUS example scenarios (each with its own generated illustration and,
+for code concepts, a runnable playground). Done-when: a learner can see the concept.
+
+Visuals are now AI-generated raster illustrations (curated by the human at the
+review gate), not hand-rolled inline SVGs.
 """
 from __future__ import annotations
 
-from .. import llm
+from concurrent.futures import ThreadPoolExecutor
+
+from .. import image_gen, llm
 from ..models import Explanation, Scenario, Concept
-from ..visual_spec import VISUAL_SPEC
 
 SYSTEM = (
-    "You build concise, correct concept explainers with a clear, polished visual, "
-    "plus concrete example scenarios. Everything must trace to the source span."
+    "You build concise, correct concept explainers plus concrete example "
+    "scenarios. Everything must trace to the source span."
 )
 
 PROMPT = """{memory}
 
-Build an explainer + 2 example scenarios for the concept below.
+Build an explainer + example scenarios for the concept below (2 scenarios by
+default — but produce FEWER if the reviewer feedback below asks you to remove one).
 
 EXPLANATION rules:
 - SHORT & SIMPLE: 2-3 plain sentences. Use everyday words and short sentences a
@@ -31,19 +35,15 @@ EXPLANATION rules:
   state. Even true domain knowledge is a faithfulness violation if it is not in
   the span. Explain only what the source itself says, in simpler words.
 
-{visual_spec}
-
 SCENARIO rules (Example Scenarios rubric):
 - Each scenario 1-2 SHORT sentences in plain words, factually accurate, a valid
   INSTANCE of the concept. Concrete and specific, adds understanding beyond the
   explanation — but keep it easy to read.
-- The two scenarios must be DISTINCT situations, not reworded copies.
+- When you produce two, they must be DISTINCT situations, not reworded copies.
+  If the reviewer asked to drop a scenario, return only the one(s) they want.
 - Prefer real-world framing (a relatable task the learner would actually do), but
   the situation must still be grounded in / consistent with the SOURCE SPAN — do
   not introduce facts about the concept that the source does not state.
-- VISUAL: give EVERY scenario its own inline-SVG `visual_html` (same spec/rules as
-  the explanation visual above) that depicts THAT real-world example — its inputs,
-  what happens, and the result. Reuse the theme CSS variables; no <script>/images.
 
 CODE PLAYGROUND (when IS_CODE_CONCEPT is true OR the SOURCE SPAN contains a code block):
 - Put a SMALL, COMPLETE, RUNNABLE `code_playground` on at least one scenario.
@@ -70,15 +70,33 @@ SUMMARY: {summary}
 IS_CODE_CONCEPT: {is_code}
 SOURCE SPAN (only facts you may rely on):
 \"\"\"{span}\"\"\"
-
-Return JSON:
-{{"explanation": {{"text": "...", "visual_diagram_html": "<svg ...>...</svg>"}},
-  "scenarios": [{{"text": "...", "visual_html": "<svg ...>...</svg>", "code_playground": null}},
-                {{"text": "...", "visual_html": "<svg ...>...</svg>", "code_playground": null}}]}}
+{reviewer_feedback}
+Return JSON (the "scenarios" array may hold ONE or TWO items — honor the feedback):
+{{"explanation": {{"text": "..."}},
+  "scenarios": [{{"text": "...", "code_playground": null}}]}}
 """
 
 
-def build_explainer(concept: Concept, *, memory_block: str = ""):
+def _feedback_block(feedback: str) -> str:
+    """Reviewer feedback injected LATE (after the rules) so it OVERRIDES the
+    defaults above — including how many scenarios to produce. It may not override
+    grounding/faithfulness to the SOURCE SPAN."""
+    if not feedback.strip():
+        return ""
+    return (
+        "\nREVIEWER FEEDBACK — HIGHEST PRIORITY. Apply this exactly when regenerating; "
+        "it overrides the default instructions above (e.g. if it says to remove a "
+        "scenario, return fewer scenarios). Never invent facts the SOURCE SPAN does "
+        f"not support:\n{feedback.strip()}\n"
+    )
+
+
+def build_explainer(concept: Concept, *, memory_block: str = "",
+                    reviewer_feedback: str = "", with_image: bool = True,
+                    include_scenarios: bool = True):
+    """Build the explanation (+ scenarios by default). `include_scenarios=False`
+    regenerates ONLY the explanation (text + its image) — used for part-level
+    regeneration so touching the explanation doesn't rebuild the scenarios."""
     # Treat the concept as code-bearing if extraction flagged it OR the source span
     # itself contains a fenced code block — so code-heavy material (HTML/CSS/JS,
     # etc.) reliably gets a runnable/previewable playground even if skill 1 missed
@@ -89,27 +107,108 @@ def build_explainer(concept: Concept, *, memory_block: str = ""):
             {"role": "system", "content": SYSTEM},
             {"role": "user", "content": PROMPT.format(
                 memory=memory_block,
-                visual_spec=VISUAL_SPEC,
                 title=concept.title,
                 summary=concept.summary,
                 span=concept.source_span,
                 is_code=is_code,
+                reviewer_feedback=_feedback_block(reviewer_feedback),
             )},
         ],
         temperature=0.5,
-        max_tokens=3400,  # concise text + simple (small) SVGs + code — fits well under this
+        max_tokens=2000,  # concise text + code (no inline SVG anymore)
     )
     exp = data["explanation"]
-    explanation = Explanation(
-        text=exp["text"].strip(),
-        visual_diagram_html=exp.get("visual_diagram_html", "").strip(),
-    )
+    explanation = Explanation(text=exp["text"].strip())
     scenarios: list[Scenario] = []
-    for s in data.get("scenarios", []):
-        cp = s.get("code_playground")
-        scenarios.append(Scenario(text=s["text"].strip(),
-                                  visual_html=(s.get("visual_html") or "").strip(),
-                                  code_playground=cp if cp else None))
-    if not scenarios:
-        scenarios = [Scenario(text=concept.summary)]
+    if include_scenarios:
+        for s in data.get("scenarios", []):
+            cp = s.get("code_playground")
+            scenarios.append(Scenario(text=s["text"].strip(),
+                                      code_playground=cp if cp else None))
+        if not scenarios:
+            scenarios = [Scenario(text=concept.summary)]
+
+    # Generate the raster illustrations concurrently (explanation + each scenario).
+    if with_image:
+        jobs = [(image_gen.KIND_EXPLANATION, explanation)]
+        jobs += [(image_gen.KIND_SCENARIO, sc) for sc in scenarios]
+
+        def _make(job):
+            kind, target = job
+            try:
+                return target, image_gen.generate_visual(kind, concept.title, target.text)
+            except Exception as e:
+                print(f"   [skill3] {kind} image failed for {concept.title}: {e}")
+                return target, ""
+
+        with ThreadPoolExecutor(max_workers=len(jobs)) as ex:
+            for target, img in ex.map(_make, jobs):
+                target.visual_image = img
+
     return explanation, scenarios
+
+
+ONE_SCENARIO_PROMPT = """{memory}
+
+Write ONE example scenario for the concept below (to replace/add a single scenario
+in an existing lesson — the other scenarios are listed so you make a DISTINCT one).
+
+SCENARIO rules (Example Scenarios rubric):
+- 1-2 SHORT sentences in plain words, factually accurate, a valid INSTANCE of the
+  concept. Concrete and specific; adds understanding beyond a bare definition.
+- Real-world framing, but grounded in / consistent with the SOURCE SPAN — do not
+  introduce facts about the concept the source does not state.
+- It MUST be a DIFFERENT situation from the existing scenarios below (no rewording).
+
+CODE PLAYGROUND (when IS_CODE_CONCEPT is true OR the SOURCE SPAN contains a code block):
+- Include a SMALL, COMPLETE, RUNNABLE `code_playground` in the SAME language as the
+  SOURCE SPAN (```python→python, ```js→javascript, ```java→java, ```html→html …).
+  Non-web code must print visible output (<=25 lines); html renders as live preview.
+- Otherwise set "code_playground": null.
+
+CONCEPT: {title}
+SUMMARY: {summary}
+IS_CODE_CONCEPT: {is_code}
+SOURCE SPAN (only facts you may rely on):
+\"\"\"{span}\"\"\"
+
+EXISTING SCENARIOS (make yours DISTINCT from these):
+{existing}
+{reviewer_feedback}
+Return JSON: {{"text": "...", "code_playground": null}}
+"""
+
+
+def generate_one_scenario(concept: Concept, *, feedback: str = "", avoid=None,
+                          memory_block: str = "", with_image: bool = True) -> Scenario:
+    """Generate a SINGLE scenario (text + image + optional code playground), distinct
+    from `avoid` (the other scenarios' texts). Used to regenerate/add just one
+    scenario without rebuilding the explanation or the other scenarios."""
+    is_code = bool(concept.__dict__.get("is_code_concept", False)) or ("```" in concept.source_span)
+    existing = "\n".join(f"- {t}" for t in (avoid or [])) or "(none)"
+    data = llm.chat_json(
+        [
+            {"role": "system", "content": SYSTEM},
+            {"role": "user", "content": ONE_SCENARIO_PROMPT.format(
+                memory=memory_block,
+                title=concept.title,
+                summary=concept.summary,
+                span=concept.source_span,
+                is_code=is_code,
+                existing=existing,
+                reviewer_feedback=_feedback_block(feedback),
+            )},
+        ],
+        temperature=0.6,
+        max_tokens=1200,
+    )
+    cp = data.get("code_playground")
+    scenario = Scenario(text=(data.get("text") or "").strip() or concept.summary,
+                        code_playground=cp if cp else None)
+    if with_image:
+        try:
+            scenario.visual_image = image_gen.generate_visual(
+                image_gen.KIND_SCENARIO, concept.title, scenario.text)
+        except Exception as e:
+            print(f"   [skill3] one-scenario image failed for {concept.title}: {e}")
+    return scenario

@@ -66,18 +66,23 @@ _DRAWABLE = ("<svg", "<img", "<canvas", "<path", "<rect", "<circle",
              "<line", "<polygon", "<ellipse", "<polyline")
 
 
-def check_visual_present(html: str | None) -> Verdict:
-    """EXP #4: a visual/diagram with *renderable content* is present.
+def check_visual_present(visual: str | None) -> Verdict:
+    """EXP #4: a visual is present.
 
-    Naive presence checks pass an empty wrapper like '<div>   </div>'. We require
-    either a drawable element OR non-empty text after stripping tags/whitespace.
+    Accepts an AI-generated raster image (a data URL or an /ilm-images/… path) OR
+    a legacy inline-SVG diagram with renderable content. Naive presence checks pass
+    an empty wrapper like '<div>   </div>', so for SVG/HTML we require either a
+    drawable element or non-empty text after stripping tags/whitespace.
     """
-    if not html or not html.strip():
-        return _v(False, "visual present", "no visual_diagram_html")
-    low = html.lower()
+    if not visual or not visual.strip():
+        return _v(False, "visual present", "no visual generated")
+    low = visual.lower()
+    # A generated raster image reference counts as present.
+    if low.startswith("data:image/") or "/ilm-images/" in low:
+        return _v(True, "visual present", "")
     if any(tag in low for tag in _DRAWABLE):
         return _v(True, "visual present", "")
-    text_only = _re_tags.sub("", html).strip()
+    text_only = _re_tags.sub("", visual).strip()
     ok = bool(text_only)
     return _v(ok, "visual present", "visual wrapper has no renderable content")
 
@@ -115,7 +120,7 @@ def run_unit_code_graders(unit: dict[str, Any]) -> list[Verdict]:
                 out.append(res)
 
     exp = unit.get("explanation", {})
-    out.append(check_visual_present(exp.get("visual_diagram_html")))
+    out.append(check_visual_present(exp.get("visual_image") or exp.get("visual_diagram_html")))
 
     # All components present (UNT-03).
     for comp in ("explanation", "analogy", "scenarios", "mini_quiz"):

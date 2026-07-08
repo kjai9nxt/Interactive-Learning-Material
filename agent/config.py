@@ -31,6 +31,11 @@ MEMORY_PATH = ROOT / "agent" / "memory_store.json"
 EVAL_DIR = ROOT / "pre Requisites" / "eval sets"
 # Where the React frontend reads the published units from.
 FRONTEND_DATA = ROOT / "src" / "data" / "conceptUnits.json"
+# Generated raster visuals are written here (served by Vite at /ilm-images/…) so
+# conceptUnits.json stores a short URL, not a multi-MB base64 data URL. Gitignored.
+PUBLIC_DIR = ROOT / "public"
+IMAGE_DIR = PUBLIC_DIR / "ilm-images"
+IMAGE_URL_PREFIX = "/ilm-images"
 
 for _d in (OUTPUT_DIR, RUNS_DIR):
     _d.mkdir(parents=True, exist_ok=True)
@@ -41,6 +46,16 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 GEN_MODEL = os.environ.get("ILM_GEN_MODEL", "openai/gpt-4o")
 JUDGE_MODEL = os.environ.get("ILM_JUDGE_MODEL", "openai/gpt-4o")
+# Image-generation model (Skills 2/3 visuals). Must be an OpenRouter id that
+# returns images via chat-completions modalities. Verified reachable on the
+# project key: google/gemini-2.5-flash-image.
+IMAGE_MODEL = os.environ.get("ILM_IMAGE_MODEL", "google/gemini-2.5-flash-image")
+# Generated images come back as ~1MB PNGs. We downscale to a max dimension and
+# re-encode as WebP so each visual is a few tens of KB instead. Tunable via env.
+IMAGE_MAX_DIM = int(os.environ.get("ILM_IMAGE_MAX_DIM", "1024"))   # longest side, px
+# Higher quality keeps small label text crisp (low quality blurs it). 90 ≈ still tiny.
+IMAGE_QUALITY = int(os.environ.get("ILM_IMAGE_QUALITY", "90"))     # WebP quality 1-100
+IMAGE_FORMAT = os.environ.get("ILM_IMAGE_FORMAT", "WEBP").upper()  # WEBP | JPEG | PNG
 
 # ── Pipeline knobs ───────────────────────────────────────────────────────
 # eval gate 2 auto-retry budget. 1 by default: surgical retries (regenerate only
