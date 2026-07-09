@@ -38,7 +38,8 @@ Config is env-driven (`.env`, gitignored). Key vars: `OPENROUTER_API_KEY`,
 |------|------|
 | `orchestrator.py` | Wires the whole pipeline. `run_on_text()` is the entry; `build_unit()` builds/retries one unit; `_apply_image_decision()` + `_persist_unit_images()` handle gate-2 image curation. |
 | `config.py` | Paths, models, knobs. Image model + `public/ilm-images` dirs. |
-| `llm.py` | OpenRouter client: `chat()`, `chat_json()`, **`generate_image()`** (image modality), and **token/image usage accounting** (`usage_snapshot()`/`reset_usage()`). |
+| `llm.py` | OpenRouter client: `chat()`, `chat_json()`, **`generate_image()`** (image modality), and **token/image usage accounting** (`usage_snapshot()`/`reset_usage()`; splits chat vs. image tokens for accurate costing). |
+| `pricing.py` | Token/image → USD cost. `estimate_cost(usage, gen, image)` + `rates_snapshot()`. Rates in USD/1M tokens (chat) + flat USD/image; overridable via `ILM_GEN_INPUT_PRICE`/`ILM_GEN_OUTPUT_PRICE`/`ILM_IMAGE_PRICE_USD`. |
 | `image_gen.py` | Builds image prompts, generates raster visuals, `persist_data_url()` → writes PNG to `public/ilm-images/<run_id>/` and returns a short URL. |
 | `models.py` | Pydantic `ConceptUnit` schema — the core contract. Visuals: `visual_image` (raster, current) + legacy `visual_*_html` (optional, SVG fallback). |
 | `skills/skill1_extract.py` | Concept extraction. |
@@ -47,7 +48,7 @@ Config is env-driven (`.env`, gitignored). Key vars: `OPENROUTER_API_KEY`,
 | `skills/skill4_mcq.py` | Mini-quiz MCQs. |
 | `skills/skill5_audit.py` | Eval gate 2 (code graders + LLM judge). Judge only sees text, not image data. |
 | `graders/code_graders.py` | Deterministic checks. `check_visual_present()` accepts a raster image OR legacy SVG. |
-| `server.py` | Flask async-job API. Endpoints: `/api/generate`, `/api/status/<id>`, `/api/review/<id>`, **`/api/image`** (stateless (re)generate one visual for the gate), `/api/run`, `/api/units`, `/api/health`, `/api/sample`. |
+| `server.py` | Flask async-job API. Endpoints: `/api/generate`, `/api/status/<id>`, `/api/review/<id>`, **`/api/image`** (stateless (re)generate one visual for the gate), **`/api/pricing`** (current token/image rates for UI cost estimation), `/api/run`, `/api/units`, `/api/health`, `/api/sample`. |
 | `human_gate.py` | CLI review path (`--auto-approve` for unattended). |
 | `memory.py` / `memory_store.json` | Reviewer feedback → learned rules injected into skills. |
 | `logging_store.py` | `RunLogger` → one JSON line per run in `runs/runs.jsonl` (includes a `usage` event). |
@@ -61,6 +62,7 @@ Config is env-driven (`.env`, gitignored). Key vars: `OPENROUTER_API_KEY`,
 | `ConceptUnitView.tsx` | Renders a unit. `Visual` prefers a raster `image`, falls back to legacy inline SVG `html`. |
 | `types.ts` | TS mirror of the schema + gate payloads/decisions. |
 | `Lesson.tsx`, `ilm.css` | Lesson shell; styles. |
+| `UsagePanel.tsx` | Token usage & cost panel on the result screen (tokens, USD cost split text/image, per-concept cost, projection table). Uses `data.usage.cost` when present, else computes from `/api/pricing`. |
 | `../components/CodePlayground.tsx`, `CodeRunner.tsx` | Web live-preview / server-run code. |
 | `../data/conceptUnits.json` | Published output the renderer reads. |
 
@@ -99,8 +101,14 @@ generated but still **render as a fallback** for already-published units. The ol
 
 Every OpenRouter call's `usage` is accumulated per run and written to
 **`runs/usage.jsonl`** (one line per run: `chat_calls`, `image_calls`,
-`prompt/completion/total_tokens`, models). Also embedded in each run's
-`concept_units.json` (`usage` key) and in the `runs/runs.jsonl` trace.
+`prompt/completion/total_tokens` + `chat_*`/`image_*` token splits, models, and a
+nested **`cost`** breakdown). Also embedded in each run's `concept_units.json`
+(`usage` key) and in the `runs/runs.jsonl` trace. **In-app visibility:** the
+`UsagePanel` on the result screen shows tokens, USD cost (text vs. image),
+per-concept cost, and a projection of what generating more concepts would cost.
+Rates live in `agent/pricing.py` (served at `/api/pricing`); the UI computes cost
+from `usage.cost` when present, else from the live rates (so pre-`cost` runs still
+show money).
 
 - Quick total: `cat runs/usage.jsonl | jq -s 'map(.total_tokens)|add'`.
 - **Image calls dominate cost** — each ~1 image ≈ ~$0.03–0.04 on gemini flash
@@ -120,6 +128,41 @@ Every OpenRouter call's `usage` is accumulated per run and written to
 - Work autonomously — finish end-to-end without yes/no prompts (saved preference).
 
 ## Change log
+- **2026-07-09 (13)** — **Fix: publish dropped back to the Ingest screen (dev server).**
+  Publishing writes the result to `src/data/conceptUnits.json` (`config.FRONTEND_DATA`),
+  which lives inside Vite's watched root — so each publish tripped a **full page
+  reload**, wiping the in-memory React result and returning the user to step 1
+  ("upload new reading material"). Fix is dev-only: `vite.config.ts` now sets
+  `server.watch.ignored` for `**/src/data/conceptUnits.json` + `**/public/ilm-images/**`
+  (the two paths the pipeline writes at publish time). Nothing imports these (the
+  renderer reads the result over `/api`), so ignoring them is safe. Verified E2E
+  (mocked API): gate 1 → gate 2 → Publish now renders the lesson and it *stays* on
+  screen when the data file is (re)written. Requires a Vite restart to take effect.
+- **2026-07-09 (12)** — **Export parity + usage behind a button.** (1) Rewrote
+  `src/ilm/exportHtml.ts` so the downloaded standalone `.html` mirrors the live
+  reading material: CSS ported from `Styles.css`/`ilm.css` (dark theme) and markup
+  ported from `Lesson.tsx`/`ConceptUnitView.tsx`/`DataQuiz.tsx`/`CodePlayground.tsx`
+  — centered hero + section layout, **one-question-at-a-time** mini-quiz (progress
+  bar, aspect/difficulty badges, reveal + explanation, confetti, done card),
+  gated sections (locked preview → continue breaker → next) + a course-complete
+  score card, and a **tabbed HTML/CSS/JS playground** with live iframe preview +
+  console (non-web code stays a read-only `.cr` block). (2) `IlmApp.tsx`: the
+  `UsagePanel` is now hidden by default and toggled by a top-bar **"⛁ Tokens &
+  cost"** button (only shown when `data.usage` exists) instead of always rendering
+  in the reading material. Verified end-to-end in a headless browser (gating,
+  quiz completion, playground Run). Additive.
+- **2026-07-09 (11)** — **Token usage & cost visibility.** New `agent/pricing.py`
+  turns the per-run usage snapshot into USD (rates USD/1M tokens for chat + flat
+  USD/image; env-overridable). `llm._record_usage` now splits chat vs. image
+  tokens so chat cost isn't mispriced by image-call tokens; orchestrator embeds a
+  `cost` breakdown into `usage` (→ output + `runs/usage.jsonl` + trace + CLI print).
+  New `/api/pricing` endpoint exposes live rates. Frontend: `src/ilm/UsagePanel.tsx`
+  (rendered in `IlmApp.tsx` result view) shows total/prompt/completion tokens,
+  chat+image call counts, total cost split text/image, cost per concept, and a
+  projection table for generating N more concepts; prefers `usage.cost`, falls
+  back to computing from `/api/pricing` for older runs. `types.ts` gained
+  `Usage`/`UsageCost`/`UsageRates`; `.ilm-usage*` styles in `ilm.css`. Additive —
+  no existing behaviour changed.
 - **2026-07-08 (10)** — **Interactive HTML export (parity upgrade).** The standalone
   HTML export now embeds the app's dynamic behaviour as vanilla JS (fully offline):
   (1) **sequential gated units** — each unit's mini-quiz must be attempted before

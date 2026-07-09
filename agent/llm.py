@@ -25,9 +25,14 @@ class LLMError(RuntimeError):
 # so the orchestrator can snapshot per-run spend into the trace (runs/usage.jsonl)
 # and the CLAUDE.md harness can report "how many tokens this is costing".
 _USAGE_LOCK = threading.Lock()
+# Aggregate counters + per-kind splits. The splits (chat_* / image_*) let the
+# pricing module cost chat tokens at chat rates without lumping in image-call
+# tokens, which are priced per-image instead (see agent/pricing.py).
 _USAGE: dict[str, int] = {
     "chat_calls": 0, "image_calls": 0,
     "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0,
+    "chat_prompt_tokens": 0, "chat_completion_tokens": 0,
+    "image_prompt_tokens": 0, "image_completion_tokens": 0,
 }
 
 
@@ -35,11 +40,14 @@ def _record_usage(kind: str, usage: dict[str, Any] | None) -> None:
     with _USAGE_LOCK:
         _USAGE[f"{kind}_calls"] = _USAGE.get(f"{kind}_calls", 0) + 1
         if usage:
-            _USAGE["prompt_tokens"] += int(usage.get("prompt_tokens", 0) or 0)
-            _USAGE["completion_tokens"] += int(usage.get("completion_tokens", 0) or 0)
-            _USAGE["total_tokens"] += int(
-                usage.get("total_tokens",
-                          (usage.get("prompt_tokens", 0) or 0) + (usage.get("completion_tokens", 0) or 0)))
+            p = int(usage.get("prompt_tokens", 0) or 0)
+            c = int(usage.get("completion_tokens", 0) or 0)
+            t = int(usage.get("total_tokens", p + c) or (p + c))
+            _USAGE["prompt_tokens"] += p
+            _USAGE["completion_tokens"] += c
+            _USAGE["total_tokens"] += t
+            _USAGE[f"{kind}_prompt_tokens"] = _USAGE.get(f"{kind}_prompt_tokens", 0) + p
+            _USAGE[f"{kind}_completion_tokens"] = _USAGE.get(f"{kind}_completion_tokens", 0) + c
 
 
 def usage_snapshot() -> dict[str, int]:

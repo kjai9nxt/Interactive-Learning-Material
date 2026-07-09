@@ -1,14 +1,32 @@
 {
-  "run_id": "r_61f58241",
+  "run_id": "r_8bb67166",
   "doc": "Session 2.md",
   "generator_model": "anthropic/claude-haiku-4.5",
   "image_model": "google/gemini-2.5-flash-image",
   "usage": {
-    "chat_calls": 32,
-    "image_calls": 11,
-    "prompt_tokens": 37476,
-    "completion_tokens": 21444,
-    "total_tokens": 58920
+    "chat_calls": 23,
+    "image_calls": 10,
+    "prompt_tokens": 27463,
+    "completion_tokens": 17656,
+    "total_tokens": 45119,
+    "chat_prompt_tokens": 25096,
+    "chat_completion_tokens": 4566,
+    "image_prompt_tokens": 2367,
+    "image_completion_tokens": 13090,
+    "cost": {
+      "currency": "USD",
+      "text_cost": 0.047926,
+      "image_cost": 0.4,
+      "total_cost": 0.447926,
+      "rates": {
+        "currency": "USD",
+        "gen_model": "anthropic/claude-haiku-4.5",
+        "image_model": "google/gemini-2.5-flash-image",
+        "input_per_mtok": 1.0,
+        "output_per_mtok": 5.0,
+        "image_per_call": 0.04
+      }
+    }
   },
   "generated_units": 3,
   "published_units": 3,
@@ -20,24 +38,26 @@
       "source_span": "The HTML `div` element defines a container.\n\n```html\n<div>\n  <h1>Tourism</h1>\n  <p>Plan your trip wherever you want to go</p>\n  <button>Get Started</button>\n</div>\n```",
       "is_code_concept": true,
       "explanation": {
-        "text": "The HTML `div` element is a container—a box that holds and groups other HTML elements together. You use it to organize related content like headings, paragraphs, and buttons into one unit, making it easier to style or manage them as a group.",
-        "visual_image": "/ilm-images/r_61f58241/c1-explanation.webp",
+        "text": "The HTML `div` element is a container—a box that holds and groups other HTML elements together. You use it to organize related content like headings, paragraphs, and buttons in one place, making it easier to style or manage them as a unit.",
+        "visual_image": "/ilm-images/r_8bb67166/c1-explanation.webp",
         "visual_diagram_html": ""
       },
       "analogy": {
-        "text": "A div is like a cardboard box that holds different items together. The box itself (the div) is the container, and the items inside it—a label, a description card, and a button—are like the h1, p, and button elements grouped within the div. Just as the box groups these separate items into one unit, the div groups these separate HTML elements into one container.",
-        "visual_image": "/ilm-images/r_61f58241/c1-analogy.webp",
+        "text": "A div is like a cardboard box that holds different items together. The box itself (the div) is like the container, and the items inside it—a heading, paragraph, and button—are like the grouped HTML elements. Just as the box keeps related items in one place, the div groups related HTML elements together.",
+        "visual_image": "/ilm-images/r_8bb67166/c1-analogy.webp",
         "visual_html": "",
-        "grounding_check": "Box = 'container' (source: 'div element defines a container'); items inside (label, description, button) = h1, p, button elements shown in the source code example grouped within the div tags."
+        "grounding_check": "Box = 'container' (source: 'div element defines a container'); items inside (heading, paragraph, button) = 'other HTML elements' (source: example shows h1, p, button grouped inside div)"
       },
       "scenarios": [
         {
-          "text": "You're building a tourism website and want to group a heading, description, and button together so they stay visually connected. You wrap all three inside a `div` to keep them organized as one section.",
-          "visual_image": "/ilm-images/r_61f58241/c1-scenario1.webp",
+          "text": "You are building a tourism website and want to group a heading, description, and button together so they stay visually connected. You wrap all three inside a `div` to keep them organized.",
+          "visual_image": "/ilm-images/r_8bb67166/c1-scenario1.webp",
           "visual_html": "",
           "code_playground": {
             "language": "html",
-            "html": "<!DOCTYPE html>\n<html>\n<head>\n  <title>Tourism Site</title>\n  <style>\n    div {\n      border: 2px solid #0066cc;\n      padding: 20px;\n      background-color: #f0f8ff;\n      width: 300px;\n    }\n  </style>\n</head>\n<body>\n  <div>\n    <h1>Tourism</h1>\n    <p>Plan your trip wherever you want to go</p>\n    <button>Get Started</button>\n  </div>\n</body>\n</html>"
+            "html": "<div>\n  <h1>Tourism</h1>\n  <p>Plan your trip wherever you want to go</p>\n  <button>Get Started</button>\n</div>",
+            "css": "div {\n  border: 2px solid #0066cc;\n  padding: 20px;\n  background-color: #f0f8ff;\n  border-radius: 8px;\n  max-width: 400px;\n}",
+            "js": ""
           }
         }
       ],
@@ -47,53 +67,53 @@
             "question": "What is the main purpose of the HTML div element?",
             "options": [
               "To define a container that groups other HTML elements together",
-              "To create a line break between elements",
-              "To add styling directly to text",
-              "To embed images in a webpage"
+              "To create a line break between paragraphs",
+              "To display text in bold formatting",
+              "To add a border around a single element"
             ],
             "correct_index": 0,
-            "explanation": "The source span explicitly states that the div element 'defines a container' that groups other HTML elements together. The other options describe different HTML elements or features, not the div's purpose.",
+            "explanation": "The source states that the div element 'defines a container' used to group other HTML elements together. The other options describe different HTML elements or features, not the div's purpose.",
             "difficulty": "easy",
             "aspect": "recall"
           },
           {
-            "question": "In the example, what elements are grouped inside the div container?",
+            "question": "In the example, which elements are grouped inside the div container?",
             "options": [
               "An h1 heading, a paragraph, and a button",
-              "Only the h1 heading and the button",
-              "Only the paragraph and the button",
-              "Just the h1 heading"
+              "Only the h1 heading and the paragraph",
+              "Only the button element",
+              "The div and the h1 heading only"
             ],
             "correct_index": 0,
-            "explanation": "The source span shows a div containing three elements: an h1 with 'Tourism', a p with 'Plan your trip wherever you want to go', and a button with 'Get Started'. All three are grouped inside the div.",
-            "difficulty": "easy",
-            "aspect": "recall"
-          },
-          {
-            "question": "Which of the following is a valid use of a div element?",
-            "options": [
-              "Grouping a heading, text, and a button together",
-              "Replacing the h1 element for all page headings",
-              "Automatically styling text without CSS",
-              "Creating a table of data"
-            ],
-            "correct_index": 0,
-            "explanation": "The source span example shows a div grouping an h1, a paragraph, and a button together, demonstrating that this is a valid use. The other options either misrepresent the div's role or describe different elements.",
+            "explanation": "The source example shows an h1, a p, and a button all nested inside the div tags. These three elements are the ones grouped together by the container.",
             "difficulty": "easy",
             "aspect": "understanding"
           },
           {
-            "question": "What type of element is the div?",
+            "question": "What does the div element do with the elements inside it?",
             "options": [
-              "A container element",
-              "A text formatting element",
-              "An image element",
-              "A form input element"
+              "Groups them together",
+              "Hides them from the page",
+              "Changes their color automatically",
+              "Removes them from the HTML"
             ],
             "correct_index": 0,
-            "explanation": "The source span explicitly identifies the div as a 'container' element. The other options describe different categories of HTML elements, not what a div is.",
+            "explanation": "The source explicitly states the div 'defines a container that groups other HTML elements together.' Grouping is the core function; the other options are misconceptions about what a container does.",
             "difficulty": "easy",
             "aspect": "recall"
+          },
+          {
+            "question": "Based on the example, can a div container hold different types of elements?",
+            "options": [
+              "Yes, it holds headings, paragraphs, and buttons together",
+              "No, it can only hold paragraphs",
+              "No, it can only hold one type of element",
+              "Yes, but only text elements, not buttons"
+            ],
+            "correct_index": 0,
+            "explanation": "The source example demonstrates a div containing an h1, a p, and a button—three different element types. This shows that a div can group multiple different kinds of elements.",
+            "difficulty": "easy",
+            "aspect": "understanding"
           }
         ]
       },
@@ -110,27 +130,22 @@
       "source_span": "```\nselector {\n  property1: value1;\n  property2: value2;\n}\n```",
       "is_code_concept": true,
       "explanation": {
-        "text": "A CSS rule is a block of styling instructions made up of two parts: a selector (which targets which elements to style) and a declaration block (the curly braces containing one or more property-value pairs). Each property-value pair tells the browser what style to apply—the property is the style name (like color or font-size) and the value is what you want it to be (like blue or 16px).",
-        "visual_image": "/ilm-images/r_61f58241/c2-explanation.webp",
+        "text": "A CSS rule is a block of styling instructions. It starts with a selector (the part that picks which elements to style), then has curly braces containing one or more property-value pairs separated by semicolons. Each property is the thing you want to change (like color or size), and the value is what you want it to be.",
+        "visual_image": "/ilm-images/r_8bb67166/c2-explanation.webp",
         "visual_diagram_html": ""
       },
       "analogy": {
-        "text": "A CSS rule is like addressing a package: the selector is like writing the recipient's name on the envelope (specifying who gets it), and the curly braces contain the delivery instructions inside, just like property-value pairs (color: blue; font-size: 16px) are the specific details about how to style that selected element.",
-        "visual_image": "/ilm-images/r_61f58241/c2-analogy.webp",
+        "text": "A CSS rule is like a mailing label on a package. The address on the label is like the selector—it identifies which package (element) the rule applies to. The contents listed inside the box are like the property-value pairs—each item (property) has a specific quantity or description (value) that describes what's in the package.",
+        "visual_image": "/ilm-images/r_8bb67166/c2-analogy.webp",
         "visual_html": "",
-        "grounding_check": "selector → 'selector followed by' in source; property-value pairs → 'block containing one or more property-value pairs' in source; curly braces → implied by the code block structure showing { } syntax"
+        "grounding_check": "selector → 'selector' in source; property-value pairs → 'property1: value1; property2: value2' in source"
       },
       "scenarios": [
         {
-          "text": "You want to make all paragraph text blue and increase its size. You write a CSS rule with the selector `p`, then inside the braces add `color: blue;` and `font-size: 18px;` as two separate property-value pairs.",
-          "visual_image": "/ilm-images/r_61f58241/c2-scenario1.webp",
+          "text": "CSS rules consist of a selector followed by a block containing one or more property-value pairs.",
+          "visual_image": "/ilm-images/r_8bb67166/c2-scenario1.webp",
           "visual_html": "",
-          "code_playground": {
-            "language": "html",
-            "html": "<!DOCTYPE html>\n<html>\n<head>\n<style>\np {\n  color: blue;\n  font-size: 18px;\n}\n</style>\n</head>\n<body>\n<p>This paragraph is blue and larger.</p>\n<p>This one too.</p>\n</body>\n</html>",
-            "css": "",
-            "js": ""
-          }
+          "code_playground": null
         }
       ],
       "mini_quiz": {
@@ -139,51 +154,51 @@
             "question": "What two main parts make up a CSS rule?",
             "options": [
               "A selector and a declaration block",
-              "A property and a value",
-              "An element and an attribute",
-              "A class and an ID"
+              "A property and a value only",
+              "A class name and a tag name",
+              "An ID and a color code"
             ],
             "correct_index": 0,
-            "explanation": "The source shows a CSS rule has a selector (the part before the curly braces) and a block with property-value pairs inside curly braces. The other options name parts that exist *within* a rule or are unrelated CSS concepts.",
+            "explanation": "The source shows a CSS rule has a selector (like the word before the curly braces) followed by a block with property-value pairs inside curly braces. The other options name only parts of a rule or unrelated concepts.",
             "difficulty": "easy",
             "aspect": "recall"
           },
           {
-            "question": "In a CSS rule, what goes inside the curly braces?",
+            "question": "Inside the curly braces of a CSS rule, what do you write?",
             "options": [
               "One or more property-value pairs",
               "Only the selector name",
-              "HTML element tags",
-              "Comments and notes"
+              "Just the color and font size",
+              "A list of HTML tags"
             ],
             "correct_index": 0,
-            "explanation": "The source span shows that inside the curly braces are property-value pairs separated by semicolons (like `property1: value1;`). The selector goes *before* the braces, not inside them.",
+            "explanation": "The source span shows that inside the curly braces (the declaration block) there are property-value pairs separated by semicolons. The other options either name things outside the braces or incorrectly limit what can go inside.",
             "difficulty": "easy",
             "aspect": "recall"
           },
           {
-            "question": "How should each property-value pair end in a CSS rule?",
+            "question": "How should each property-value pair in a CSS rule end?",
             "options": [
               "With a semicolon",
               "With a comma",
               "With a colon only",
-              "With a closing brace"
+              "With nothing"
             ],
             "correct_index": 0,
-            "explanation": "The source shows each property-value pair ends with a semicolon (for example, `property1: value1;`). A colon separates the property from the value, but a semicolon terminates the pair.",
+            "explanation": "The source span shows each property-value pair ends with a semicolon (for example, `property1: value1;`). A colon separates the property from the value, but the semicolon ends the pair.",
             "difficulty": "easy",
             "aspect": "recall"
           },
           {
-            "question": "In the CSS rule shown, what is `property1: value1;` an example of?",
+            "question": "In the CSS rule shown, what comes immediately after the selector?",
             "options": [
-              "A property-value pair",
-              "A selector",
-              "A declaration block",
-              "An HTML attribute"
+              "An opening curly brace",
+              "A semicolon",
+              "A property name",
+              "A colon"
             ],
             "correct_index": 0,
-            "explanation": "The source shows `property1: value1;` as one item inside the declaration block—this is a property-value pair. The selector is the part before the braces, and the declaration block is the entire curly-braced section.",
+            "explanation": "The source span shows the selector is followed directly by an opening curly brace `{`, which begins the declaration block. The other options are parts that appear later or in different contexts.",
             "difficulty": "easy",
             "aspect": "understanding"
           }
@@ -198,29 +213,28 @@
     {
       "id": "c3",
       "title": "Text Align Property",
-      "summary": "The CSS text-align property controls the horizontal alignment of text within an HTML element using values like center, left, or right.",
+      "summary": "The CSS text-align property controls the horizontal alignment of text within an HTML element, with options for center, left, or right alignment.",
       "source_span": "The CSS `text-align` property specifies the horizontal alignment of the text in an HTML element.\n\n```css\n.h-center {\n  text-align: center;\n}\n```\n\n| Value  | Description                   |\n| ------ | ----------------------------- |\n| center | Aligns the text to the center |\n| left   | Aligns the text to the left   |\n| right  | Aligns the text to the right  |",
       "is_code_concept": true,
       "explanation": {
-        "text": "The CSS `text-align` property controls where text lines up horizontally inside an element. You give it a value like `center`, `left`, or `right` to move all the text in that direction.",
-        "visual_image": "/ilm-images/r_61f58241/c3-explanation.webp",
+        "text": "The CSS `text-align` property controls where text lines up horizontally inside an HTML element. You can choose to push text to the center, left edge, or right edge of its container. This property only affects the horizontal (left-to-right) direction.",
+        "visual_image": "/ilm-images/r_8bb67166/c3-explanation.webp",
         "visual_diagram_html": ""
       },
       "analogy": {
-        "text": "Imagine text as books on a shelf. The `text-align: left` value is like pushing all books to the left edge of the shelf, the `text-align: center` value is like stacking them in the middle, and the `text-align: right` value is like pushing them to the right edge. Just as each shelf position determines where the books sit horizontally, each text-align value determines where the text sits horizontally within the element.",
-        "visual_image": "/ilm-images/r_61f58241/c3-analogy.webp",
+        "text": "Imagine text as books on a shelf. The `text-align` property is like deciding where to push those books: `text-align: left` pushes them to the left edge of the shelf (just like \"Aligns the text to the left\"), `text-align: center` stacks them in the middle (just like \"Aligns the text to the center\"), and `text-align: right` pushes them to the right edge (just like \"Aligns the text to the right\"). The shelf itself is the HTML element that contains the text.",
+        "visual_image": "/ilm-images/r_8bb67166/c3-analogy.webp",
         "visual_html": "",
-        "grounding_check": "left/center/right values trace to 'Aligns the text to the left/center/right'; horizontal positioning traces to 'specifies the horizontal alignment of the text in an HTML element'"
+        "grounding_check": "left/center/right alignment values trace to \"Aligns the text to the left/center/right\"; the shelf traces to \"the text in an HTML element\"; the pushing action traces to \"specifies the horizontal alignment\""
       },
       "scenarios": [
         {
-          "text": "You want a website heading to appear in the middle of the page instead of on the left side where it normally sits.",
-          "visual_image": "/ilm-images/r_61f58241/c3-scenario1.webp",
+          "text": "You're building a website header and want the title text centered on the page. You apply `text-align: center;` to the heading element so the text appears in the middle instead of at the left edge.",
+          "visual_image": "/ilm-images/r_8bb67166/c3-scenario1.webp",
           "visual_html": "",
           "code_playground": {
             "language": "html",
-            "html": "<h1 class=\"h-center\">Welcome to My Site</h1>\n<p>This paragraph stays left-aligned by default.</p>",
-            "css": ".h-center {\n  text-align: center;\n}"
+            "html": "<div style=\"text-align: center; border: 1px solid #ccc; padding: 20px;\">\n  <h1>Welcome to My Site</h1>\n  <p>This text is centered horizontally</p>\n</div>\n\n<div style=\"text-align: left; border: 1px solid #ccc; padding: 20px; margin-top: 20px;\">\n  <h1>Left-aligned heading</h1>\n  <p>This text is aligned to the left</p>\n</div>\n\n<div style=\"text-align: right; border: 1px solid #ccc; padding: 20px; margin-top: 20px;\">\n  <h1>Right-aligned heading</h1>\n  <p>This text is aligned to the right</p>\n</div>"
           }
         }
       ],
@@ -235,12 +249,12 @@
               "The color of the text in an element"
             ],
             "correct_index": 0,
-            "explanation": "The source states that text-align specifies the horizontal alignment of text. Vertical alignment, size, and color are controlled by different CSS properties, not text-align.",
+            "explanation": "The source states that text-align specifies the horizontal alignment of text. The other options describe different CSS properties (vertical alignment, font size, and color), not what text-align does.",
             "difficulty": "easy",
             "aspect": "recall"
           },
           {
-            "question": "Which text-align value centers text horizontally?",
+            "question": "Which value would you use with text-align to move text to the middle of an element?",
             "options": [
               "center",
               "middle",
@@ -248,35 +262,35 @@
               "horizontal-center"
             ],
             "correct_index": 0,
-            "explanation": "The source table lists 'center' as the value that aligns text to the center. 'middle' is used for vertical alignment in other properties; the other options are not valid text-align values.",
+            "explanation": "The source table shows that 'center' aligns text to the center. 'Middle' is not a valid text-align value; the other options are made-up property names.",
             "difficulty": "easy",
             "aspect": "recall"
           },
           {
-            "question": "What happens when you set text-align to left?",
+            "question": "What is the correct CSS syntax to align text to the left?",
             "options": [
-              "Text aligns to the left side of the element",
-              "Text aligns to the right side of the element",
-              "Text moves to the left margin of the page",
-              "Text is indented from the left"
+              "text-align: left;",
+              "text-align: align-left;",
+              "align: left;",
+              "text-position: left;"
             ],
             "correct_index": 0,
-            "explanation": "The source table states that the 'left' value aligns text to the left. The other options describe different effects unrelated to the text-align property's function.",
+            "explanation": "The source shows that 'left' is a valid value for the text-align property. The other options use incorrect property names or incorrect value syntax.",
             "difficulty": "easy",
-            "aspect": "understanding"
+            "aspect": "recall"
           },
           {
-            "question": "Which value would you use to align text to the right side of an element?",
+            "question": "According to the source, how many horizontal alignment options does text-align have?",
             "options": [
-              "right",
-              "right-align",
-              "align-right",
-              "float-right"
+              "Three: center, left, and right",
+              "Two: center and left only",
+              "Four: center, left, right, and justify",
+              "Five: center, left, right, top, and bottom"
             ],
             "correct_index": 0,
-            "explanation": "The source table lists 'right' as the value that aligns text to the right. The other options are not valid text-align values; float and other properties handle different layout tasks.",
+            "explanation": "The source table lists exactly three values: center, left, and right. The other options either omit one of these or add values not mentioned in the source.",
             "difficulty": "easy",
-            "aspect": "application"
+            "aspect": "recall"
           }
         ]
       },

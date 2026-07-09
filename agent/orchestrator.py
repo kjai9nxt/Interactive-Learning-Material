@@ -23,7 +23,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
-from . import config, human_gate, image_gen, llm, memory
+from . import config, human_gate, image_gen, llm, memory, pricing
 from .logging_store import RunLogger
 from .models import Concept, ConceptUnit
 from .parse_chunk import parse_and_chunk
@@ -515,8 +515,9 @@ def run_on_text(
                 "flags": (rep.flags if rep else []),
             })
 
-    # Per-run token / image usage (for the harness + cost visibility).
+    # Per-run token / image usage + cost (for the harness + in-app cost visibility).
     usage = llm.usage_snapshot()
+    usage["cost"] = pricing.estimate_cost(usage, config.GEN_MODEL, config.IMAGE_MODEL)
     usage_line = {"run_id": run_id, "at": __import__("datetime").datetime.now(
         __import__("datetime").timezone.utc).isoformat(), "doc": doc_name,
         "gen_model": config.GEN_MODEL, "image_model": config.IMAGE_MODEL, **usage}
@@ -524,7 +525,7 @@ def run_on_text(
         f.write(json.dumps(usage_line) + "\n")
     log.event("usage", **usage)
     print(f"Usage: {usage['total_tokens']} tokens · {usage['chat_calls']} chat + "
-          f"{usage['image_calls']} image call(s)")
+          f"{usage['image_calls']} image call(s) · ${usage['cost']['total_cost']:.4f}")
 
     # Output (only approved units ship)
     out = {

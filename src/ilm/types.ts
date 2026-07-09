@@ -50,10 +50,43 @@ export interface RejectedUnit {
   flags: AuditFlag[];
 }
 
+/* Token/cost accounting (agent/llm.py usage snapshot + agent/pricing.py cost). */
+export interface UsageRates {
+  currency: string;
+  gen_model: string;
+  image_model: string;
+  input_per_mtok: number;
+  output_per_mtok: number;
+  image_per_call: number;
+}
+
+export interface UsageCost {
+  currency: string;
+  text_cost: number;
+  image_cost: number;
+  total_cost: number;
+  rates: UsageRates;
+}
+
+export interface Usage {
+  chat_calls: number;
+  image_calls: number;
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_tokens: number;
+  chat_prompt_tokens?: number;
+  chat_completion_tokens?: number;
+  image_prompt_tokens?: number;
+  image_completion_tokens?: number;
+  cost?: UsageCost;
+}
+
 export interface ConceptUnitsFile {
   run_id: string;
   doc: string;
   generator_model?: string;
+  image_model?: string;
+  usage?: Usage;
   generated_units: number;
   published_units: number;
   units: ConceptUnit[];

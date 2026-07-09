@@ -21,7 +21,7 @@ import uuid
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from . import config, image_gen
+from . import config, image_gen, pricing
 from .orchestrator import run_on_text, regenerate_part, unit_display
 from .runner import run_code, supported_languages, installed_languages
 
@@ -109,6 +109,13 @@ def health():
                     "judge_model": config.JUDGE_MODEL,
                     "runnable_languages": supported_languages(),
                     "installed_languages": installed_languages()})
+
+
+@app.get("/api/pricing")
+def pricing_route():
+    """Current token/image pricing (USD) so the UI can compute cost + projections
+    even for usage records that predate embedded cost."""
+    return jsonify(pricing.rates_snapshot())
 
 
 @app.post("/api/run")

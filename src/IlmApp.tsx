@@ -6,6 +6,7 @@ import type { ConceptUnitsFile } from "./ilm/types";
 import ThemeToggle from "./components/ThemeToggle";
 import Ingest from "./ilm/Ingest";
 import Lesson from "./ilm/Lesson";
+import UsagePanel from "./ilm/UsagePanel";
 import { buildLessonHtml } from "./ilm/exportHtml";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -26,6 +27,9 @@ function App() {
   }, [theme]);
 
   const [data, setData] = useState<ConceptUnitsFile | null>(null);
+  // Token/cost panel is hidden by default and revealed by a top-bar button, so
+  // the reading material stays clean until the user asks to see usage.
+  const [showUsage, setShowUsage] = useState(false);
 
   const units = data?.units || [];
   const rejected = data?.rejected || [];
@@ -75,6 +79,15 @@ function App() {
           Interactive Learning Material {data && <span>· {data.doc}</span>}
         </div>
         <div style={{ flex: 1 }} />
+        {data && data.usage && (
+          <button
+            className={`ilm-dlbtn${showUsage ? " is-on" : ""}`}
+            onClick={() => setShowUsage((v) => !v)}
+            title="Show token usage & cost for this run"
+          >
+            {showUsage ? "✕ Hide usage" : "⛁ Tokens & cost"}
+          </button>
+        )}
         {data && (
           <button className="ilm-dlbtn" onClick={downloadHtml} title="Download the lesson as a standalone HTML file">
             ↓ Export HTML
@@ -121,6 +134,7 @@ function App() {
               </div>
             )}
           </div>
+          {showUsage && <UsagePanel data={data} />}
           {units.length > 0
             ? <Lesson key={data.run_id} data={data} />
             : <div className="ilm-empty"><h1>No units passed the eval gate</h1>
