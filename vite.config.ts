@@ -27,6 +27,17 @@ export default defineConfig({
         target: "http://127.0.0.1:5174",
         changeOrigin: true,
       },
+      // Serve generated concept-unit images from Flask, NOT Vite's public dir.
+      // public/ilm-images/** is in `watch.ignored` above (so a publish doesn't
+      // reload the page), but that also makes Vite refuse to serve files created
+      // in that folder after startup — it answers index.html instead, so a fresh
+      // run's images render broken. Proxying here routes /ilm-images to the backend
+      // (which reads from disk per request), so new images always load AND the
+      // no-reload behaviour is kept. See agent/server.py:ilm_image.
+      "/ilm-images": {
+        target: "http://127.0.0.1:5174",
+        changeOrigin: true,
+      },
     },
   },
 })

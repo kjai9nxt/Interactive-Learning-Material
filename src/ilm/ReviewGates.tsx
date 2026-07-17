@@ -33,11 +33,13 @@ export function PartitionGate({
   concepts,
   onApprove,
   onRevise,
+  onBack,
   submitting,
 }: {
   concepts: ProposedConcept[];
   onApprove: (concepts: ProposedConcept[], feedback: string) => void;
   onRevise: (feedback: string) => void;
+  onBack: () => void;
   submitting: boolean;
 }) {
   const [list, setList] = useState<ProposedConcept[]>(concepts);
@@ -144,6 +146,14 @@ export function PartitionGate({
       />
 
       <div className="rg-actions">
+        <button
+          className="rg-btn ghost"
+          disabled={submitting}
+          onClick={onBack}
+          title="Discard this run and return to the upload screen"
+        >
+          ← Back to upload
+        </button>
         <button
           className="rg-btn ghost"
           disabled={!feedback.trim() || submitting}
@@ -318,12 +328,14 @@ export function UnitsGate({
   onSubmit,
   onGenerateImage,
   onRegeneratePart,
+  onBack,
   submitting,
 }: {
   units: UnitReviewItem[];
   onSubmit: (reviews: Record<string, UnitReviewDecision>) => void;
   onGenerateImage: GenerateImage;
   onRegeneratePart: RegeneratePart;
+  onBack: () => void;
   submitting: boolean;
 }) {
   // The unit content shown in the gate. Held in state so a single unit can be
@@ -522,6 +534,14 @@ export function UnitsGate({
       </div>
 
       <div className="rg-actions">
+        <button
+          className="rg-btn ghost"
+          disabled={submitting || !!busyKey}
+          onClick={onBack}
+          title="Go back to the concept partition (these units are rebuilt on re-approve)"
+        >
+          ← Back to concept partition
+        </button>
         <button className="rg-btn primary" disabled={submitting || !!busyKey} onClick={() => submit()}>
           {submitting ? "Publishing…" : `Publish ${approvedCount} approved unit${approvedCount === 1 ? "" : "s"} →`}
         </button>

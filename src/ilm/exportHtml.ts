@@ -61,11 +61,25 @@ function collectImageSrcs(data: ConceptUnitsFile): string[] {
   return [...out];
 }
 
+// Resolve a possibly root-relative src ("/ilm-images/…") to an absolute URL
+// against the current page, so the fetch targets the right origin and a fallback
+// URL still works when the exported file is opened elsewhere.
+function absUrl(src: string): string {
+  try {
+    return typeof location !== "undefined" && location.href ? new URL(src, location.href).href : src;
+  } catch {
+    return src;
+  }
+}
+
 async function toDataUrl(src: string): Promise<string | null> {
   try {
-    const res = await fetch(src);
+    const res = await fetch(absUrl(src));
     if (!res.ok) return null;
     const blob = await res.blob();
+    // A dev server can answer a MISSING asset with its SPA fallback (index.html,
+    // HTTP 200). That's not an image — don't embed HTML markup as a picture.
+    if (blob.type && !blob.type.startsWith("image/")) return null;
     return await new Promise<string>((resolve, reject) => {
       const fr = new FileReader();
       fr.onload = () => resolve(String(fr.result));
@@ -77,18 +91,31 @@ async function toDataUrl(src: string): Promise<string | null> {
   }
 }
 
-// A failed fetch keeps the original src (that one image just won't be portable
-// rather than breaking the whole export).
-async function inlineImages(data: ConceptUnitsFile): Promise<Record<string, string>> {
+export interface InlineResult {
+  map: Record<string, string>;
+  failed: string[];
+}
+
+// Inline every image as a data URL. A src that can't be fetched falls back to its
+// ABSOLUTE url (so it still loads while the app is running) instead of a
+// root-relative path (which breaks in a standalone file), and is reported in
+// `failed` so the caller can warn the user rather than shipping silent gaps.
+async function inlineImages(data: ConceptUnitsFile): Promise<InlineResult> {
   const srcs = collectImageSrcs(data);
   const map: Record<string, string> = {};
+  const failed: string[] = [];
   await Promise.all(
     srcs.map(async (src) => {
       const dataUrl = await toDataUrl(src);
-      map[src] = dataUrl || src;
+      if (dataUrl) {
+        map[src] = dataUrl;
+      } else {
+        map[src] = absUrl(src);
+        failed.push(src);
+      }
     }),
   );
-  return map;
+  return { map, failed };
 }
 
 function visualHtml(src: string | undefined, images: Record<string, string>, label: string): string {
@@ -294,6 +321,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15
 
 /* Hero */
 .hero{padding:4rem 2rem 3rem;text-align:center;position:relative;overflow:hidden;border-bottom:1px solid var(--border);background:radial-gradient(ellipse at top,#1a2240 0%,var(--bg) 65%)}
+.hero-orbs{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.hero-orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.4;animation:float 7s ease-in-out infinite}
+.hero-orb:nth-child(1){top:-20px;left:15%;width:180px;height:180px;background:var(--indigo);animation-delay:0s}
+.hero-orb:nth-child(2){top:30%;right:12%;width:220px;height:220px;background:var(--purple);animation-delay:1.5s}
+.hero-orb:nth-child(3){bottom:-40px;left:40%;width:200px;height:200px;background:var(--cyan);opacity:.25;animation-delay:3s}
+.hero>*{position:relative;z-index:1}
 .hero-tag{display:inline-flex;align-items:center;gap:8px;background:var(--indigo-soft);border:1px solid rgba(99,102,241,0.25);color:var(--indigo);font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:6px 14px;border-radius:999px;margin-bottom:1.2rem}
 .hero-tag::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--indigo);box-shadow:0 0 8px var(--indigo)}
 .hero h1{font-size:clamp(2rem,5vw,3rem);line-height:1.12;margin-bottom:1rem;color:var(--text);letter-spacing:-0.025em;font-weight:700}
@@ -700,9 +733,16 @@ const SCRIPT = `
 })();
 `;
 
-/** Build a self-contained, interactive HTML document string for the lesson. */
-export async function buildLessonHtml(data: ConceptUnitsFile): Promise<string> {
-  const images = await inlineImages(data);
+export interface LessonExport {
+  html: string;
+  /** Images that could not be embedded (fell back to an absolute URL). */
+  missingImages: number;
+}
+
+/** Build a self-contained, interactive HTML document for the lesson. Returns the
+ *  HTML plus how many images couldn't be embedded, so the caller can warn. */
+export async function buildLessonHtml(data: ConceptUnitsFile): Promise<LessonExport> {
+  const { map: images, failed } = await inlineImages(data);
   const units = data.units || [];
   const docTitle = (data.doc || "Lesson").replace(/\.md$/i, "").replace(/[_-]/g, " ");
   const body = units.map((u, i) => unitHtml(u, i, units.length, images)).join("\n");
@@ -710,7 +750,7 @@ export async function buildLessonHtml(data: ConceptUnitsFile): Promise<string> {
     "AI-generated · Eval-governed · Human-approved" +
     (data.generator_model ? ` · ${esc(data.generator_model)}` : "");
 
-  return `<!doctype html>
+  const html = `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -721,6 +761,7 @@ export async function buildLessonHtml(data: ConceptUnitsFile): Promise<string> {
 <body>
 <div class="mq-root theme-dark">
 <header class="hero">
+<div class="hero-orbs"><span class="hero-orb"></span><span class="hero-orb"></span><span class="hero-orb"></span></div>
 <div class="hero-tag">${tag}</div>
 <h1>Learn <span class="gradient">${esc(docTitle)}</span>, interactively</h1>
 <p class="lede">${units.length} concept${units.length === 1 ? "" : "s"} passed the eval gate and shipped.</p>
@@ -733,4 +774,5 @@ ${body}
 <script>${SCRIPT}<\/script>
 </body>
 </html>`;
+  return { html, missingImages: failed.length };
 }

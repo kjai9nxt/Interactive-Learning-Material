@@ -569,3 +569,71 @@
 @media (max-width: 720px) {
   .ilm-usage-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   DASHBOARD — run history ("how many ILMs built"). Reuses the app's tokens.
+   ══════════════════════════════════════════════════════════════════════ */
+.ilm-dash { max-width: 1040px; margin: 0 auto; padding: 28px 20px 80px; }
+.ilm-dash-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+.ilm-dash-kicker { font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--indigo); margin-bottom: 4px; }
+.ilm-dash-head h1 { font-size: 26px; margin: 0 0 6px; color: var(--text); }
+.ilm-dash-lede { color: var(--text2); font-size: 14px; line-height: 1.55; margin: 0; max-width: 620px; }
+.ilm-dash-headbtns { display: flex; gap: 8px; flex-shrink: 0; }
+.ilm-dash-msg { color: var(--text2); padding: 24px 0; }
+
+/* Summary tiles */
+.ilm-dash-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.ilm-dash-tile { display: flex; flex-direction: column; gap: 4px; padding: 16px 18px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface2); }
+.ilm-dash-tile.primary { background: linear-gradient(135deg, var(--indigo-soft), var(--surface2)); border-color: color-mix(in srgb, var(--indigo) 40%, transparent); }
+.ilm-dash-label { font-size: 12px; font-weight: 600; color: var(--text3); }
+.ilm-dash-value { font-size: 30px; font-weight: 800; color: var(--text); line-height: 1.05; letter-spacing: -.02em; }
+.ilm-dash-tile.primary .ilm-dash-value { color: var(--indigo); }
+.ilm-dash-foot { font-size: 12px; color: var(--text2); }
+
+/* Card wrapper (chart) */
+.ilm-dash-card { border: 1px solid var(--border); border-radius: 14px; background: var(--surface2); padding: 16px 18px; margin-bottom: 20px; }
+.ilm-dash-card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+.ilm-dash-card-head h3 { margin: 0; font-size: 15px; color: var(--text); }
+.ilm-dash-card-sub { font-size: 12px; color: var(--text3); }
+
+/* Single-series bar chart */
+.ilm-dash-chart { display: flex; align-items: flex-end; gap: 6px; height: 180px; padding-top: 18px; overflow-x: auto; }
+.ilm-dash-barcol { flex: 1 1 0; min-width: 34px; display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; cursor: default; }
+.ilm-dash-bartrack { width: 100%; height: 140px; display: flex; align-items: flex-end; justify-content: center; position: relative; }
+.ilm-dash-bar { width: 60%; max-width: 40px; background: var(--indigo); border-radius: 4px 4px 0 0; transition: opacity .12s; }
+.ilm-dash-barcol.hot .ilm-dash-bar { opacity: .82; }
+.ilm-dash-barval { position: absolute; top: -16px; left: 0; right: 0; text-align: center; font-size: 11px; font-weight: 700; color: var(--text2); }
+.ilm-dash-barlabel { font-size: 10.5px; color: var(--text3); white-space: nowrap; font-family: var(--mono); }
+.ilm-dash-tip { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 4px; background: var(--surface3); border: 1px solid var(--border2); border-radius: 8px; padding: 6px 9px; display: flex; flex-direction: column; gap: 1px; white-space: nowrap; z-index: 5; box-shadow: 0 6px 20px rgba(0,0,0,.28); pointer-events: none; }
+.ilm-dash-tip b { font-size: 11px; color: var(--text); }
+.ilm-dash-tip span { font-size: 11px; color: var(--text2); }
+
+/* Filters */
+.ilm-dash-filters { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.ilm-dash-search { flex: 1 1 200px; min-width: 160px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font: inherit; font-size: 13px; outline: none; }
+.ilm-dash-search:focus { border-color: var(--indigo); }
+.ilm-dash-seg { display: inline-flex; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.ilm-dash-segbtn { padding: 7px 13px; background: var(--surface2); border: none; color: var(--text2); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; border-right: 1px solid var(--border); }
+.ilm-dash-segbtn:last-child { border-right: none; }
+.ilm-dash-segbtn.on { background: var(--indigo); color: #fff; }
+.ilm-dash-count { font-size: 12px; color: var(--text3); margin-left: auto; }
+
+/* Run table */
+.ilm-dash-tablewrap { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; overflow-x: auto; }
+.ilm-dash-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ilm-dash-table th { text-align: left; padding: 10px 14px; background: var(--surface3); color: var(--text2); font-weight: 600; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.ilm-dash-table th.sortable { cursor: pointer; user-select: none; }
+.ilm-dash-table th.sortable:hover { color: var(--indigo); }
+.ilm-dash-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+.ilm-dash-table tbody tr:last-child td { border-bottom: none; }
+.ilm-dash-table tbody tr:hover { background: var(--surface2); }
+.ilm-dash-table td.doc { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ilm-dash-table td.nowrap { white-space: nowrap; }
+.ilm-dash-table .muted { color: var(--text3); }
+.ilm-dash-empty { text-align: center; color: var(--text3); padding: 28px 0 !important; }
+.ilm-dash-badge { display: inline-block; padding: 2px 9px; border-radius: 100px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+.ilm-dash-badge.ok { color: var(--emerald); background: var(--emerald-soft); }
+.ilm-dash-badge.warn { color: var(--amber); background: var(--amber-soft); }
+.ilm-dash-badge.err { color: var(--red); background: var(--red-soft); }
+.ilm-dash-badge.muted { color: var(--text3); background: var(--surface3); }
+.ilm-dash-note { font-size: 12px; color: var(--text3); margin: 10px 2px 0; line-height: 1.5; }

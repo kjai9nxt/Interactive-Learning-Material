@@ -138,6 +138,35 @@ export default function Ingest({ onResult }: { onResult: (data: ConceptUnitsFile
     }
   };
 
+  // Back out of gate 1 (concept partition) to the ingest/upload screen. Tells the
+  // backend to cancel the paused run so its worker thread stops (rather than sitting
+  // blocked and later auto-approving), then resets the UI. Nothing expensive has
+  // been generated yet at gate 1, so this just discards the extraction.
+  const backToIngest = async () => {
+    const jobId = jobRef.current;
+    jobRef.current = null;
+    setGate(null); setBusy(false); setSubmitting(false); setError(null);
+    setProgress({ stage: "queued" });
+    if (jobId) {
+      try {
+        await fetch(`/api/review/${jobId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "cancel" }),
+        });
+      } catch { /* ignore — an abandoned job times out on its own */ }
+    }
+  };
+
+  // Back out of gate 2 (units) to gate 1 (concept partition). The generated units
+  // are discarded and rebuilt once the (possibly edited) split is re-approved.
+  const backToPartition = () => {
+    if (!window.confirm(
+      "Go back to the concept partition?\n\nThe units generated in this round will be discarded and rebuilt when you approve the split again.",
+    )) return;
+    submitReview({ action: "back" });
+  };
+
   // Generate / regenerate a single visual for the review gate (stateless — does
   // not touch the paused job). Returns the new image as a data URL.
   const generateImage = async (
@@ -198,6 +227,7 @@ export default function Ingest({ onResult }: { onResult: (data: ConceptUnitsFile
               submitting={submitting}
               onApprove={(concepts, feedback) => submitReview({ action: "approve", concepts, feedback })}
               onRevise={(feedback) => submitReview({ action: "revise", feedback })}
+              onBack={backToIngest}
             />
           ) : (
             <UnitsGate
@@ -207,6 +237,7 @@ export default function Ingest({ onResult }: { onResult: (data: ConceptUnitsFile
               onGenerateImage={generateImage}
               onRegeneratePart={regeneratePart}
               onSubmit={(reviews) => submitReview({ reviews })}
+              onBack={backToPartition}
             />
           )}
           {error && <div className="ingest-error">{error}</div>}

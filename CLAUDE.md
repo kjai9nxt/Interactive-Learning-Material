@@ -48,10 +48,11 @@ Config is env-driven (`.env`, gitignored). Key vars: `OPENROUTER_API_KEY`,
 | `skills/skill4_mcq.py` | Mini-quiz MCQs. |
 | `skills/skill5_audit.py` | Eval gate 2 (code graders + LLM judge). Judge only sees text, not image data. |
 | `graders/code_graders.py` | Deterministic checks. `check_visual_present()` accepts a raster image OR legacy SVG. |
-| `server.py` | Flask async-job API. Endpoints: `/api/generate`, `/api/status/<id>`, `/api/review/<id>`, **`/api/image`** (stateless (re)generate one visual for the gate), **`/api/pricing`** (current token/image rates for UI cost estimation), `/api/run`, `/api/units`, `/api/health`, `/api/sample`. |
+| `server.py` | Flask async-job API. Endpoints: `/api/generate`, `/api/status/<id>`, `/api/review/<id>`, **`/api/image`** (stateless (re)generate one visual for the gate), **`/api/pricing`** (current token/image rates for UI cost estimation), **`/api/runs`** (dashboard run history via `run_history.load_runs()`), `/api/run`, `/api/units`, `/api/health`, `/api/sample`. |
 | `human_gate.py` | CLI review path (`--auto-approve` for unattended). |
 | `memory.py` / `memory_store.json` | Reviewer feedback → learned rules injected into skills. |
 | `logging_store.py` | `RunLogger` → one JSON line per run in `runs/runs.jsonl` (includes a `usage` event). |
+| `run_history.py` | **Dashboard aggregation.** `load_runs()` joins `runs/runs.jsonl` + `runs/usage.jsonl` by `run_id` → normalized per-run rows + summary totals ("lessons built" = finished + ≥1 published unit). Read-only over the logs (no DB). |
 | `rubrics.json`, `parse_chunk.py`, `runner.py` | Rubrics; markdown chunking; server-side code execution for playgrounds. |
 
 ### Frontend — `src/ilm/`
@@ -63,6 +64,7 @@ Config is env-driven (`.env`, gitignored). Key vars: `OPENROUTER_API_KEY`,
 | `types.ts` | TS mirror of the schema + gate payloads/decisions. |
 | `Lesson.tsx`, `ilm.css` | Lesson shell; styles. |
 | `UsagePanel.tsx` | Token usage & cost panel on the result screen (tokens, USD cost split text/image, per-concept cost, projection table). Uses `data.usage.cost` when present, else computes from `/api/pricing`. |
+| `Dashboard.tsx` | **Run-history dashboard** ("how many ILMs built"). Fetches `/api/runs`; summary tiles (lessons built, concepts, cost, tokens) + a single-series **lessons-built-per-day** bar chart (one hue, hover tooltip) + a searchable/status-filterable/sortable run table. Toggled from `IlmApp.tsx`'s top-bar **"📊 History"** button. |
 | `../components/CodePlayground.tsx`, `CodeRunner.tsx` | Web live-preview / server-run code. |
 | `../data/conceptUnits.json` | Published output the renderer reads. |
 
@@ -128,6 +130,69 @@ show money).
 - Work autonomously — finish end-to-end without yes/no prompts (saved preference).
 
 ## Change log
+- **2026-07-10 (17)** — **Fix: published-lesson images 404'd (broken-image icons).**
+  Images showed at gate 2 (inline base64 data URLs) but the published lesson rendered
+  broken icons. Root cause: change (13) added `public/ilm-images/**` to Vite's
+  `server.watch.ignored` (to stop a publish from reloading the page) — but that ALSO
+  makes Vite refuse to *serve* files CREATED in that folder after startup: it returns
+  the SPA fallback (`index.html`, HTTP 200, `text/html`) instead of the image, so a
+  freshly-built run's images load as HTML → broken. (A run whose folder already
+  existed when Vite started served fine, which masked the bug.) Fix: serve the images
+  from **Flask** instead of Vite's public dir — new `GET /ilm-images/<path>` route in
+  `server.py` (`send_from_directory(config.IMAGE_DIR, …)`), and a `/ilm-images` proxy
+  entry in `vite.config.ts` pointing at the backend (5174). Flask reads from disk per
+  request, so new images always serve, and the watch-ignore (no-reload) behaviour is
+  kept. Image paths/`IMAGE_URL_PREFIX` are unchanged (`/ilm-images/<run_id>/<file>`),
+  so existing published data and the HTML export keep working. Verified with both
+  servers up: a run folder created AFTER startup serves `image/webp` (200) through the
+  Vite proxy (previously `text/html` 613 bytes). **Requires a Vite restart.**
+- **2026-07-10 (16)** — **HTML export fidelity + robust image inlining.** Investigated
+  a report that the exported standalone lesson looked unlike the live render with
+  missing images. Root cause: image inlining could **fail silently** — a failed
+  fetch left a **root-relative** `/ilm-images/…` src (unreachable in a standalone
+  file), and a dev-server SPA fallback (`index.html`, HTTP 200) could be embedded as
+  if it were an image. Verified with headless Chrome that the export DOES render
+  faithfully when inlining succeeds (same-origin `fetch('/ilm-images/…')` returns the
+  real webp). Fixes in `src/ilm/exportHtml.ts`: `toDataUrl` now fetches via an
+  **absolute** URL (`absUrl`) and rejects non-`image/*` blobs; `inlineImages` returns
+  `{map, failed}`, falling back to an absolute URL (works while the app runs) instead
+  of a broken relative one; `buildLessonHtml` now returns `{html, missingImages}`.
+  `IlmApp.tsx` `downloadHtml` alerts the user when any image couldn't be embedded (so
+  a partial export is never silent) and says to re-export with the app running. Also
+  added the hero **orbs** to the export CSS for closer parity with the app hero.
+  Verified: happy path embeds 9/9 data URLs (screenshot matches the live lesson),
+  SPA-fallback + network-error paths both report `missingImages:9` with no HTML
+  embedded as images; `npx tsc -b` + `vite build` clean.
+- **2026-07-09 (15)** — **Run-history dashboard ("how many ILMs built").** New
+  read-only view over the pipeline's own logs — no database. `agent/run_history.py`
+  `load_runs()` joins `runs/runs.jsonl` + `runs/usage.jsonl` by `run_id` into
+  normalized rows + summary totals; a "lesson built" = finished (`status:"ok"`) with
+  ≥1 published unit. To count that directly, `orchestrator.run_on_text` now stamps
+  `generated_units`/`published_units` onto the trace (new `RunLogger.summarize()`)
+  before `close("ok")`; pre-change rows fall back to counting `units[]` and are
+  flagged `published_approx`. New `GET /api/runs` serves `{runs, summary}`. Frontend:
+  `src/ilm/Dashboard.tsx` (summary tiles + single-series lessons-built-per-day bar
+  chart with hover tooltip + searchable/filterable/sortable run table), toggled by a
+  top-bar **"📊 History"** button in `IlmApp.tsx` (available with or without a loaded
+  lesson); `RunRow`/`RunHistory`/`RunHistorySummary` in `types.ts`; `.ilm-dash*`
+  styles (reusing the app's theme tokens) in `ilm.css`. Verified: `/api/runs` returns
+  live totals (71 built / 74 runs / 300 concepts / $2.48), `npx tsc -b` + `vite build`
+  clean. Additive — no existing behaviour changed.
+- **2026-07-09 (14)** — **Back navigation between the human gates.** The reviewer
+  can now step **back** at each gate. (1) Gate 2 (units) → gate 1 (partition): a
+  "← Back to concept partition" button posts `{action:"back"}`; the orchestrator
+  wraps gate1 → generate → gate2 in an **outer loop** so `back` discards the current
+  units and re-opens the partition gate (units are rebuilt on re-approve — a
+  `window.confirm` warns first). (2) Gate 1 (partition) → ingest/upload: a "← Back
+  to upload" button posts `{action:"cancel"}` → new `orchestrator.PipelineCancelled`
+  stops the worker thread cleanly (server catches it → job state `"cancelled"`, no
+  generation spent) and the frontend resets to the upload screen. Generation +
+  gate-2 finalize were factored into nested `_generate_units()`/`_finalize_reviews()`
+  in `run_on_text` so the loop can re-run them; CLI/`auto_approve` path unchanged.
+  Touched `orchestrator.py`, `server.py`, `Ingest.tsx` (`backToIngest`/`backToPartition`),
+  `ReviewGates.tsx` (`onBack` on both gates). Verified with a mocked-LLM harness:
+  gate2-back reopens gate1 then republishes; gate1-cancel raises PipelineCancelled;
+  normal approve→approve still publishes. `npx tsc -b` clean.
 - **2026-07-09 (13)** — **Fix: publish dropped back to the Ingest screen (dev server).**
   Publishing writes the result to `src/data/conceptUnits.json` (`config.FRONTEND_DATA`),
   which lives inside Vite's watched root — so each publish tripped a **full page

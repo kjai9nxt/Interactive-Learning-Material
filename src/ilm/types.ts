@@ -136,3 +136,39 @@ export interface UnitReviewDecision {
 export type GatePayload =
   | { kind: "partition"; concepts: ProposedConcept[] }
   | { kind: "units"; units: UnitReviewItem[] };
+
+/* ── Run history (dashboard) — GET /api/runs joins runs.jsonl + usage.jsonl ─── */
+export interface RunRow {
+  run_id: string;
+  doc: string | null;
+  started_at: string | null;
+  ended_at: string | null;
+  duration_s: number | null;
+  status: string;                 // "ok" | "cancelled" | "error" | "unknown"
+  generated_units: number;
+  published_units: number | null; // null for runs that predate the field
+  effective_published: number;
+  published_approx: boolean;      // true → published derived, not recorded
+  built: boolean;                 // finished + >=1 published unit
+  cost_usd: number | null;
+  total_tokens: number | null;
+  chat_calls: number | null;
+  image_calls: number | null;
+  gen_model: string | null;
+  image_model: string | null;
+}
+
+export interface RunHistorySummary {
+  lessons_built: number;
+  total_runs: number;
+  concepts_published: number;
+  total_cost_usd: number;
+  total_tokens: number;
+  by_status: Record<string, number>;
+  by_day: { date: string; built: number; cost: number }[];
+}
+
+export interface RunHistory {
+  runs: RunRow[];
+  summary: RunHistorySummary;
+}

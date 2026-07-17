@@ -18,11 +18,11 @@ import threading
 import traceback
 import uuid
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 
-from . import config, image_gen, pricing
-from .orchestrator import run_on_text, regenerate_part, unit_display
+from . import config, image_gen, pricing, run_history
+from .orchestrator import run_on_text, regenerate_part, unit_display, PipelineCancelled
 from .runner import run_code, supported_languages, installed_languages
 
 app = Flask(__name__)
@@ -93,6 +93,10 @@ def _run_job(job_id: str, md: str, doc_name: str, limit, llm_audit: bool):
             units_sink=units_sink,   # exposes live units to /api/regenerate-part
         )
         _set(job_id, state="done", result=out, progress={"stage": "done"})
+    except PipelineCancelled:
+        # Reviewer backed out of gate 1 to the ingest screen — a clean, expected
+        # stop (not an error). The browser has already navigated away.
+        _set(job_id, state="cancelled", progress={"stage": "cancelled"})
     except Exception as e:
         traceback.print_exc()
         _set(job_id, state="error", error=str(e))
@@ -101,6 +105,20 @@ def _run_job(job_id: str, md: str, doc_name: str, limit, llm_audit: bool):
             GATES.pop(job_id, None)
         with GATE_UNITS_LOCK:
             GATE_UNITS.pop(job_id, None)
+
+
+@app.get("/ilm-images/<path:subpath>")
+def ilm_image(subpath: str):
+    """Serve a persisted concept-unit image from public/ilm-images/<run_id>/<file>.
+
+    The generated images live under Vite's `public/` dir, but that dir is in Vite's
+    `server.watch.ignored` list (so a publish doesn't trigger a full page reload).
+    A side effect is that Vite will NOT serve files CREATED in that folder after it
+    started — it answers the SPA fallback (index.html) instead, so a freshly-built
+    run's images render as broken. Serving them from Flask (which reads from disk
+    per request) and proxying `/ilm-images` here in vite.config.ts fixes that: new
+    images are always served, and the no-reload behaviour is preserved."""
+    return send_from_directory(config.IMAGE_DIR, subpath)
 
 
 @app.get("/api/health")
@@ -116,6 +134,13 @@ def pricing_route():
     """Current token/image pricing (USD) so the UI can compute cost + projections
     even for usage records that predate embedded cost."""
     return jsonify(pricing.rates_snapshot())
+
+
+@app.get("/api/runs")
+def runs_history():
+    """Aggregated run history for the dashboard: joins runs.jsonl + usage.jsonl by
+    run_id → {runs: [...newest first], summary: {...}}. Read-only over the logs."""
+    return jsonify(run_history.load_runs())
 
 
 @app.post("/api/run")

@@ -6,6 +6,7 @@ import type { ConceptUnitsFile } from "./ilm/types";
 import ThemeToggle from "./components/ThemeToggle";
 import Ingest from "./ilm/Ingest";
 import Lesson from "./ilm/Lesson";
+import Dashboard from "./ilm/Dashboard";
 import UsagePanel from "./ilm/UsagePanel";
 import { buildLessonHtml } from "./ilm/exportHtml";
 
@@ -30,6 +31,9 @@ function App() {
   // Token/cost panel is hidden by default and revealed by a top-bar button, so
   // the reading material stays clean until the user asks to see usage.
   const [showUsage, setShowUsage] = useState(false);
+  // History dashboard (how many ILMs built so far) — a separate top-level view
+  // toggled from the top bar, available regardless of whether a lesson is loaded.
+  const [showHistory, setShowHistory] = useState(false);
 
   const units = data?.units || [];
   const rejected = data?.rejected || [];
@@ -60,7 +64,7 @@ function App() {
     if (!data) return;
     const slug = data.doc.replace(/\.md$/, "").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
     const fname = `ilm_${slug || "lesson"}_${data.run_id || "output"}.html`;
-    const html = await buildLessonHtml(data);
+    const { html, missingImages } = await buildLessonHtml(data);
     const blob = new Blob([html], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -70,6 +74,15 @@ function App() {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+    // Don't let a partial export look "broken" silently: tell the user which
+    // images couldn't be embedded and why (so the file isn't fully standalone).
+    if (missingImages > 0) {
+      window.alert(
+        `Heads up: ${missingImages} image${missingImages === 1 ? "" : "s"} couldn't be embedded in the exported file, ` +
+          `so ${missingImages === 1 ? "it" : "they"} will only show while the app is running.\n\n` +
+          `Export again with the app running (npm run dev) so every image can be fetched and inlined.`,
+      );
+    }
   };
 
   return (
@@ -79,7 +92,14 @@ function App() {
           Interactive Learning Material {data && <span>· {data.doc}</span>}
         </div>
         <div style={{ flex: 1 }} />
-        {data && data.usage && (
+        <button
+          className={`ilm-dlbtn${showHistory ? " is-on" : ""}`}
+          onClick={() => setShowHistory((v) => !v)}
+          title="See how many Interactive Learning Materials have been built"
+        >
+          {showHistory ? "✕ Close history" : "📊 History"}
+        </button>
+        {!showHistory && data && data.usage && (
           <button
             className={`ilm-dlbtn${showUsage ? " is-on" : ""}`}
             onClick={() => setShowUsage((v) => !v)}
@@ -88,23 +108,25 @@ function App() {
             {showUsage ? "✕ Hide usage" : "⛁ Tokens & cost"}
           </button>
         )}
-        {data && (
+        {!showHistory && data && (
           <button className="ilm-dlbtn" onClick={downloadHtml} title="Download the lesson as a standalone HTML file">
             ↓ Export HTML
           </button>
         )}
-        {data && (
+        {!showHistory && data && (
           <button className="ilm-dlbtn" onClick={downloadJson} title="Download the generated Concept Units as JSON">
             ↓ Export JSON
           </button>
         )}
-        {data && (
+        {!showHistory && data && (
           <button className="ilm-newbtn" onClick={() => setData(null)}>← New material</button>
         )}
         <ThemeToggle theme={theme} onToggle={() => setTheme((t) => (t === "dark" ? "light" : "dark"))} />
       </div>
 
-      {!data ? (
+      {showHistory ? (
+        <Dashboard onClose={() => setShowHistory(false)} />
+      ) : !data ? (
         <Ingest onResult={setData} />
       ) : (
         <>

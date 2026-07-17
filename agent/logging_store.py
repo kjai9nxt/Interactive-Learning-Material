@@ -55,6 +55,12 @@ class RunLogger:
         with self._lock:
             self.trace["reviewer_edits"].append({"unit_id": unit_id, "note": note})
 
+    def summarize(self, **data: Any) -> None:
+        """Stamp run-level roll-up fields onto the trace (e.g. generated_units,
+        published_units) so the dashboard can count 'lessons built' directly."""
+        with self._lock:
+            self.trace.update(data)
+
     def close(self, status: str) -> dict[str, Any]:
         self.trace["status"] = status
         self.trace["ended_at"] = _now()

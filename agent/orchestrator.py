@@ -31,6 +31,12 @@ from .skills import skill1_extract, skill2_analogy, skill3_explainer, skill4_mcq
 from .skills.skill5_audit import audit_unit
 
 
+class PipelineCancelled(Exception):
+    """Raised when the reviewer backs out of gate 1 to the ingest screen, so the
+    worker thread stops cleanly instead of sitting blocked (and later auto-approving
+    and spending generation budget on an abandoned run)."""
+
+
 def _eval_gate_1(concepts, doc_text: str) -> tuple[bool, list[str]]:
     """Cheap coverage/grounding checks before the expensive per-concept loop."""
     problems = []
@@ -329,145 +335,91 @@ def run_on_text(
     if limit:
         concepts = concepts[:limit]
 
-    # ── Human gate 1: concept-partition approval ────────────────────────────
-    # Before spending any generation budget, let the human approve/edit/merge the
-    # split (or reject with feedback → re-extract). Rejection feedback is recorded
-    # to memory so FUTURE runs partition better on their own.
-    if gate is not None:
-        while True:
-            payload = {"concepts": [
-                {"id": c.id, "title": c.title, "summary": c.summary,
-                 "source_span": c.source_span,
-                 "is_code_concept": bool(c.__dict__.get("is_code_concept", False))}
-                for c in concepts
-            ]}
-            decision = gate("partition", payload) or {}
-            feedback = (decision.get("feedback") or "").strip()
-            if feedback:
-                memory.record_correction(feedback, stage="partition")
-            if decision.get("action") == "revise":
-                # Re-extract with the reviewer's feedback applied (and refreshed
-                # memory, so any just-recorded lesson is in the prompt).
-                mem = memory.load()
-                memory_block = memory.as_prompt_block(mem)
-                _report(stage="extracting")
-                log.invoke("skill_1")
-                concepts = skill1_extract.extract_concepts(
-                    chunks, past_materials=mem.get("past_materials", []),
-                    memory_block=memory_block, reviewer_feedback=feedback)
-                if limit:
-                    concepts = concepts[:limit]
-                log.event("partition_reextracted", concepts=[c.title for c in concepts])
-                continue
-            # approve — use the (possibly) edited/merged concept list from the UI
-            edited = decision.get("concepts")
-            if edited:
-                rebuilt = _concepts_from_edits(edited)
-                if rebuilt:
-                    concepts = rebuilt
-            log.event("partition_approved", concepts=[c.title for c in concepts])
-            break
-        # Corrections recorded above are now live for the generation skills too.
-        mem = memory.load()
-        memory_block = memory.as_prompt_block(mem)
+    # ── Generation (skills 2–5 + eval-gate-2 auto-retry) ─────────────────────
+    # Factored into a function so the gated web path can re-run it when the
+    # reviewer steps BACK from gate 2 to change the concept split and re-approve.
+    def _generate_units(concepts):
+        print(f"Extracted {len(concepts)} concept(s): {[c.title for c in concepts]}")
+        _report(stage="generating", total=len(concepts), done=0,
+               concepts=[c.title for c in concepts])
 
-    print(f"Extracted {len(concepts)} concept(s): {[c.title for c in concepts]}")
-    _report(stage="generating", total=len(concepts), done=0,
-           concepts=[c.title for c in concepts])
+        audits: dict[str, Any] = {}
+        skill_scores = {"skill_2": [], "skill_3": [], "skill_4": [], "skill_5": []}
+        _done_lock = __import__("threading").Lock()
+        _done = {"n": 0}
 
-    audits: dict[str, Any] = {}
-    skill_scores = {"skill_2": [], "skill_3": [], "skill_4": [], "skill_5": []}
-    _done_lock = __import__("threading").Lock()
-    _done = {"n": 0}
-
-    def process_concept(concept):
-        """Generate + audit one unit, with eval-gate-2 auto-retry. Returns
-        (unit_dict, report) or None. Safe to run concurrently."""
-        print(f"→ Generating unit for: {concept.title}")
-        attempt = 0
-        report = None
-        unit = None
-        prev_flag_sig = None
-        while attempt <= config.MAX_RETRIES_PER_UNIT:
-            attempt += 1
-            # First attempt: full build. Retry: regenerate ONLY the flagged
-            # skill(s), carrying the passing artifacts over from the last attempt.
-            only = None if (attempt == 1 or report is None) else _skills_for_flags(report.flags)
-            try:
-                unit = build_unit(concept, memory_block=memory_block, log=log, prev=unit, only=only)
-            except Exception as e:
-                log.event("assemble_error", concept=concept.id, attempt=attempt, error=str(e))
-                print(f"   {concept.title}: assemble failed (attempt {attempt}): {e}")
-                continue
-            log.invoke("skill_5")
-            report = audit_unit(unit.model_dump(), use_llm=use_llm_audit, source_doc=md)
-            print(f"   {concept.title}: audit attempt {attempt} → score={report.score} flags={len(report.flags)}")
-            if report.passed:
-                break  # eval gate 2 passed
-            # Early-stop: if a retry produced the SAME set of failing criteria, the
-            # model is stuck (usually an inference the source genuinely doesn't
-            # support) — more retries just burn time. Ship it flagged instead.
-            flag_sig = tuple(sorted((f.get("source", ""), f.get("criterion", "")) for f in report.flags))
-            if flag_sig == prev_flag_sig:
-                log.event("eval_gate_2_stuck", concept=concept.id, attempt=attempt, flags=report.flags)
-                print(f"   {concept.title}: same flags as last attempt — stopping retries early.")
-                break
-            prev_flag_sig = flag_sig
-            log.event("eval_gate_2_retry", concept=concept.id, attempt=attempt, flags=report.flags)
-        if unit is None:
-            log.unit_result(concept.id, status="assemble_failed")
+        def process_concept(concept):
+            """Generate + audit one unit, with eval-gate-2 auto-retry. Returns
+            (unit_dict, report) or None. Safe to run concurrently."""
+            print(f"→ Generating unit for: {concept.title}")
+            attempt = 0
+            report = None
+            unit = None
+            prev_flag_sig = None
+            while attempt <= config.MAX_RETRIES_PER_UNIT:
+                attempt += 1
+                # First attempt: full build. Retry: regenerate ONLY the flagged
+                # skill(s), carrying the passing artifacts over from the last attempt.
+                only = None if (attempt == 1 or report is None) else _skills_for_flags(report.flags)
+                try:
+                    unit = build_unit(concept, memory_block=memory_block, log=log, prev=unit, only=only)
+                except Exception as e:
+                    log.event("assemble_error", concept=concept.id, attempt=attempt, error=str(e))
+                    print(f"   {concept.title}: assemble failed (attempt {attempt}): {e}")
+                    continue
+                log.invoke("skill_5")
+                report = audit_unit(unit.model_dump(), use_llm=use_llm_audit, source_doc=md)
+                print(f"   {concept.title}: audit attempt {attempt} → score={report.score} flags={len(report.flags)}")
+                if report.passed:
+                    break  # eval gate 2 passed
+                # Early-stop: if a retry produced the SAME set of failing criteria, the
+                # model is stuck (usually an inference the source genuinely doesn't
+                # support) — more retries just burn time. Ship it flagged instead.
+                flag_sig = tuple(sorted((f.get("source", ""), f.get("criterion", "")) for f in report.flags))
+                if flag_sig == prev_flag_sig:
+                    log.event("eval_gate_2_stuck", concept=concept.id, attempt=attempt, flags=report.flags)
+                    print(f"   {concept.title}: same flags as last attempt — stopping retries early.")
+                    break
+                prev_flag_sig = flag_sig
+                log.event("eval_gate_2_retry", concept=concept.id, attempt=attempt, flags=report.flags)
+            if unit is None:
+                log.unit_result(concept.id, status="assemble_failed")
+                with _done_lock:
+                    _done["n"] += 1
+                    _report(stage="generating", total=len(concepts), done=_done["n"])
+                return None
+            log.unit_result(unit.id, status="audited", score=report.score,
+                            flags=len(report.flags), attempts=attempt)
             with _done_lock:
                 _done["n"] += 1
                 _report(stage="generating", total=len(concepts), done=_done["n"])
-            return None
-        log.unit_result(unit.id, status="audited", score=report.score,
-                        flags=len(report.flags), attempts=attempt)
-        with _done_lock:
-            _done["n"] += 1
-            _report(stage="generating", total=len(concepts), done=_done["n"])
-        return unit.model_dump(), report
+            return unit.model_dump(), report
 
-    # Concepts are independent — generate them concurrently so wall-clock is
-    # roughly one concept's time, not the sum. Order is preserved.
-    workers = min(len(concepts), config.MAX_CONCEPT_WORKERS) or 1
-    with ThreadPoolExecutor(max_workers=workers) as ex:
-        outcomes = list(ex.map(process_concept, concepts))
+        # Concepts are independent — generate them concurrently so wall-clock is
+        # roughly one concept's time, not the sum. Order is preserved.
+        workers = min(len(concepts), config.MAX_CONCEPT_WORKERS) or 1
+        with ThreadPoolExecutor(max_workers=workers) as ex:
+            outcomes = list(ex.map(process_concept, concepts))
 
-    units: list[dict[str, Any]] = []
-    for res in outcomes:
-        if res is None:
-            continue
-        unit_dict, report = res
-        audits[unit_dict["id"]] = report
-        units.append(unit_dict)
-        skill_scores["skill_5"].append(report.score)
+        units: list[dict[str, Any]] = []
+        for res in outcomes:
+            if res is None:
+                continue
+            unit_dict, report = res
+            audits[unit_dict["id"]] = report
+            units.append(unit_dict)
+            skill_scores["skill_5"].append(report.score)
 
-    for sk, vals in skill_scores.items():
-        if vals:
-            log.score(sk, round(sum(vals) / len(vals), 3))
-        elif sk in log.trace["skills_invoked"]:
-            log.score(sk, 1.0)  # invoked, no audit-derived score -> keep trace complete
+        for sk, vals in skill_scores.items():
+            if vals:
+                log.score(sk, round(sum(vals) / len(vals), 3))
+            elif sk in log.trace["skills_invoked"]:
+                log.score(sk, 1.0)  # invoked, no audit-derived score -> keep trace complete
+        return units, audits
 
-    # ── Human gate 2: per-unit review + per-PART in-place regeneration ────────
-    _report(stage="reviewing")
-    if gate is not None:
-        def _clean(u):
-            rep = audits.get(u["id"])
-            return rep is None or rep.passed
-
-        # Expose the live unit dicts to the /api/regenerate-part endpoint, which
-        # mutates a single part of one unit IN PLACE (same objects we hold here, so
-        # the mutations are already applied when the reviewer clicks Publish). It
-        # records which units changed so we re-audit only those.
-        changed_ids: set[str] = set()
-        if units_sink is not None:
-            units_sink({"units": units, "changed": changed_ids,
-                        "lock": __import__("threading").Lock()})
-
-        payload = {"units": [unit_display(u, audits.get(u["id"])) for u in units]}
-        decision = gate("units", payload) or {}
-        reviews = decision.get("reviews", {}) or {}
-
+    def _finalize_reviews(units, audits, reviews, changed_ids):
+        """Re-audit any parts regenerated at gate 2, apply the per-unit + per-image
+        decisions, and return the approved unit dicts."""
         # Re-audit any unit whose parts were regenerated at the gate, so published
         # units carry an accurate audit (the endpoint itself does not audit).
         for uid in list(changed_ids):
@@ -476,6 +428,10 @@ def run_on_text(
                 log.invoke("skill_5")
                 audits[uid] = audit_unit(u, use_llm=use_llm_audit, source_doc=md)
                 log.event("unit_part_regenerated", concept=uid)
+
+        def _clean(u):
+            rep = audits.get(u["id"])
+            return rep is None or rep.passed
 
         approved = []
         for u in units:
@@ -491,7 +447,89 @@ def run_on_text(
                            "notes": note or None}
             if status == "approved":
                 approved.append(u)
+        return approved
+
+    if gate is not None:
+        # Gated (web) path. An OUTER loop lets the reviewer step BACK from gate 2
+        # (units) to gate 1 (partition): they re-approve a (possibly different) split
+        # and the units are regenerated. Stepping back from gate 1 itself cancels the
+        # run (returns to the ingest screen) so no generation budget is spent.
+        while True:
+            # ── Human gate 1: concept-partition approval ────────────────────────
+            # Before spending any generation budget, let the human approve/edit/merge
+            # the split (or reject with feedback → re-extract, or back out → cancel).
+            # Feedback is recorded to memory so FUTURE runs partition better.
+            while True:
+                payload = {"concepts": [
+                    {"id": c.id, "title": c.title, "summary": c.summary,
+                     "source_span": c.source_span,
+                     "is_code_concept": bool(c.__dict__.get("is_code_concept", False))}
+                    for c in concepts
+                ]}
+                decision = gate("partition", payload) or {}
+                action = decision.get("action")
+                feedback = (decision.get("feedback") or "").strip()
+                if feedback:
+                    memory.record_correction(feedback, stage="partition")
+                if action == "cancel":
+                    # Reviewer backed out to the ingest screen — stop cleanly so the
+                    # worker thread doesn't sit blocked (and later auto-approve/spend).
+                    log.event("partition_cancelled")
+                    log.close("cancelled")
+                    raise PipelineCancelled()
+                if action == "revise":
+                    # Re-extract with the reviewer's feedback applied (and refreshed
+                    # memory, so any just-recorded lesson is in the prompt).
+                    mem = memory.load()
+                    memory_block = memory.as_prompt_block(mem)
+                    _report(stage="extracting")
+                    log.invoke("skill_1")
+                    concepts = skill1_extract.extract_concepts(
+                        chunks, past_materials=mem.get("past_materials", []),
+                        memory_block=memory_block, reviewer_feedback=feedback)
+                    if limit:
+                        concepts = concepts[:limit]
+                    log.event("partition_reextracted", concepts=[c.title for c in concepts])
+                    continue
+                # approve — use the (possibly) edited/merged concept list from the UI
+                edited = decision.get("concepts")
+                if edited:
+                    rebuilt = _concepts_from_edits(edited)
+                    if rebuilt:
+                        concepts = rebuilt
+                log.event("partition_approved", concepts=[c.title for c in concepts])
+                break
+            # Corrections recorded above are now live for the generation skills too.
+            mem = memory.load()
+            memory_block = memory.as_prompt_block(mem)
+
+            # ── Generate the units for the approved split ───────────────────────
+            units, audits = _generate_units(concepts)
+
+            # ── Human gate 2: per-unit review + per-PART in-place regeneration ──
+            _report(stage="reviewing")
+            # Expose the live unit dicts to /api/regenerate-part, which mutates a
+            # single part of one unit IN PLACE (same objects we hold here, so the
+            # mutations are already applied on Publish). It records which units
+            # changed so we re-audit only those.
+            changed_ids: set[str] = set()
+            if units_sink is not None:
+                units_sink({"units": units, "changed": changed_ids,
+                            "lock": __import__("threading").Lock()})
+
+            payload = {"units": [unit_display(u, audits.get(u["id"])) for u in units]}
+            decision = gate("units", payload) or {}
+            if decision.get("action") == "back":
+                # Reviewer wants a different concept split — discard these units and
+                # re-open gate 1. (The next approve regenerates from the new split.)
+                log.event("units_back_to_partition")
+                continue
+
+            reviews = decision.get("reviews", {}) or {}
+            approved = _finalize_reviews(units, audits, reviews, changed_ids)
+            break
     else:
+        units, audits = _generate_units(concepts)
         approved = human_gate.review_units(units, audits, auto_approve=auto_approve)
 
     # Persist every kept image to a file so the published JSON stays small (works
@@ -548,6 +586,9 @@ def run_on_text(
         shutil.copyfile(out_path, config.FRONTEND_DATA)
         print(f"Published to frontend: {config.FRONTEND_DATA}")
 
+    # Roll-up counts on the trace so the dashboard can tally "lessons built"
+    # (finished + >=1 published unit) straight from runs.jsonl.
+    log.summarize(generated_units=len(units), published_units=len(approved))
     log.close("ok")
     return out
 
